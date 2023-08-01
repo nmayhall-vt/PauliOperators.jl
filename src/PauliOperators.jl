@@ -18,5 +18,6 @@ export rotate_phase
 export get_phase
 export is_diagonal
 export negate 
+export commute
 
 end
