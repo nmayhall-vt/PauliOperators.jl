@@ -12,15 +12,6 @@ function Base.:*(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
     return PauliBitString{N}(θ,z,x)
 end
 
-"""
-    Base.:+(p::PauliBitString{N}, θ::Integer) where N
-
-Add an integer `PauliBitString`'s together
-"""
-function Base.:+(p::PauliBitString{N}, θ::Integer) where N
-    return PauliBitString{N}((p.θ + θ)%4, p.z, p.x)
-end
-
 
 """
     Base.:(==)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
@@ -43,12 +34,23 @@ function get_phase(p::PauliBitString)
 end
 
 """
+    rotate_phase(p::PauliBitString{N}, θ::Integer) where N
+
+Rotate phase in units of π/2. In otherwords, multiply the phase by i^θ.
+E.g., mutliplication by -1 is obtained with θ=2.
+"""
+function rotate_phase(p::PauliBitString{N}, θ::Integer) where N
+    return PauliBitString{N}((p.θ + θ)%4, p.z, p.x)
+end
+
+
+"""
     negate(p::PauliBitString)
 
 Multiply `p` by -1
 """
 function negate(p::PauliBitString{N}) where N
-    return PauliBitString{N}((p.θ + 2)%4, p.z, p.x)
+    return rotate_phase(p,2) 
 end
 
 """

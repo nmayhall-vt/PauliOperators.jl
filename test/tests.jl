@@ -20,4 +20,9 @@ using Test
 
     @test get_phase(c) == -1
     @test get_phase(negate(c)) == 1
+    @test get_phase(rotate_phase(c,0)) == -1
+    @test get_phase(rotate_phase(c,1)) == -1im
+    @test get_phase(rotate_phase(c,2)) == 1
+    @test get_phase(rotate_phase(c,3)) == 1im
+    @test get_phase(rotate_phase(c,5)) == -1im
 end

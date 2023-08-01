@@ -14,8 +14,9 @@ include("operations.jl")
 # Exports
 export PauliBitString
 export KetBitString
-export is_diagonal
+export rotate_phase 
 export get_phase
+export is_diagonal
 export negate 
 
 end
