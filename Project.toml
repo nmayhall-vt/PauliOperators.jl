@@ -3,6 +3,9 @@ uuid = "be646426-f34c-4536-b1d4-a45a9633e6db"
 authors = ["Nick Mayhall"]
 version = "1.0.0-DEV"
 
+[deps]
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
 [compat]
 julia = "1.7"
 
