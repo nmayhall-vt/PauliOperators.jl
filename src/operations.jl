@@ -15,7 +15,7 @@ end
 """
     Base.:+(p::PauliBitString{N}, θ::Integer) where N
 
-Add two `PauliBitString`'s together
+Add an integer `PauliBitString`'s together
 """
 function Base.:+(p::PauliBitString{N}, θ::Integer) where N
     return PauliBitString{N}((p.θ + θ)%4, p.z, p.x)
@@ -31,10 +31,30 @@ function Base.:(==)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
     return p1.x == p2.x && p1.z == p2.z && p1.θ == p2.θ
 end
 
+
+
+"""
+    get_phase(p::PauliBitString)
+
+Return the phase of the `PauliBitString`, i^θ
+"""
+function get_phase(p::PauliBitString)
+    return 1im^p.θ
+end
+
+"""
+    negate(p::PauliBitString)
+
+Multiply `p` by -1
+"""
+function negate(p::PauliBitString{N}) where N
+    return PauliBitString{N}((p.θ + 2)%4, p.z, p.x)
+end
+
 """
     is_diagonal(p::PauliBitString)
 
-Does this operator consist of only I and/or Z?
+Check if operator is diagonal in the computational (z) basis. E.g., does this operator consist of only I and/or Z?
 """
 function is_diagonal(p::PauliBitString)
     return count_ones(p.x) == 0

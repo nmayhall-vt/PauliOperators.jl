@@ -1,7 +1,7 @@
 """
 In this representation, the Pauli string operator is represented as two binary strings, one for x and one for z.
 
-The format is as follows: Z^z1 X^x1 ⊗ Z^z2 X^x2 ⊗ ⋯ ⊗ Z^zN X^xN  
+The format is as follows: (i)^\theta Z^z1 X^x1 ⊗ Z^z2 X^x2 ⊗ ⋯ ⊗ Z^zN X^xN  
     
 Products of operators simply concatonate the left and right strings separately. For example, 
 

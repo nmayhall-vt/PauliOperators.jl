@@ -17,4 +17,7 @@ using Test
     display(a*b)
     display(c)
     @test c == a*b 
+
+    @test get_phase(c) == -1
+    @test get_phase(negate(c)) == 1
 end
