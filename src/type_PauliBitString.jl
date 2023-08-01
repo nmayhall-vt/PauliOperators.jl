@@ -1,11 +1,25 @@
 """
 In this representation, the Pauli string operator is represented as two binary strings, one for x and one for z.
 
-The format is as follows: (i)^\theta Z^z1 X^x1 ⊗ Z^z2 X^x2 ⊗ ⋯ ⊗ Z^zN X^xN  
+The format is as follows: 
+    
+    (i)^\theta Z^z1 X^x1 ⊗ Z^z2 X^x2 ⊗ ⋯ ⊗ Z^zN X^xN  
     
 Products of operators simply concatonate the left and right strings separately. For example, 
 
     XYZIY = 11001|01101
+
+
+To create a Y operator, bits in the same locations in `z` and `x` should be on. 
+This means that we have a phase to keep track of because Z^1*X^1 = iY. 
+As such, we end up working with operators of the form:
+    
+    (i)^\theta σ1 ⊗ σ2 ⊗ σ3 ⊗ ⋯ ⊗ σN,
+
+where,
+
+    σ ∈ {X, iY, Z, I}
+
 """
 struct PauliBitString{N} <: Integer
     θ::UInt8
