@@ -23,6 +23,36 @@ function Base.:(==)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
 end
 
 
+"""
+    Base.Matrix(p::PauliBitString{N}) where N
+
+Create dense matrix representation 
+"""
+function Base.Matrix(p::PauliBitString{N}) where N
+    mat = ones(Int8,1,1)
+    str = string(p)
+    X = [0 1; 1 0]
+    y = [0 1; -1 0]
+    Z = [1 0; 0 -1]
+    I = [1 0; 0 1]
+    for i in reverse(1:N)
+        # println(i, " ", typeof(str[i]))
+        # println(str[i] == "X"[1])
+        if str[i] == "X"[1] 
+            mat = kron(X,mat)
+        elseif str[i] == "y"[1]
+            mat = kron(y,mat)
+        elseif str[i] == "Z"[1]
+            mat = kron(Z,mat)
+        elseif str[i] == "I"[1]
+            mat = kron(I,mat)
+        else
+            throw(ErrorException)
+        end
+    end
+
+    return mat .* get_phase(p)
+end
 
 """
     get_phase(p::PauliBitString)

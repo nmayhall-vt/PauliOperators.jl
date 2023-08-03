@@ -26,4 +26,13 @@ using Test
     @test get_phase(rotate_phase(c,2)) == 1
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
+
+
+
+    ZX = [0+0im  1+0im   0+0im   0+0im
+    1+0im  0+0im   0+0im   0+0im
+    0+0im  0+0im   0+0im  -1+0im
+    0+0im  0+0im  -1+0im   0+0im]
+
+    @test all(ZX .== Matrix(PauliBitString("ZX")))
 end
