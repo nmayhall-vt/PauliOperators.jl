@@ -32,8 +32,8 @@ end
 
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, p, zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
-Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p]
-Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p] = v
+Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[phasefree(p)]
+Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[phasefree(p)] = v*get_phase(p)
 
 """
     Base.+(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
@@ -81,9 +81,7 @@ TBW
 """
 function LinearAlgebra.adjoint(ps::PauliSum{N}) where N 
     out = deepcopy(ps)
-    for (key, val) in out.ops
-        out[key] = adjoint(val) * (-1)^count_ones(key.z & key.x) 
-    end
+    adjoint!(out)    
     return out
 end
 
@@ -105,14 +103,8 @@ function Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
     out = PauliSum(N)
     for (op1, coeff1) in ps1.ops 
         for (op2, coeff2) in ps2.ops
-            println()
-            display(op1.θ)
-            display(op1)
-            display(op2)
-            display((coeff1, coeff2))
-            prod = phasefree(op2) * phasefree(op2)
-            display(prod)
-            out[prod] = get(out, prod) + get_phase(prod)*coeff1*coeff2 
+            prod = op1 * op2
+            out[phasefree(prod)] = get(out, prod) + get_phase(prod)*coeff1*coeff2 
         end
     end 
     return out

@@ -68,19 +68,24 @@ using Test
     @test check
 
     # Test Multiply
+
+
     println("Test Multiply")
-    a = Pauli(123, 2345, 5)
-    b = Pauli(533, 345, 5)
-    c = Pauli(33, 435, 5)
-    d = Pauli(513, 534, 5)
+    for i in 1:10
+        N = 8
+        a = Pauli(rand(1:2^N-1), rand(1:2^N-1), N)
+        b = Pauli(rand(1:2^N-1), rand(1:2^N-1), N)
+        c = Pauli(rand(1:2^N-1), rand(1:2^N-1), N)
+        d = Pauli(rand(1:2^N-1), rand(1:2^N-1), N)
 
-    s1 = a + b
-    s2 = a + c + d 
-    display(s1*s2)
-    println()
-    display(s2)
+        s1 = a + b + d
+        s2 = a + c + d
+        display(s1 * s2)
+        println()
+        display(s2)
 
-
+        @test all(Matrix(s1) * Matrix(s2) - Matrix(s1 * s2) .≈ 0)
+    end
 
     println()
     ZX = [0+0im  1+0im   0+0im   0+0im

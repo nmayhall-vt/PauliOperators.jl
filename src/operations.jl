@@ -53,10 +53,10 @@ end
 Add two `Pauli`'s together. This returns a `PauliSum`
 """
 function Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    if Base.isequal(p1, p2)
-        return PauliSum{N}(Dict(p1=>get_phase(p1)+get_phase(p2)))
+    if phasefree(p1) == phasefree(p2) 
+        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1)+get_phase(p2)))
     else
-        return PauliSum{N}(Dict(p1=>get_phase(p1), p2=>get_phase(p2)))
+        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1), phasefree(p2)=>get_phase(p2)))
     end
 end
 
@@ -79,7 +79,7 @@ end
 Add a `Pauli` to a PauliSum. 
 """
 function Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    ps[p] = get(ps, p) + get_phase(p) 
+    ps[phasefree(p)] = get(ps, p) + get_phase(p) 
 end
 
 """

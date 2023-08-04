@@ -34,6 +34,8 @@ TBW
 """
 function Pauli(z::I, x::I, N) where I<:Integer
     # N = maximum(map(i -> ndigits(i, base=2), [x, z]))
+    z < 2^N || throw(DimensionMismatch)
+    x < 2^N || throw(DimensionMismatch)
     θ = count_ones(z & x)*3 % 4
     return Pauli{N}(θ, z, x)
 end
