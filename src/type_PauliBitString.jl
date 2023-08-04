@@ -32,8 +32,8 @@ end
 
 TBW
 """
-function PauliBitString(z::I, x::I) where I<:Integer
-    N = maximum(map(i -> ndigits(i, base=2), [x, z]))
+function PauliBitString(z::I, x::I, N) where I<:Integer
+    # N = maximum(map(i -> ndigits(i, base=2), [x, z]))
     θ = count_ones(z & x)*3 % 4
     return PauliBitString{N}(θ, z, x)
 end
@@ -103,3 +103,5 @@ function PauliBitString(N::Integer; X=[], Y=[], Z=[])
     return PauliBitString(join(str))
     
 end
+
+Base.hash(p::PauliBitString) = hash((p.z,p.x))

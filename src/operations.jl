@@ -24,6 +24,36 @@ end
 
 
 """
+    Base.:(>)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+
+Check if `p1` > `p2`
+"""
+function Base.:(>)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    if p1.z > p2.z
+        return true
+    elseif p1.z == p2.z && p1.x > p2.x
+        return true
+    end
+    return false
+end
+
+
+"""
+    Base.:(<)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+
+Check if `p1` < `p2`
+"""
+function Base.:(<)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    if p1.z < p2.z
+        return true
+    elseif p1.z == p2.z && p1.x < p2.x
+        return true
+    end
+    return false
+end
+
+
+"""
     Base.Matrix(p::PauliBitString{N}) where N
 
 Create dense matrix representation 
