@@ -60,6 +60,7 @@ function Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
     end
 end
 
+
 """
     Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
 

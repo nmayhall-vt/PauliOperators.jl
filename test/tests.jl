@@ -41,16 +41,31 @@ using Test
     @test c < b
     @test c == c
   
-    # make sure that two operators that only differ in phase are equal
+    # make sure that two operators that only differ in phase are equal in hash
     d = rotate_phase(a,1)
     @test hash(a) == hash(d)
     @test a != d
    
     sum1 = a + b
     display(sum1)
+    println()
 
     sum2 = a + d
     display(sum2)
+
+    println()
+    sum3 = sum1 + sum2
+    sum!(sum1, sum2)
+    display(sum1)
+    
+    println()
+    display(sum3)
+
+    check = true
+    for key in keys(sum3)
+        check = sum3[key] ≈ sum1[key] && check
+    end
+    @test check
 
     println()
     ZX = [0+0im  1+0im   0+0im   0+0im
