@@ -9,6 +9,7 @@ include("helpers.jl")
 include("type_PauliBitString.jl")
 include("type_KetBitString.jl")
 include("operations.jl")
+include("transformations.jl")
 
 
 # Exports
