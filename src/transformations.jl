@@ -1,9 +1,9 @@
 function boson_binary_transformation(nqubits)
 
-    # I = Matrix(PauliBitString("I"))
-    # X = Matrix(PauliBitString("X"))
-    # Y = Matrix(PauliBitString("Y"))
-    # Z = Matrix(PauliBitString("Z"))
+    # I = Matrix(Pauli("I"))
+    # X = Matrix(Pauli("X"))
+    # Y = Matrix(Pauli("Y"))
+    # Z = Matrix(Pauli("Z"))
 
     # σp = (X - 1im*Y) ./ 2
     # σm = (X + 1im*Y) ./ 2
@@ -96,7 +96,7 @@ function boson_binary_transformation(nqubits)
     println(" -------- Pauli Representation -------- ")
 
     rep2 = Dict{Tuple{Int128,Int128},ComplexF64}() 
-    # rep2 = Dict{PauliBitString{nqubits},Float64}() 
+    # rep2 = Dict{Pauli{nqubits},Float64}() 
 
     for i in rep1
         to_prod = []
@@ -121,7 +121,7 @@ function boson_binary_transformation(nqubits)
                 coeff *= i[1]
                 op *= i[2]
             end
-            pbs = PauliBitString(op)
+            pbs = Pauli(op)
             key = (pbs.z, pbs.x)
             if haskey(rep2, key)
                 rep2[key] += sqrt(i[2]) * coeff * get_phase(pbs) 
@@ -129,12 +129,12 @@ function boson_binary_transformation(nqubits)
                 rep2[key] = sqrt(i[2]) * coeff * get_phase(pbs) 
             end
             # if haskey(rep2, (pbs.z,pbs.x)
-            # println(PauliBitString(op), coeff)
+            # println(Pauli(op), coeff)
         end
     end
    
     for key in sort(rep2)
-        @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), PauliBitString(key[1]..., nqubits))
+        @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), Pauli(key[1]..., nqubits))
         # println(key[1])
     end
     println(" Number of operators: ", length(rep2))
@@ -143,7 +143,7 @@ function boson_binary_transformation(nqubits)
 
     println(" Create Product")
     for prod in Iterators.product(keys(rep2), keys(rep2))
-        pbs = PauliBitString(prod[1]..., nqubits) * PauliBitString(prod[2]..., nqubits)
+        pbs = Pauli(prod[1]..., nqubits) * Pauli(prod[2]..., nqubits)
         # println(pbs)
         coeff::ComplexF64 = rep2[prod[1]]*rep2[prod[2]]'
         key = (pbs.z, pbs.x)
@@ -167,7 +167,7 @@ function boson_binary_transformation(nqubits)
 
     mat = zeros(2^nqubits, 2^nqubits)
     for key in sort(rep3)
-        pbs = PauliBitString(key[1]..., nqubits)
+        pbs = Pauli(key[1]..., nqubits)
         @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), pbs)
         mat += key[2]*Matrix(pbs)
         # println(key[1])

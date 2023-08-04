@@ -21,29 +21,29 @@ where,
     σ ∈ {X, iY, Z, I}
 
 """
-struct PauliBitString{N} <: Integer
+struct Pauli{N} <: Integer
     θ::UInt8
     z::Int128
     x::Int128
 end
 
 """
-    PauliBitString(z::I, x::I) where I<:Integer
+    Pauli(z::I, x::I) where I<:Integer
 
 TBW
 """
-function PauliBitString(z::I, x::I, N) where I<:Integer
+function Pauli(z::I, x::I, N) where I<:Integer
     # N = maximum(map(i -> ndigits(i, base=2), [x, z]))
     θ = count_ones(z & x)*3 % 4
-    return PauliBitString{N}(θ, z, x)
+    return Pauli{N}(θ, z, x)
 end
 
 """
-    PauliBitString(str::String)
+    Pauli(str::String)
 
 TBW
 """
-function PauliBitString(str::String)
+function Pauli(str::String)
     for i in str
         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
     end
@@ -70,16 +70,16 @@ function PauliBitString(str::String)
         idx += 1
     end
     θ = 3*ny%4
-    return PauliBitString{N}(θ, z,x) 
+    return Pauli{N}(θ, z,x) 
 end
 
 
 """
-    PauliBitString(N::Integer; X=[], Y=[], Z=[])
+    Pauli(N::Integer; X=[], Y=[], Z=[])
 
 constructor for creating PauliBoolVec by specifying the qubits where each X, Y, and Z gates exist 
 """
-function PauliBitString(N::Integer; X=[], Y=[], Z=[])
+function Pauli(N::Integer; X=[], Y=[], Z=[])
     for i in X
         i ∉ Y || throw(DimensionMismatch)
         i ∉ Z || throw(DimensionMismatch)
@@ -100,8 +100,7 @@ function PauliBitString(N::Integer; X=[], Y=[], Z=[])
     end
    
     # print(str[1:N])
-    return PauliBitString(join(str))
+    return Pauli(join(str))
     
 end
 
-Base.hash(p::PauliBitString) = hash((p.z,p.x))

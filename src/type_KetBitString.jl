@@ -36,7 +36,7 @@ end
 
 
 """
-    Base.show(io::IO, P::PauliBitString{N}) where N
+    Base.show(io::IO, P::Pauli{N}) where N
 
 TBW
 """

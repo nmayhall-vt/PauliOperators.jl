@@ -1,64 +1,104 @@
 
 """
-    Base.:*(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
-Multiply two `PauliBitString`'s together
+Multiply two `Pauli`'s together
 """
-function Base.:*(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
     θ = (p1.θ + p2.θ ) % 4
     θ = (θ + 2*count_ones(p1.x & p2.z)) % 4
-    return PauliBitString{N}(θ,z,x)
+    return Pauli{N}(θ,z,x)
 end
 
 
 """
-    Base.:(==)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
 Check if they are equal, return true or false
 """
-function Base.:(==)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+function Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
     return p1.x == p2.x && p1.z == p2.z && p1.θ == p2.θ
+end
+function Base.isequal(p1::Pauli{N}, p2::Pauli{N}) where N
+    return p1.x == p2.x && p1.z == p2.z
 end
 
 
 """
-    Base.:(>)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    Base.:(>)(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
 Check if `p1` > `p2`
 """
-function Base.:(>)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
-    if p1.z > p2.z
-        return true
-    elseif p1.z == p2.z && p1.x > p2.x
-        return true
-    end
-    return false
+function Base.:>(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    return p1.z > p2.z || p1.z == p2.z && p1.x > p2.x
 end
 
 
 """
-    Base.:(<)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    Base.:(<)(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
 Check if `p1` < `p2`
 """
-function Base.:(<)(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
-    if p1.z < p2.z
-        return true
-    elseif p1.z == p2.z && p1.x < p2.x
-        return true
+function Base.:<(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    return p1.z < p2.z || p1.z == p2.z && p1.x < p2.x
+end
+
+
+
+"""
+    Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
+
+Add two `Pauli`'s together. This returns a `PauliSum`
+"""
+function Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    if Base.isequal(p1, p2)
+        return PauliSum{N}(Dict(p1=>get_phase(p1)+get_phase(p2)))
+    else
+        return PauliSum{N}(Dict(p1=>get_phase(p1), p2=>get_phase(p2)))
     end
-    return false
+end
+
+"""
+    Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
+
+Add a `Pauli` to a PauliSum. 
+"""
+function Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N}
+    ps[p] = get(ps, p) + get_phase(p) 
+end
+
+"""
+    Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
+
+Subtract two `Pauli`'s. This returns a `PauliSum`
+"""
+function Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    if Base.isequal(p1, p2)
+        return PauliSum{N}(Dict(p1=>get_phase(p1)-get_phase(p2)))
+    else
+        return PauliSum{N}(Dict(p1=>get_phase(p1), p2=>-get_phase(p2)))
+    end
 end
 
 
 """
-    Base.Matrix(p::PauliBitString{N}) where N
+    Base.hash(p::Pauli)
+
+Create a hash for a `Pauli`. Because we want to collect matching operators, 
+    with different phases, we don't actually put the phase in the hash
+"""
+function Base.hash(p::Pauli{N}, h::UInt) where N
+    return hash((UInt8(1), p.z, p.x), h)
+end
+
+"""
+    Base.Matrix(p::Pauli{N}) where N
 
 Create dense matrix representation 
 """
-function Base.Matrix(p::PauliBitString{N}) where N
+function Base.Matrix(p::Pauli{N}) where N
     mat = ones(Int8,1,1)
     str = string(p)
     X = [0 1; 1 0]
@@ -85,40 +125,40 @@ function Base.Matrix(p::PauliBitString{N}) where N
 end
 
 """
-    get_phase(p::PauliBitString)
+    get_phase(p::Pauli)
 
-Return the phase of the `PauliBitString`, i^θ
+Return the phase of the `Pauli`, i^θ
 """
-function get_phase(p::PauliBitString)
+function get_phase(p::Pauli)
     return 1im^p.θ
 end
 
 """
-    rotate_phase(p::PauliBitString{N}, θ::Integer) where N
+    rotate_phase(p::Pauli{N}, θ::Integer) where N
 
 Rotate phase in units of π/2. In otherwords, multiply the phase by i^θ.
 E.g., mutliplication by -1 is obtained with θ=2.
 """
-function rotate_phase(p::PauliBitString{N}, θ::Integer) where N
-    return PauliBitString{N}((p.θ + θ)%4, p.z, p.x)
+function rotate_phase(p::Pauli{N}, θ::Integer) where N
+    return Pauli{N}((p.θ + θ)%4, p.z, p.x)
 end
 
 
 """
-    negate(p::PauliBitString)
+    negate(p::Pauli)
 
 Multiply `p` by -1
 """
-function negate(p::PauliBitString{N}) where N
+function negate(p::Pauli{N}) where N
     return rotate_phase(p,2) 
 end
 
 """
-    is_diagonal(p::PauliBitString)
+    is_diagonal(p::Pauli)
 
 Check if operator is diagonal in the computational (z) basis. E.g., does this operator consist of only I and/or Z?
 """
-function is_diagonal(p::PauliBitString)
+function is_diagonal(p::Pauli)
     return count_ones(p.x) == 0
 end
 
@@ -127,7 +167,7 @@ end
 
 TBW
 """
-function Base.show(io::IO, p::PauliBitString{N}) where N
+function Base.show(io::IO, p::Pauli{N}) where N
     # print(io, @sprintf "Pstring(P))
     # println(io, 1im^p.θ,"|", string(p)) 
     println(@sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p)) 
@@ -135,11 +175,11 @@ end
 
 
 """
-    Base.display(p::PauliBitString)
+    Base.display(p::Pauli)
 
 Display, y = iY
 """
-function Base.string(p::PauliBitString{N}) where N
+function Base.string(p::Pauli{N}) where N
     Iloc = get_on_bits(p.x ⊽ p.z)
     yloc = get_on_bits(p.x & p.z)
     Xloc = get_on_bits(p.x & ~p.z)
@@ -159,31 +199,31 @@ function Base.string(p::PauliBitString{N}) where N
 end
 
 """
-    random_PauliBitString(N)
+    random_Pauli(N)
 
 TBW
 """
-function random_PauliBitString(N)
-    return PauliBitString{N}(rand(0:3), rand(Int128),rand(Int128))
+function random_Pauli(N)
+    return Pauli{N}(rand(0:3), rand(Int128),rand(Int128))
 end
 
 
 """
-    commute(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+    commute(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
 Check if they commute, return true or false
 """
-function commute(p1::PauliBitString{N}, p2::PauliBitString{N}) where {N}
+function commute(p1::Pauli{N}, p2::Pauli{N}) where {N}
     return iseven(count_ones(p1.x & p2.z) - count_ones(p1.z & p2.x)) 
 end
 
 
 """
-    expectation_value_sign(p::PauliBitString{N}, ket::Vector{Bool}) where N
+    expectation_value_sign(p::Pauli{N}, ket::Vector{Bool}) where N
 
-compute expectation value of PauliBitString `o` for a product state `ket`
+compute expectation value of Pauli `o` for a product state `ket`
 """
-function expectation_value_sign(p::PauliBitString{N}, ket::KetBitString{N}) where N
+function expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N
     is_diagonal(p) || return 0.0
     
     println(p)
