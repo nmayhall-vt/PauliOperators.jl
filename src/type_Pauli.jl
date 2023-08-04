@@ -109,3 +109,13 @@ end
 function phasefree(p::Pauli)
     return rotate_phase(p, -p.θ)
 end
+
+
+"""
+    random_Pauli(N)
+
+TBW
+"""
+function random_Pauli(N)
+    return Pauli{N}(rand(0:3), rand(1:2^N-1),rand(1:2^N-1))
+end

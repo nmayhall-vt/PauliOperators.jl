@@ -30,7 +30,7 @@ function Base.display(ps::PauliSum)
     end
 end
 
-Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, p, zero(ComplexF64))
+Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, phasefree(p), zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
 Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[phasefree(p)]
 Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[phasefree(p)] = v*get_phase(p)

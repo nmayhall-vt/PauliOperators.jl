@@ -23,5 +23,6 @@ export is_diagonal
 export negate 
 export commute
 export phasefree 
+export random_Pauli 
 
 end
