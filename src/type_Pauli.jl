@@ -104,3 +104,6 @@ function Pauli(N::Integer; X=[], Y=[], Z=[])
     
 end
 
+function phasefree(p::Pauli)
+    return rotate_phase(p, -p.θ)
+end

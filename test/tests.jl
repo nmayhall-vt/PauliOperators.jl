@@ -67,6 +67,21 @@ using Test
     end
     @test check
 
+    # Test Multiply
+    println("Test Multiply")
+    a = Pauli(123, 2345, 5)
+    b = Pauli(533, 345, 5)
+    c = Pauli(33, 435, 5)
+    d = Pauli(513, 534, 5)
+
+    s1 = a + b
+    s2 = a + c + d 
+    display(s1*s2)
+    println()
+    display(s2)
+
+
+
     println()
     ZX = [0+0im  1+0im   0+0im   0+0im
     1+0im  0+0im   0+0im   0+0im

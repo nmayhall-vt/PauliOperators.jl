@@ -66,6 +66,18 @@ end
 
 Add a `Pauli` to a PauliSum. 
 """
+function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
+    out = deepcopy(ps)
+    sum!(out, p)
+    return out
+end
+
+
+"""
+    Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
+
+Add a `Pauli` to a PauliSum. 
+"""
 function Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N}
     ps[p] = get(ps, p) + get_phase(p) 
 end
@@ -85,13 +97,16 @@ end
 
 
 """
-    Base.hash(p::Pauli)
+    Base.hash(p::Pauli{N}, h::UInt) where N
 
 Create a hash for a `Pauli`. Because we want to collect matching operators, 
     with different phases, we don't actually put the phase in the hash
 """
 function Base.hash(p::Pauli{N}, h::UInt) where N
-    return hash((UInt8(1), p.z, p.x), h)
+    return hash((zero(UInt8), p.z, p.x), h)
+end
+function Base.hash(p::Pauli{N}) where N
+    return hash((zero(UInt8), p.z, p.x))
 end
 
 """
