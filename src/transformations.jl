@@ -1,3 +1,8 @@
+"""
+    boson_binary_transformation(nqubits)
+
+TBW
+"""
 function boson_binary_transformation(nqubits)
 
     # I = Matrix(Pauli("I"))
