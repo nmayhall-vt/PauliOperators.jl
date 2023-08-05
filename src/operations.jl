@@ -231,16 +231,7 @@ function is_diagonal(p::Pauli)
     return count_ones(p.x) == 0
 end
 
-"""
-    Base.show(io::IO, P::PauliMask)
 
-TBW
-"""
-function Base.show(io::IO, p::Pauli{N}) where N
-    # print(io, @sprintf "Pstring(P))
-    # println(io, 1im^p.θ,"|", string(p)) 
-    println(@sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p)) 
-end
 
 
 """

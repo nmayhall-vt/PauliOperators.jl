@@ -106,4 +106,8 @@ using LinearAlgebra
     evals = real.(eigvals(Matrix(bdag*adjoint(bdag))))
     @test all(abs.(evals .- range(0,63)) .< 1e-12)
 
+    println("Print JW Transformation")
+    fd = PauliOperators.jordan_wigner(5,10)
+    tmp = .5*(Pauli("ZZZZXIIIII") + -1im*Pauli("ZZZZYIIIII"))
+    @test all(Matrix(fd) .≈ Matrix(tmp))
 end

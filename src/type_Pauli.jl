@@ -106,10 +106,23 @@ function Pauli(N::Integer; X=[], Y=[], Z=[])
     
 end
 
+"""
+    phasefree(p::Pauli)
+
+TBW
+"""
 function phasefree(p::Pauli)
     return rotate_phase(p, -p.θ)
 end
 
+"""
+    Base.show(io::IO, P::PauliMask)
+
+TBW
+"""
+function Base.show(io::IO, p::Pauli{N}) where N
+    println(@sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p)) 
+end
 
 """
     random_Pauli(N)
