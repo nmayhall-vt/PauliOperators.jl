@@ -2,7 +2,7 @@ using PauliOperators
 using Test
 # using BenchmarkTools 
 # using Printf
-# using LinearAlgebra
+using LinearAlgebra
 # using Random
 
 @testset "Pauli" begin
@@ -87,7 +87,13 @@ using Test
         @test all(Matrix(s1) * Matrix(s2) - Matrix(s1 * s2) .≈ 0)
     end
 
+    a = random_Pauli(6)
+    b = random_Pauli(6)
+    s = a + b
+    c = 1.23
+    @test all(c*Matrix(s) - Matrix(c * s) .≈ 0)
     println()
+
     ZX = [0+0im  1+0im   0+0im   0+0im
     1+0im  0+0im   0+0im   0+0im
     0+0im  0+0im   0+0im  -1+0im
@@ -95,5 +101,9 @@ using Test
 
     @test all(ZX .== Matrix(Pauli("ZX")))
 
+
+    bdag = boson_binary_transformation(6)
+    evals = real.(eigvals(Matrix(bdag*adjoint(bdag))))
+    @test all(abs.(evals .- range(0,63)) .< 1e-12)
 
 end

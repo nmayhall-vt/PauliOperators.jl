@@ -110,6 +110,28 @@ function Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
     return out
 end
 
+"""
+    Base.:*(ps::PauliSum{N}, a::Number) where {N}
+
+TBW
+"""
+function Base.:*(ps::PauliSum{N}, a::Number) where {N}
+    out = deepcopy(ps) 
+    mult!(out,a)
+    return out
+end
+Base.:*(a::Number, ps::PauliSum{N}) where {N} = ps*a
+
+"""
+    Base.mult!(ps::PauliSum{N}, a::Number)
+
+TBW
+"""
+function mult!(ps::PauliSum, a::Number)
+    for (op, coeff) in ps.ops 
+        ps[op] = coeff * a
+    end 
+end
 
 function Base.Matrix(ps::PauliSum{N}) where N
     out = zeros(ComplexF64, 2^N, 2^N)
