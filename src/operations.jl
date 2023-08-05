@@ -12,6 +12,19 @@ function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
     return Pauli{N}(θ,z,x)
 end
 
+"""
+    Base.:*(p::Pauli{N}, c::Number) where {N}
+
+Multiply a `Pauli` with a number. This returns a `PauliSum` 
+"""
+function Base.:*(p::Pauli{N}, c::Number) where {N}
+    ps = PauliSum(N)
+    sum!(ps,p)
+    mul!(ps, c)
+    return ps 
+end
+Base.:*(c::Number, p::Pauli) = p*c
+
 
 """
     Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
@@ -71,6 +84,7 @@ function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
     sum!(out, p)
     return out
 end
+Base.:+(p::Pauli{N}, ps::PauliSum{N}) where {N} = ps + p
 
 
 """
@@ -82,38 +96,58 @@ function Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N}
     ps[phasefree(p)] = get(ps, p) + get_phase(p) 
 end
 
-"""
-    Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
+# """
+#     Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
 
-Add a `Pauli` to a PauliSum. 
-"""
-function subtract!(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    ps[phasefree(p)] = get(ps, p) - get_phase(p) 
-end
+# Add a `Pauli` to a PauliSum. 
+# """
+# function subtract!(p::Pauli{N}, ps::PauliSum{N}) where {N}
+#     ps[phasefree(p)] = get_phase(p) - get(ps, p)
+# end
 
-"""
-    Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
+# """
+#     Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
 
-Subtract two `Pauli`'s. This returns a `PauliSum`
-"""
-function Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    if Base.isequal(p1, p2)
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1)-get_phase(p2)))
-    else
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1), phasefree(p2)=>-get_phase(p2)))
-    end
-end
+# Add a `Pauli` to a PauliSum. 
+# """
+# function subtract!(ps::PauliSum{N}, p::Pauli{N}) where {N}
+#     ps[phasefree(p)] = get(ps, p) - get_phase(p) 
+# end
 
-"""
-    Base.:-(ps::PauliSum{N}, p::Pauli{N}) where {N}
+# """
+#     Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
-Add a `Pauli` to a PauliSum. 
-"""
-function Base.:-(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    out = deepcopy(ps)
-    subtract!(out, p)
-    return out
-end
+# Subtract two `Pauli`'s. This returns a `PauliSum`
+# """
+# function Base.:-(p1::Pauli{N}, p2::Pauli{N}) where {N}
+#     if Base.isequal(p1, p2)
+#         return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1)-get_phase(p2)))
+#     else
+#         return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1), phasefree(p2)=>-get_phase(p2)))
+#     end
+# end
+
+# """
+#     Base.:-(ps::PauliSum{N}, p::Pauli{N}) where {N}
+
+# Add a `Pauli` to a PauliSum. 
+# """
+# function Base.:-(ps::PauliSum{N}, p::Pauli{N}) where {N}
+#     out = deepcopy(ps)
+#     subtract!(out, p)
+#     return out
+# end
+
+# """
+#     Base.:-(ps::PauliSum{N}, p::Pauli{N}) where {N}
+
+# Add a `Pauli` to a PauliSum. 
+# """
+# function Base.:-(p::Pauli{N}, ps::PauliSum{N}) where {N}
+#     out = deepcopy(ps)
+#     subtract!(p, out)
+#     return out
+# end
 
 """
     Base.hash(p::Pauli{N}, h::UInt) where N

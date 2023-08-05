@@ -187,3 +187,24 @@ function boson_binary_transformation(nqubits)
     return mat
     
 end
+
+"""
+    jordan_wigner(f::Integer, N::Integer)
+
+Transform a single fermionic creation operator to `PauliSum`.
+
+# Arguments
+- `f`: orbital index specifying the _spin_ orbital being acted upon by the creation operator, ``\\hat{a}_f^\\dagger``
+- `N`: Total number of spin orbitals
+"""
+function jordan_wigner(f::Integer, N::Integer)
+    # 
+    # For X, we just need to turn on the correct bits
+    x = Pauli{N}(0, 2^(f-1)-1, 2^(f-1))
+   
+    # 
+    # For Y, we need to do the same, but also account for the phase
+    # coming from storing things as iY instead of Y
+    y = Pauli{N}(0, 2^(f)-1, 2^(f-1))
+    return .5*x + .5im*rotate_phase(y,1)
+end

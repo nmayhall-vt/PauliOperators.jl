@@ -21,7 +21,7 @@ where,
     σ ∈ {X, iY, Z, I}
 
 """
-struct Pauli{N} <: Integer
+struct Pauli{N}
     θ::UInt8
     z::Int128
     x::Int128

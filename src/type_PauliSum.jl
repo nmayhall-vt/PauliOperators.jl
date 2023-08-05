@@ -117,17 +117,17 @@ TBW
 """
 function Base.:*(ps::PauliSum{N}, a::Number) where {N}
     out = deepcopy(ps) 
-    mult!(out,a)
+    mul!(out,a)
     return out
 end
 Base.:*(a::Number, ps::PauliSum{N}) where {N} = ps*a
 
 """
-    Base.mult!(ps::PauliSum{N}, a::Number)
+    LinearAlgebra.mul!(ps::PauliSum, a::Number)
 
 TBW
 """
-function mult!(ps::PauliSum, a::Number)
+function LinearAlgebra.mul!(ps::PauliSum, a::Number)
     for (op, coeff) in ps.ops 
         ps[op] = coeff * a
     end 
