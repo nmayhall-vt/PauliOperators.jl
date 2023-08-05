@@ -118,3 +118,15 @@ function Base.Matrix(ps::PauliSum{N}) where N
     end
     return out
 end
+
+function clip!(ps::PauliSum, thresh)
+    to_delete = []
+    for (op,coeff) in ps.ops
+        if abs(coeff) < thresh
+            push!(to_delete, op)
+        end
+    end
+    for k in to_delete
+        delete!(ps.ops, k)
+    end
+end

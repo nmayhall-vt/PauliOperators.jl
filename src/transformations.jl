@@ -103,6 +103,8 @@ function boson_binary_transformation(nqubits)
     rep2 = Dict{Tuple{Int128,Int128},ComplexF64}() 
     # rep2 = Dict{Pauli{nqubits},Float64}() 
 
+    bdag = PauliSum(nqubits)
+
     for i in rep1
         to_prod = []
         for j in i[1]
@@ -126,18 +128,23 @@ function boson_binary_transformation(nqubits)
                 coeff *= i[1]
                 op *= i[2]
             end
+        
             pbs = Pauli(op)
-            key = (pbs.z, pbs.x)
-            if haskey(rep2, key)
-                rep2[key] += sqrt(i[2]) * coeff * get_phase(pbs) 
-            else
-                rep2[key] = sqrt(i[2]) * coeff * get_phase(pbs) 
-            end
+            
+            bdag[phasefree(pbs)] = get(bdag, pbs) + get_phase(pbs) * coeff * sqrt(i[2]) 
+            
+            # if haskey(rep2, key)
+            #     rep2[key] += sqrt(i[2]) * coeff * get_phase(pbs) 
+            # else
+            #     rep2[key] = sqrt(i[2]) * coeff * get_phase(pbs) 
+            # end
             # if haskey(rep2, (pbs.z,pbs.x)
             # println(Pauli(op), coeff)
         end
     end
-   
+  
+    display(bdag)
+    return bdag
     for key in sort(rep2)
         @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), Pauli(key[1]..., nqubits))
         # println(key[1])
