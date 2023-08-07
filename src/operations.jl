@@ -25,6 +25,11 @@ function Base.:*(p::Pauli{N}, c::Number) where {N}
 end
 Base.:*(c::Number, p::Pauli) = p*c
 
+function otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
+    return Pauli{N+M}((p1.θ + p2.θ)%4, p1.z | p2.z << N, p1.x | p2.x << N)
+    # return Pauli{N+M}((p1.θ + p2.θ)%4, p1.z + p2.z*(2^N), p1.x + p2.x*(2^N))
+end
+const ⊗ = otimes
 
 """
     Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}

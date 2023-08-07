@@ -110,4 +110,8 @@ using LinearAlgebra
     fd = PauliOperators.jordan_wigner(5,10)
     tmp = .5*(Pauli("ZZZZXIIIII") + -1im*Pauli("ZZZZYIIIII"))
     @test all(Matrix(fd) .≈ Matrix(tmp))
+
+
+    # Tensor products
+    @test Pauli("X") ⊗ Pauli("Y") ⊗ Pauli("Z") == Pauli("XYZ")
 end

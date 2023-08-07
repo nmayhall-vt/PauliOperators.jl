@@ -26,6 +26,8 @@ export phasefree
 export random_Pauli 
 export boson_binary_transformation
 export jordan_wigner
+export otimes
+export ⊗
 
 end
 
