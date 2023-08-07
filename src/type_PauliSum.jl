@@ -152,3 +152,13 @@ function clip!(ps::PauliSum, thresh)
         delete!(ps.ops, k)
     end
 end
+
+function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
+    for (op, coeff) in p1.ops
+        get(p2, op) .≈ coeff || return false
+    end
+    for (op, coeff) in p2.ops
+        get(p1, op) .≈ coeff || return false
+    end
+    return true
+end

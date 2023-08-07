@@ -27,9 +27,23 @@ Base.:*(c::Number, p::Pauli) = p*c
 
 function otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
     return Pauli{N+M}((p1.θ + p2.θ)%4, p1.z | p2.z << N, p1.x | p2.x << N)
-    # return Pauli{N+M}((p1.θ + p2.θ)%4, p1.z + p2.z*(2^N), p1.x + p2.x*(2^N))
 end
 const ⊗ = otimes
+
+function otimes(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
+    out = PauliSum(N+M)
+    for (op,coeff) in p1.ops
+        out.ops[phasefree(op ⊗ p2)] = coeff * get_phase(p2)
+    end
+    return out 
+end
+function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
+    out = PauliSum(N+M)
+    for (op,coeff) in ps.ops
+        out.ops[phasefree(p ⊗ op)] = coeff * get_phase(p)
+    end
+    return out 
+end
 
 """
     Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
