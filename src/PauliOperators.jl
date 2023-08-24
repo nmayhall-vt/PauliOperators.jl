@@ -28,6 +28,7 @@ export boson_binary_transformation
 export jordan_wigner
 export otimes
 export ⊗
+export clip! 
 
 end
 

@@ -45,6 +45,16 @@ function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
     return out 
 end
 
+function otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
+    out = PauliSum(N+M)
+    for (op1,coeff1) in p1.ops
+        for (op2,coeff2) in p2.ops
+            out.ops[phasefree(op1 ⊗ op2)] = coeff1 * coeff2 * get_phase(op1) * get_phase(op2)
+        end
+    end
+    return out 
+end
+
 """
     Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
 

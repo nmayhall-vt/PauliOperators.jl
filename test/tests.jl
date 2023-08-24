@@ -117,4 +117,6 @@ using LinearAlgebra
     @test Pauli("X") ⊗ Pauli("Y") ⊗ Pauli("Z") == Pauli("XYZ")
     
     @test Pauli("X") ⊗ (Pauli("Y") + Pauli("Z")) ≈ Pauli("XY") + Pauli("XZ") 
+    
+    @test (Pauli("X") + Pauli("Y")) ⊗ (Pauli("Y") + Pauli("Z")) ≈ Pauli("XY") + Pauli("XZ") + Pauli("YY") + Pauli("YZ") 
 end
