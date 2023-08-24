@@ -167,3 +167,9 @@ TBW
 function random_Pauli(N)
     return Pauli{N}(rand(0:3), rand(1:2^N-1),rand(1:2^N-1))
 end
+
+function is_hermitian(p::Pauli)
+    real1 = iseven(p.θ)
+    real2 = iseven(count_ones(p.x & p.z)) 
+    return ~(real1 ⊻ real2)
+end

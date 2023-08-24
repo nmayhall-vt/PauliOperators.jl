@@ -20,6 +20,7 @@ export KetBitString
 export rotate_phase 
 export get_phase
 export is_diagonal
+export is_hermitian 
 export negate 
 export commute
 export phasefree 

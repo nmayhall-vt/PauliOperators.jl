@@ -25,11 +25,21 @@ function Base.:*(p::Pauli{N}, c::Number) where {N}
 end
 Base.:*(c::Number, p::Pauli) = p*c
 
+"""
+    otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
+
+TBW
+"""
 function otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
     return Pauli{N+M}((p1.θ + p2.θ)%4, p1.z | p2.z << N, p1.x | p2.x << N)
 end
 const ⊗ = otimes
 
+"""
+    otimes(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
+
+TBW
+"""
 function otimes(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
     out = PauliSum(N+M)
     for (op,coeff) in p1.ops
@@ -37,6 +47,11 @@ function otimes(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
     end
     return out 
 end
+"""
+    otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
+
+TBW
+"""
 function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
     out = PauliSum(N+M)
     for (op,coeff) in ps.ops
@@ -45,6 +60,11 @@ function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
     return out 
 end
 
+"""
+    otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
+
+TBW
+"""
 function otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
     out = PauliSum(N+M)
     for (op1,coeff1) in p1.ops

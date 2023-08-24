@@ -119,4 +119,14 @@ using LinearAlgebra
     @test Pauli("X") ⊗ (Pauli("Y") + Pauli("Z")) ≈ Pauli("XY") + Pauli("XZ") 
     
     @test (Pauli("X") + Pauli("Y")) ⊗ (Pauli("Y") + Pauli("Z")) ≈ Pauli("XY") + Pauli("XZ") + Pauli("YY") + Pauli("YZ") 
+
+
+    # is_hermitian
+    @test is_hermitian(Pauli("XXXXX")) == true
+    @test is_hermitian(Pauli("XXXXY")) == true
+    @test is_hermitian(Pauli("XXYZY")) == true
+    @test is_hermitian(Pauli("XXXXX")) == true
+    @test is_hermitian(phasefree(Pauli("YXXXX"))) == false 
+    @test is_hermitian(phasefree(Pauli("YYYXX"))) == false 
+    @test is_hermitian(phasefree(Pauli("YZYXX"))) == true 
 end
