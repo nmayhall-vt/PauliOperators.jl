@@ -76,6 +76,75 @@ function otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
 end
 
 """
+    osum(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
+
+Returns the direct sum of two Paulis
+"""
+function osum(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
+    I1 = Pauli("I"^length(string(p1)))
+    I2 = Pauli("I"^length(string(p2)))
+    out = otimes(p1, I2) + otimes(I1, p2)
+    return out
+end
+const ⊕ = osum
+
+"""
+    osum(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
+
+Returns the direct sum of a PauliSum and a Pauli
+"""
+function osum(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
+    I1 = Pauli(N)
+    for (op,coeff) in p1.ops
+        tmp1 = Pauli("I"^length(string(op)))
+        I1 = tmp1
+        break
+    end
+    I2 = Pauli("I"^length(string(p2)))
+    out = otimes(p1, I2) + otimes(I1, p2)
+    return out
+end
+
+"""
+    osum(p1::Pauli{N}, p2::PauliSum{M}) where {N,M}
+
+Returns the direct sum of a PauliSum and a Pauli
+"""
+function osum(p1::Pauli{N}, p2::PauliSum{M}) where {N,M}
+    I2 = Pauli(M)
+    for (op,coeff) in p2.ops
+        tmp2 = Pauli("I"^length(string(op)))
+        I2 = tmp2
+        break
+    end
+    I1 = Pauli("I"^length(string(p1)))
+    out = otimes(p1, I2) + otimes(I1, p2)
+    return out
+end
+
+"""
+    osum(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
+
+Returns the direct sum of two PauliSums
+"""
+function osum(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
+    I1 = Pauli(N)
+    I2 = Pauli(M)
+    for (op,coeff) in p1.ops
+        tmp1 = Pauli("I"^length(string(op)))
+        I1 = tmp1
+        break
+    end
+    for (op,coeff) in p2.ops
+        tmp2 = Pauli("I"^length(string(op)))
+        I2 = tmp2
+        break
+    end
+    out = otimes(p1, I2) + otimes(I1, p2)
+    return out
+end
+
+"""
     Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
 
 Check if they are equal, return true or false
