@@ -129,4 +129,10 @@ using LinearAlgebra
     @test is_hermitian(phasefree(Pauli("YXXXX"))) == false 
     @test is_hermitian(phasefree(Pauli("YYYXX"))) == false 
     @test is_hermitian(phasefree(Pauli("YZYXX"))) == true 
+
+    # Direct sums
+    @test Pauli("X") ⊕ Pauli("IZ") ≈ Pauli("XII") + Pauli("IIZ")
+    @test Pauli("IZ") ⊕ (Pauli("Y") + Pauli("Z")) ≈ Pauli("IZI") + Pauli("IIY") + Pauli("IIZ")
+    @test (Pauli("YI") + Pauli("ZX")) ⊕ Pauli("IZ") ≈ Pauli("YIII") + Pauli("ZXII") + Pauli("IIIZ")
+    @test (Pauli("YI") + Pauli("ZX")) ⊕ (Pauli("Z") + Pauli("X")) ≈ Pauli("YII") + Pauli("ZXI") + Pauli("IIZ") + Pauli("IIX")
 end
