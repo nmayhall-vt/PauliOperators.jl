@@ -30,6 +30,7 @@ export jordan_wigner
 export otimes
 export ⊗
 export clip! 
+export ⊕
 
 end
 
