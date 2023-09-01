@@ -28,8 +28,8 @@ export random_Pauli
 export boson_binary_transformation
 export jordan_wigner
 export otimes
-export ⊗
 export clip! 
+export ⊗
 export ⊕
 
 end

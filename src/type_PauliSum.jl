@@ -153,6 +153,11 @@ function clip!(ps::PauliSum; thresh=1e-16)
     end
 end
 
+"""
+    Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
+
+TBW
+"""
 function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
     for (op, coeff) in p1.ops
         get(p2, op) .≈ coeff || return false
@@ -161,4 +166,11 @@ function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
         get(p1, op) .≈ coeff || return false
     end
     return true
+end
+
+
+function matvec(ps::PauliSum{N}, v::Matrix) where N
+
+    σ = zeros(T,size(v))
+
 end

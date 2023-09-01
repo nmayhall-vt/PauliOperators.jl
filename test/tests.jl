@@ -135,4 +135,11 @@ using LinearAlgebra
     @test Pauli("IZ") ⊕ (Pauli("Y") + Pauli("Z")) ≈ Pauli("IZI") + Pauli("IIY") + Pauli("IIZ")
     @test (Pauli("YI") + Pauli("ZX")) ⊕ Pauli("IZ") ≈ Pauli("YIII") + Pauli("ZXII") + Pauli("IIIZ")
     @test (Pauli("YI") + Pauli("ZX")) ⊕ (Pauli("Z") + Pauli("X")) ≈ Pauli("YII") + Pauli("ZXI") + Pauli("IIZ") + Pauli("IIX")
+    
+    # Pauli KetBitString multiplication 
+    @test Pauli("YZYZ") * KetBitString([1,0,0,0]) == (1, KetBitString([0,0,1,0]))
+    @test Pauli("YZYZ") * KetBitString([1,0,1,0]) == (-1, KetBitString([0,0,0,0]))
+    @test Pauli("YZYZ") * KetBitString([1,1,1,0]) == (1, KetBitString([0,1,0,0]))
+    @test Pauli("YZXZ") * KetBitString([1,1,1,0]) == (1im, KetBitString([0,1,0,0]))
+    @test Pauli("XZXZ") * KetBitString([1,1,1,0]) == (-1, KetBitString([0,1,0,0]))
 end

@@ -25,6 +25,19 @@ function Base.:*(p::Pauli{N}, c::Number) where {N}
 end
 Base.:*(c::Number, p::Pauli) = p*c
 
+
+"""
+    Base.:*(p::Pauli{N}, KetBitString{N}) where N
+
+TBW
+"""
+function Base.:*(p::Pauli{N}, ψ::KetBitString{N}) where N
+    tmp = p.x ⊻ ψ.v
+    sign = count_ones(p.z & tmp) % 2
+    return get_phase(p)*(-1)^sign, KetBitString{N}(tmp)
+end
+
+
 """
     otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
 
