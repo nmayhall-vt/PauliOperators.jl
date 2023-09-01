@@ -101,8 +101,20 @@ function Base.:*(p::Pauli{N}, ψ::KetBitString{N}) where N
     return get_phase(p)*(-1)^sign, KetBitString{N}(tmp)
 end
 
-
-# ScaledPauli
 function Base.:*(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N}
     return ScaledPauli{T,N}(p1.coeff*p2.coeff, p1.pauli*p2.pauli)
 end
+
+function Base.:*(p1::ScaledPauli{T,N}, p2::Pauli{N}) where {T,N}
+    return ScaledPauli{T,N}(p1.coeff, p1.pauli*p2)
+end
+
+function Base.:*(p1::Pauli{N}, p2::ScaledPauli{T,N}) where {T,N}
+    return ScaledPauli{T,N}(p2.coeff, p1*p2.pauli)
+end
+
+function Base.:*(p::ScaledPauli{T,N}, a::Number) where {T,N}
+    return ScaledPauli{T,N}(p.coeff*a, p.pauli)
+end
+
+Base.:*(a::Number, p::ScaledPauli{T,N}) where {T,N} = p*a

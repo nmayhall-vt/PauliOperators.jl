@@ -147,8 +147,9 @@ using LinearAlgebra
     N=8
     a = ScaledPauli(random_Pauli(N))
     b = ScaledPauli(random_Pauli(N))
-    c = ScaledPauli(random_Pauli(N))
-    d = ScaledPauli(random_Pauli(N))
 
     a *= 2.3
+    b *= 3.2
+    @test get_coeff(a*b) == 2.3 * 3.2 * get_phase(a.pauli*b.pauli)
+    
 end

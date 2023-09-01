@@ -13,6 +13,7 @@ include("type_KetBitString.jl")
 include("operations.jl")
 include("transformations.jl")
 include("function_mul.jl")
+include("function_length.jl")
 
 
 # Exports
@@ -22,6 +23,7 @@ export PauliSum
 export KetBitString
 export rotate_phase 
 export get_phase
+export get_coeff
 export is_diagonal
 export is_hermitian 
 export negate 
