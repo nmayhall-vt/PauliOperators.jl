@@ -142,4 +142,13 @@ using LinearAlgebra
     @test Pauli("YZYZ") * KetBitString([1,1,1,0]) == (1, KetBitString([0,1,0,0]))
     @test Pauli("YZXZ") * KetBitString([1,1,1,0]) == (1im, KetBitString([0,1,0,0]))
     @test Pauli("XZXZ") * KetBitString([1,1,1,0]) == (-1, KetBitString([0,1,0,0]))
+
+    # ScaledPauli
+    N=8
+    a = ScaledPauli(random_Pauli(N))
+    b = ScaledPauli(random_Pauli(N))
+    c = ScaledPauli(random_Pauli(N))
+    d = ScaledPauli(random_Pauli(N))
+
+    a *= 2.3
 end

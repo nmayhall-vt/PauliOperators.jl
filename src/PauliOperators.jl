@@ -7,14 +7,17 @@ using Printf
 
 include("helpers.jl")
 include("type_Pauli.jl")
+include("type_ScaledPauli.jl")
 include("type_PauliSum.jl")
 include("type_KetBitString.jl")
 include("operations.jl")
 include("transformations.jl")
+include("function_mul.jl")
 
 
 # Exports
 export Pauli
+export ScaledPauli
 export PauliSum
 export KetBitString
 export rotate_phase 
