@@ -7,7 +7,7 @@ struct ScaledPauli{T,N}
     pauli::Pauli{N}
 end
 
-# ScaledPauliVector{T,N} = Vector{ScaledPauli{T,N}}
+ScaledPauliVector{T,N} = Vector{ScaledPauli{T,N}}
 
 function Base.convert(::Type{ScaledPauli{T,N}}, p::Pauli{N}) where {T,N}
     return ScaledPauli{T,N}(get_phase(p), phase(phasefree(p)))

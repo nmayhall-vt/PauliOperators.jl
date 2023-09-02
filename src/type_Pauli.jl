@@ -174,7 +174,3 @@ function is_hermitian(p::Pauli)
     return ~(real1 ⊻ real2)
 end
 
-
-Base.isless(p1::Pauli{N}, p2::Pauli{N}) where N = isless((p1.z, p1.x), (p2.z, p2.x))
-Base.isless(p1::ScaledPauli{T,N}, p2::Pauli{N}) where {T,N} = isless(p1.pauli, p2)
-Base.isless(p1::Pauli{N}, p2::ScaledPauli{T,N}) where {T,N} = isless(p1, p2.pauli)
