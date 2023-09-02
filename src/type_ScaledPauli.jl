@@ -114,9 +114,11 @@ function Base.unique!(spv::Vector{ScaledPauli{T,N}}) where {T,N}
     #     #     end 
     #     # end
     # end
+    fill_idx = 1
     for i in 1:length(spv)-1
         for j in i+1:length(spv)
             if isless(spv[i], spv[j])
+                fill_idx += 1
                 continue
             elseif isequal(spv[i], spv[j])
                 
