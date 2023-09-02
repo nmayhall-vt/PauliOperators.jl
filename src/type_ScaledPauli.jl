@@ -1,6 +1,8 @@
 """
     coeff::T
     pauli::Pauli{N}
+
+Simply a combination of a `Pauli` with a coefficient. When sorted, only `pauli` is considered for the comparisons.
 """
 struct ScaledPauli{T,N}
     coeff::T
