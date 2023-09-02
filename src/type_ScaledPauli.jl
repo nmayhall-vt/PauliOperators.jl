@@ -85,44 +85,46 @@ get_coeff(p::Pauli{N}) where {N} = get_phase(p)
 Base.isless(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N} = isless(p1.pauli, p2.pauli)
 Base.isequal(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N} = isequal(p1.pauli, p2.pauli)
 
+"""
+    Base.unique!(spv::Vector{ScaledPauli{T,N}}) where {T,N}
+
+Sort and add duplicates. This modifies `spv` to be a sorted list of only unique `ScaledPauli`'s
+"""
 function Base.unique!(spv::Vector{ScaledPauli{T,N}}) where {T,N}
     sort!(spv)
-
-    # i = 1
-    # while i < length(spv)
-    #     njump = 0
-    #     j = i+1
-    #     while j < length(spv) && isequal(spv[j], spv[i])
-    #         println(i, " ", j)
-    #         spv[i] = ScaledPauli{T,N}(get_coeff(spv[i]) + get_coeff(spv[j]), phasefree(spv[i].pauli))
-    #         spv[j] *= 0 
-    #         j += 1
-    #         njump += 1
-    #     end
-    #     i += 1 + njump
-    #     j += 1
-    #     # for j in i+1:length(spv)
-    #     #     if isless(spv[i], spv[j])
-    #     #         # spv[i+1] = spv[j]
-    #     #         i += njump
-    #     #         continue
-    #     #     elseif isequal(spv[i], spv[j])
-    #     #         njump += 1
-    #     #         spv[i] = ScaledPauli{T,N}(get_coeff(spv[i]) + get_coeff(spv[j]), phasefree(spv[i].pauli))
-    #     #     else
-    #     #         error(i, " ", j, " Why is this not sorted?")
-    #     #     end 
-    #     # end
-    # end
-    fill_idx = 1
-    for i in 1:length(spv)-1
-        for j in i+1:length(spv)
-            if isless(spv[i], spv[j])
-                fill_idx += 1
-                continue
-            elseif isequal(spv[i], spv[j])
-                
-            end
+    i = 1
+    for j in 2:length(spv)
+        if isless(spv[i], spv[j])
+            i += 1
+            spv[i] = spv[j] 
+        elseif isequal(spv[i], spv[j])
+            spv[i] = ScaledPauli{T,N}(get_coeff(spv[i]) + get_coeff(spv[j]), phasefree(spv[i].pauli))
         end
     end
+    resize!(spv,i)
+end
+
+"""
+    Base.unique(spv::Vector{ScaledPauli{T,N}}) where {T,N}
+
+Sort and add duplicates. This returns a sorted list of only unique `ScaledPauli`'s
+"""
+function Base.unique(spv::Vector{ScaledPauli{T,N}}) where {T,N}
+    out = deepcopy(spv)
+    unique!(out)
+    return out
+end
+
+
+"""
+    Base.Matrix(spv::Vector{ScaledPauli{T,N}}) where {T,N}
+
+TBW
+"""
+function Base.Matrix(spv::Vector{ScaledPauli{T,N}}) where {T,N}
+    out = zeros(T, 2^N, 2^N)
+    for spvi in spv 
+        out .+= Matrix(spvi.pauli) .* spvi.coeff
+    end
+    return out
 end

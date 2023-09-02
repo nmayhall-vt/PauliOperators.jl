@@ -133,14 +133,24 @@ function LinearAlgebra.mul!(ps::PauliSum, a::Number)
     end 
 end
 
-function Base.Matrix(ps::PauliSum{N}) where N
-    out = zeros(ComplexF64, 2^N, 2^N)
+"""
+    Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
+
+Create a dense Matrix of type `T`
+"""
+function Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
+    out = zeros(T, 2^N, 2^N)
     for (op, coeff) in ps.ops
         out .+= Matrix(op) .* coeff
     end
     return out
 end
 
+"""
+    clip!(ps::PauliSum; thresh=1e-16)
+
+Delete Pauli's with coeffs smaller than thresh
+"""
 function clip!(ps::PauliSum; thresh=1e-16)
     to_delete = []
     for (op,coeff) in ps.ops

@@ -3,9 +3,11 @@ using Test
 # using BenchmarkTools 
 # using Printf
 using LinearAlgebra
-# using Random
+using Random
 
 @testset "Pauli" begin
+
+    Random.seed!(1)
 
     println() 
     a = Pauli("XYZIXY")
@@ -154,4 +156,27 @@ using LinearAlgebra
 
         @test get_coeff(a * b) ≈ get_coeff(a) * get_coeff(b) * get_phase(a.pauli * b.pauli)
     end
+
+    # Test unique!
+    # Create vector of scaled paulis
+    v = [ScaledPauli(random_Pauli(8)) for i in 1:10]
+   
+    # add duplicates
+    w = deepcopy(v)
+    for i in 1:10
+        for j in i:10
+            push!(w, v[rand(1:10)]*i)
+        end
+    end
+    display(v)
+    println() 
+    display(w)
+
+    @test length(v) != length(w)
+    @test length(v) == length(unique(w))
+    
+    mat1 = Matrix(w)
+    mat2 = Matrix(unique(w))
+
+    @test norm(mat1-mat2) ≈ 0
 end
