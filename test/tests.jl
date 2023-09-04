@@ -96,10 +96,14 @@ using Random
     @test all(c*Matrix(s) - Matrix(c * s) .≈ 0)
     println()
 
-    ZX = [0+0im  1+0im   0+0im   0+0im
-    1+0im  0+0im   0+0im   0+0im
-    0+0im  0+0im   0+0im  -1+0im
-    0+0im  0+0im  -1+0im   0+0im]
+    # ZX = [  0+0im  1+0im   0+0im   0+0im
+    #         1+0im  0+0im   0+0im   0+0im
+    #         0+0im  0+0im   0+0im  -1+0im
+    #         0+0im  0+0im  -1+0im   0+0im]
+    ZX = [  0+0im  0+0im   1+0im   0+0im
+            0+0im  0+0im   0+0im  -1+0im
+            1+0im  0+0im   0+0im   0+0im
+            0+0im -1+0im   0+0im   0+0im]
 
     @test all(ZX .== Matrix(Pauli("ZX")))
 
@@ -179,4 +183,16 @@ using Random
     mat2 = Matrix(unique(w))
 
     @test norm(mat1-mat2) ≈ 0
+
+
+    #matvec
+    println("w'")
+    display(w')
+    w = w + w'
+    return
+    e1,v1 = eigen(Matrix(w))
+
+    # dav = Davidson(LinearMap(w); max_iter=200, max_ss_vecs=8, tol=1e-6, nroots=6, v0=v_guess, lindep_thresh=1e-10)
+    # e2,v2 = eigs(dav)
+
 end

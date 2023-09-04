@@ -1,4 +1,5 @@
 using LinearAlgebra
+using BlockDavidson 
 
 """
     ops::Dict{Pauli{N},ComplexF64}
@@ -181,8 +182,22 @@ function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
 end
 
 
-function matvec(ps::PauliSum{N}, v::Matrix) where N
+function BlockDavidson.LinOpMat(ps::PauliSum{N}; issymmetric=false) where N
+    function matvec(v)
+        return ps * v
+    end
+    return LinOpMat{ComplexF64}(matvec, 2^N, issymmetric) 
+end
 
-    σ = zeros(T,size(v))
 
+# function LinearMaps.LinearMap(ps::PauliSum{N}) where N
+
+#     function matvec(v)
+#         return ps * v
+#     end
+#     return LinearMap 
+# end
+
+function nqubits(p::PauliSum{N}) where N
+    return N
 end

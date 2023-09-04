@@ -1,5 +1,7 @@
 using PauliOperators
 using LinearAlgebra
+using BlockDavidson
+import LinearMaps
 
 function hubbard_holstein(;t=1, U=1, ω=.5, g=.2)
 
@@ -94,7 +96,30 @@ end
 
 Hf, Hb, H, N, Sz = hubbard_holstein()
 
-e,v = eigen(Matrix(H))
-ni = real.(diag(v'*Matrix(N)*v))
-states = [i ≈ 4 for i in ni];
-display(e[states][1:60])
+# e,v = eigen(Matrix(H))
+# ni = real.(diag(v'*Matrix(N)*v))
+# states = [i ≈ 4 for i in ni];
+# display(e[states][1:60])
+
+ndim = 2^nqubits(H)
+nvec = 2
+function mymatvec(v::Matrix) 
+    # display(typeof(v))
+    return H * v
+end
+
+
+
+lmap = LinearMaps.LinearMap(mymatvec, ndim, ndim; issymmetric=false, ismutating=false, ishermitian=true)
+lmap = LinOpMat{ComplexF64}(mymatvec, ndim, false)
+vin = rand(ComplexF64, ndim, nvec)
+# σ = lmap * 
+display(typeof(H))
+display(typeof(vin))
+display(lmap*vin)
+# display(lmap * rand(T,ndim, nvec))
+dav = Davidson(lmap; max_iter=200, max_ss_vecs=8, tol=1e-6, nroots=nvec, T=ComplexF64)
+e, v = eigs(dav)
+
+# dav = Davidson(LinOpMat(H); max_iter=200, max_ss_vecs=8, tol=1e-6, nroots=6, lindep_thresh=1e-10)
+# e,v = eigs(dav)

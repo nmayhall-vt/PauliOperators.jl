@@ -7,7 +7,7 @@ I think this should be much faster if we were to store vectors as rows,
 so that summing over states acts on contiguous data 
 """
 function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}) where {T,N}
-    fill!(out, T(0))
+    # fill!(out, T(0))
     ndim = size(in,1)
     nvec = size(in,2)
     
@@ -35,7 +35,7 @@ end
 ABα+Cβ. The result is stored in C by overwriting it. Note that C must not be aliased with either A or B.
 """
 function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}, α, β) where {T,N}
-    scale!(C, β)
+    out .= out .* β
     ndim = size(in,1)
     
     # Check dimensions 
@@ -46,7 +46,7 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}, α, β) 
     # need to go from 0:N-1 because we convert to binary
     for i in 0:ndim-1                           
         (phase, j) = p * KetBitString{N}(i)
-        C[j.v+1,:] .+= phase*in[i+1,:] .* α
+        out[j.v+1,:] .+= phase*in[i+1,:] .* α
     end
 end
 
@@ -118,3 +118,33 @@ function Base.:*(p::ScaledPauli{T,N}, a::Number) where {T,N}
 end
 
 Base.:*(a::Number, p::ScaledPauli{T,N}) where {T,N} = p*a
+
+"""
+    Base.:*(ps::PauliSum{N}, v::Array{T}) where {T,N}
+
+TBW
+"""
+function Base.:*(ps::PauliSum{N}, v::Array{T}) where {T,N}
+    σ = zeros(T,size(v))
+    ndim = size(v,1)
+    ndim == 2^N || throw(DimensionMismatch)
+    for (op,coeff) in ps.ops
+        mul!(σ, op, v, coeff, 1.0)
+    end
+    return σ 
+end
+
+"""
+    Base.:*(spv::Vector{ScaledPauli{T,N}}, v::Array{T}) where {T,N}
+
+TBW
+"""
+function Base.:*(spv::Vector{ScaledPauli{T,N}}, v::Array{T}) where {T,N}
+    σ = zeros(T,size(v))
+    ndim = size(v,1)
+    ndim == 2^N || throw(DimensionMismatch)
+    for sp in spv 
+        mul!(σ, sp.pauli, v, sp.coeff, 1.0)
+    end
+    return σ 
+end

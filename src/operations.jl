@@ -120,41 +120,6 @@ end
 
 
 
-"""
-    Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
-
-Add two `Pauli`'s together. This returns a `PauliSum`
-"""
-function Base.:+(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    if phasefree(p1) == phasefree(p2) 
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1)+get_phase(p2)))
-    else
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1), phasefree(p2)=>get_phase(p2)))
-    end
-end
-
-
-"""
-    Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
-
-Add a `Pauli` to a PauliSum. 
-"""
-function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    out = deepcopy(ps)
-    sum!(out, p)
-    return out
-end
-Base.:+(p::Pauli{N}, ps::PauliSum{N}) where {N} = ps + p
-
-
-"""
-    Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
-
-Add a `Pauli` to a PauliSum. 
-"""
-function Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    ps[phasefree(p)] = get(ps, p) + get_phase(p) 
-end
 
 # """
 #     Base.sum!(p1::PauliSum{N}, p2::Pauli{N}) where {N}
@@ -238,13 +203,17 @@ function Base.Matrix(p::Pauli{N}) where N
         # println(i, " ", typeof(str[i]))
         # println(str[i] == "X"[1])
         if str[i] == "X"[1] 
-            mat = kron(X,mat)
+            mat = kron(mat, X)
+            # mat = kron(X,mat)
         elseif str[i] == "y"[1]
-            mat = kron(y,mat)
+            mat = kron(mat, y)
+            # mat = kron(y,mat)
         elseif str[i] == "Z"[1]
-            mat = kron(Z,mat)
+            mat = kron(mat, Z)
+            # mat = kron(Z,mat)
         elseif str[i] == "I"[1]
-            mat = kron(I,mat)
+            mat = kron(mat, I)
+            # mat = kron(I,mat)
         else
             throw(ErrorException)
         end
