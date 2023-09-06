@@ -8,7 +8,7 @@ A collection of `Pauli`s, joined by addition.
 This uses a `Dict` to store them, however, the specific use cases should probably dictate the container type,
 so this will probably be removed.
 """
-struct PauliSum{N}  
+struct PauliSum{N}
     ops::Dict{Pauli{N},ComplexF64}
 end
 

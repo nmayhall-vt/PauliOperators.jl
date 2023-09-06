@@ -40,6 +40,7 @@ function Pauli(z::I, x::I, N) where I<:Integer
     return Pauli{N}(θ, z, x)
 end
 
+
 """
     Pauli(str::String)
 
@@ -49,37 +50,6 @@ Create a `Pauli` from a string, e.g.,
 
 This is convieniant for manual manipulations, but is not type-stable so will be slow.
 """
-# function Pauli(str::String, ::Val{N}) where N
-#     for i in str
-#         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
-#     end
-
-#     x = Int128(0)
-#     z = Int128(0)
-#     ny = 0 
-#     N == length(str) || throw(DimensionMismatch)
-#     idx = Int128(1)
-#     two = Int128(2)
-#     one = Int128(1)
-
-#     for i in str
-#         # println(i, " ", idx, typeof(idx))
-#         if i in ['X', 'Y']
-#             x |= two^(idx-one)
-#             if i == 'Y'
-#                 ny += 1
-#             end
-#         end
-#         if i in ['Z', 'Y']
-#             z |= two^(idx-one)
-#         end
-#         idx += 1
-#     end
-#     θ = 3*ny%4
-#     return Pauli{N}(θ, z,x) 
-# end
-
-
 function Pauli(str::String)
     for i in str
         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
@@ -138,8 +108,8 @@ function Pauli(N::Integer; X=[], Y=[], Z=[])
    
     # print(str[1:N])
     return Pauli(join(str))
-    
 end
+
 
 """
     phasefree(p::Pauli)
