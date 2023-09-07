@@ -16,8 +16,8 @@ TBW
 """
 function otimes(p1::PauliSum{N}, p2::Pauli{M}) where {N,M}
     out = PauliSum(N+M)
-    for (op,coeff) in p1.ops
-        out.ops[phasefree(op ⊗ p2)] = coeff * get_phase(p2)
+    for (op,coeff) in p1
+        out[phasefree(op ⊗ p2)] = coeff * get_phase(p2)
     end
     return out 
 end
@@ -28,8 +28,8 @@ TBW
 """
 function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
     out = PauliSum(N+M)
-    for (op,coeff) in ps.ops
-        out.ops[phasefree(p ⊗ op)] = coeff * get_phase(p)
+    for (op,coeff) in ps
+        out[phasefree(p ⊗ op)] = coeff * get_phase(p)
     end
     return out 
 end
@@ -41,9 +41,9 @@ TBW
 """
 function otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
     out = PauliSum(N+M)
-    for (op1,coeff1) in p1.ops
-        for (op2,coeff2) in p2.ops
-            out.ops[phasefree(op1 ⊗ op2)] = coeff1 * coeff2 * get_phase(op1) * get_phase(op2)
+    for (op1,coeff1) in p1
+        for (op2,coeff2) in p2
+            out[phasefree(op1 ⊗ op2)] = coeff1 * coeff2 * get_phase(op1) * get_phase(op2)
         end
     end
     return out 

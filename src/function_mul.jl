@@ -128,7 +128,7 @@ function Base.:*(ps::PauliSum{N}, v::Array{T}) where {T,N}
     σ = zeros(T,size(v))
     ndim = size(v,1)
     ndim == 2^N || throw(DimensionMismatch)
-    for (op,coeff) in ps.ops
+    for (op,coeff) in ps
         mul!(σ, op, v, coeff, 1.0)
     end
     return σ 
