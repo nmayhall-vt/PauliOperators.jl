@@ -35,6 +35,12 @@ function Base.display(sv::Vector{ScaledPauli{T,N}}) where {T,N}
         display(i)
     end
 end
+"""
+    Base.display(p::Pauli)
+
+Display, y = iY
+"""
+Base.string(p::ScaledPauli) = string(p.pauli)
 
 
 """
@@ -49,20 +55,6 @@ function Base.:-(p::Pauli{N}) where {N}
     return rotate_phase(p,2) 
 end
 
-# 
-function Base.:+(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N}
-    if isequal(p1.pauli, p2.pauli)
-        return Vector{ScaledPauli{T,N}}([ScaledPauli{T,N}(get_coeff(p1) + get_coeff(p2), phasefree(p1.pauli))])
-    else
-        return Vector{ScaledPauli{T,N}}([p1, p2])
-    end
-end
-function Base.:+(p::ScaledPauli{T,N}, a::Number) where {T,N}
-    return p + ScaledPauli{T,N}(a, Pauli{N}(0,0,0))
-end
-function Base.:+(p::ScaledPauli{T,N}, a::Pauli{N}) where {T,N}
-    return p + ScaledPauli{T,N}(1, a)
-end
 
 """
     commute(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N}
@@ -129,4 +121,14 @@ function Base.Matrix(spv::Vector{ScaledPauli{T,N}}) where {T,N}
         out .+= Matrix(spvi.pauli) .* spvi.coeff
     end
     return out
+end
+
+
+"""
+    Base.Matrix(p::Pauli{N}) where N
+
+Create dense matrix representation 
+"""
+function Base.Matrix(p::ScaledPauli{T,N}) where {T,N}
+    return Matrix(p.pauli) .* p.coeff 
 end

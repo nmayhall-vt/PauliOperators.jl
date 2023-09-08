@@ -155,14 +155,6 @@ function PauliNew(N::Integer; X=[], Y=[], Z=[])
     return PauliNew{N,M}(θ, ntuple(zints->zints, M), ntuple(xints->xints, M))
 end
 
-"""
-    phasefree(p::Pauli)
-
-TBW
-"""
-function phasefree(p::Pauli)
-    return rotate_phase(p, -p.θ)
-end
 
 """
     Base.show(io::IO, P::PauliMask)

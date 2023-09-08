@@ -9,7 +9,8 @@ abstract type AbstractPauli{N} end
 
 Create dense matrix representation 
 """
-function Base.Matrix(p::AbstractPauli{N}) where N
+function Base.Matrix(p::AbstractPauli)
+    N = nqubits(p)
     mat = ones(Int8,1,1)
     str = string(p)
     X = [0 1; 1 0]
@@ -39,13 +40,6 @@ function Base.Matrix(p::AbstractPauli{N}) where N
 end
 
 
-function Base.convert(::Type{Pauli{N}}, p::PauliPF{N}) where {N}
-    return Pauli{N}(phase(p), p.z, p.x)
-end
-
-function Pauli(p::PauliPF{N}) where {N}
-    return Pauli{N}(phase(p), p.z, p.x)
-end
 
 """
     commute(p1::AbstractPauli, p2::AbstractPauli)

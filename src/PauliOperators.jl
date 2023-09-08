@@ -12,7 +12,9 @@ include("type_KetBitString.jl")
 include("operations.jl")
 include("transformations.jl")
 include("function_mul.jl")
+include("function_add.jl")
 include("function_base.jl")
+include("function_convert.jl")
 
 
 # Exports

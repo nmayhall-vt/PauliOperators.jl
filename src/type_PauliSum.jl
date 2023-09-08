@@ -8,7 +8,7 @@ This uses a `Dict` to store them, however, the specific use cases should probabl
 so this will probably be removed.
 """
 struct PauliSum{N}  
-    ops::Dict{Pauli{N},ComplexF64}
+    ops::Dict{PauliPF{N},ComplexF64}
 end
 
 """
@@ -17,7 +17,7 @@ end
 TBW
 """
 function PauliSum(N)
-    return PauliSum{N}(Dict{Pauli{N},ComplexF64}())
+    return PauliSum{N}(Dict{PauliPF{N},ComplexF64}())
 end
 
 
@@ -28,23 +28,16 @@ TBW
 """
 function Base.display(ps::PauliSum)
     for (key,val) in ps.ops
-        @printf(" %12.8f +%12.8fi θ:%1i %s\n", real(val), imag(val), key.θ, key)
+        @printf(" %12.8f +%12.8fi %s\n", real(val), imag(val), key)
     end
 end
 
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, phasefree(p), zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
 Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[phasefree(p)]
+Base.getindex(ps::PauliSum{N}, p::PauliPF{N}) where N = ps.ops[p]
 Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[phasefree(p)] = v*get_phase(p)
-
-"""
-    Base.+(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
-
-Add two `PauliSum`s. 
-"""
-function Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    return PauliSum{N}(mergewith(+, ps1.ops, ps2.ops))
-end
+Base.setindex!(ps::PauliSum{N}, v, p::PauliPF{N}) where N = ps.ops[p] = v*get_phase(p)
 
 """
     Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
@@ -146,6 +139,15 @@ function Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
         out .+= Matrix(op) .* coeff
     end
     return out
+end
+
+function is_hermitian(ps::PauliSum) 
+    for (p,coeff) in ps.ops
+        if is_hermitian(p) ⊻ (abs(imag(coeff)) < 1e-12 )
+            return false
+        end
+    end
+    return true
 end
 
 """

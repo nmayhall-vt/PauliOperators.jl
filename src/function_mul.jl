@@ -89,13 +89,33 @@ function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
     return Pauli{N}(θ, z,x)
 end
 
-"""
-    Base.:*(p::Pauli{N}, c::Number) where {N}
+function Base.:*(p1::Pauli{N}, p2::PauliPF{N}) where {N}
+    x = p1.x ⊻ p2.x
+    z = p1.z ⊻ p2.z
+    θ = (p1.θ + phase(p2)) % 4
+    θ += (2*count_ones(p1.x & p2.z)) % 4
+    return Pauli{N}(θ, z, x)
+end
 
-Multiply a `Pauli` with a number. This returns a `PauliSum` 
+function Base.:*(p1::PauliPF{N}, p2::Pauli{N}) where {N}
+    x = p1.x ⊻ p2.x
+    z = p1.z ⊻ p2.z
+    θ = (phase(p1) + p2.θ) % 4
+    θ += (2*count_ones(p1.x & p2.z)) % 4
+    return Pauli{N}(θ, z, x)
+end
+
+Base.:*(p1::PauliPF{N}, p2::ScaledPauli{T,N}) where {T,N} = ScaledPauli{T,N}(get_phase(p1) * p2.coeff, p1 * p2.pauli)
+Base.:*(p1::ScaledPauli{T,N}, p2::PauliPF{N}) where {T,N} = ScaledPauli{T,N}(p1.coeff * get_phase(p2), p1.pauli * p2)
+
+
+"""
+    Base.:*(p::PauliPF{N}, c::T) where {N,T<:Number}
+
+Multiply a `PauliPF` with a number. This returns a `ScaledPauli` 
 """
 function Base.:*(p::PauliPF{N}, c::T) where {N,T<:Number}
-    return ScaledPauli{T,N}(c,p)
+    return ScaledPauli{T,N}(c*get_phase(p), p)
 end
 Base.:*(c::Number, p::PauliPF) = p*c
 
@@ -104,11 +124,8 @@ Base.:*(c::Number, p::PauliPF) = p*c
 
 Multiply a `Pauli` with a number. This returns a `PauliSum` 
 """
-function Base.:*(p::Pauli{N}, c::Number) where {N}
-    ps = PauliSum(N)
-    sum!(ps,p)
-    mul!(ps, c)
-    return ps 
+function Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}
+    return ScaledPauli{T,N}(c, p)
 end
 Base.:*(c::Number, p::Pauli) = p*c
 

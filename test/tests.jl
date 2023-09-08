@@ -38,13 +38,16 @@ using Random
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
 
-    return
 
     display((a.z, a.x))
     display((b.z, b.x))
     display((c.z, c.x))
 
     println()
+    a = Pauli("XYZIXY")
+    b = Pauli("YXXYZZ")
+    c = Pauli("ZZYYYX")
+    c = rotate_phase(c,1)
     @test a < b
     @test b > a
     @test a > c
@@ -99,6 +102,7 @@ using Random
         @test all(Matrix(s1) * Matrix(s2) - Matrix(s1 * s2) .≈ 0)
     end
 
+    return
     a = random_Pauli(6)
     b = random_Pauli(6)
     s = a + b
