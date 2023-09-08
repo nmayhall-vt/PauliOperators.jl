@@ -21,11 +21,12 @@ where,
     σ ∈ {X, iY, Z, I}
 
 """
-struct Pauli{N}
+struct Pauli{N} <: AbstractPauli{N}
     θ::UInt8
     z::Int128
     x::Int128
 end
+
 
 """
     Pauli(z::I, x::I) where I<:Integer
@@ -40,6 +41,7 @@ function Pauli(z::I, x::I, N) where I<:Integer
     return Pauli{N}(θ, z, x)
 end
 
+
 """
     Pauli(str::String)
 
@@ -49,37 +51,6 @@ Create a `Pauli` from a string, e.g.,
 
 This is convieniant for manual manipulations, but is not type-stable so will be slow.
 """
-# function Pauli(str::String, ::Val{N}) where N
-#     for i in str
-#         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
-#     end
-
-#     x = Int128(0)
-#     z = Int128(0)
-#     ny = 0 
-#     N == length(str) || throw(DimensionMismatch)
-#     idx = Int128(1)
-#     two = Int128(2)
-#     one = Int128(1)
-
-#     for i in str
-#         # println(i, " ", idx, typeof(idx))
-#         if i in ['X', 'Y']
-#             x |= two^(idx-one)
-#             if i == 'Y'
-#                 ny += 1
-#             end
-#         end
-#         if i in ['Z', 'Y']
-#             z |= two^(idx-one)
-#         end
-#         idx += 1
-#     end
-#     θ = 3*ny%4
-#     return Pauli{N}(θ, z,x) 
-# end
-
-
 function Pauli(str::String)
     for i in str
         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
@@ -138,7 +109,50 @@ function Pauli(N::Integer; X=[], Y=[], Z=[])
    
     # print(str[1:N])
     return Pauli(join(str))
+end
+
+"""
+    PauliNew(N::Integer; X=[], Y=[], Z=[])
+
+constructor for creating PauliBoolVec by specifying the qubits where each X, Y, and Z gates exist 
+"""
+function PauliNew(N::Integer; X=[], Y=[], Z=[])
+    M = (N-1)÷32+1
+    one = Int32(1)
+    two = Int32(2)
+
+
+    # println(M)
+    for i in X
+        i ∉ Y || throw(DimensionMismatch)
+        i ∉ Z || throw(DimensionMismatch)
+    end
+    for i in Y
+        i ∉ Z || throw(DimensionMismatch)
+    end
+   
+    zints = [Int32(0) for i in 1:M]
+    xints = [Int32(0) for i in 1:M]
+    for i in X
+        register = (i-1)÷32+1
+        idx = i%32+1
+        xints[register] |= two^(idx-one)
+        # println(register, " ", index)
+    end
+    for i in Y
+        register = (i-1)÷32+1
+        idx = i%32+1
+        zints[register] |= two^(idx-one)
+        xints[register] |= two^(idx-one)
+    end
+    for i in Z
+        register = (i-1)÷32+1
+        idx = i%32+1
+        zints[register] |= two^(idx-one)
+    end
     
+    θ = 3*length(Y)%4 
+    return PauliNew{N,M}(θ, ntuple(zints->zints, M), ntuple(xints->xints, M))
 end
 
 """
@@ -160,6 +174,30 @@ function Base.show(io::IO, p::Pauli{N}) where N
 end
 
 """
+    Base.display(p::Pauli)
+
+Display, y = iY
+"""
+function Base.string(p::Pauli{N}) where N
+    Iloc = get_on_bits(p.x ⊽ p.z)
+    yloc = get_on_bits(p.x & p.z)
+    Xloc = get_on_bits(p.x & ~p.z)
+    Zloc = get_on_bits(p.z & ~p.x)
+    out = ["I" for i in 1:128]
+
+    for i in Xloc
+        out[i] = "X"
+    end
+    for i in yloc
+        out[i] = "y"
+    end
+    for i in Zloc
+        out[i] = "Z"
+    end
+    return join(out[1:N])
+end
+
+"""
     random_Pauli(N)
 
 TBW
@@ -168,9 +206,16 @@ function random_Pauli(N)
     return Pauli{N}(rand(0:3), rand(1:2^N-1),rand(1:2^N-1))
 end
 
+"""
+    is_hermitian(p::Pauli)
+
+TBW
+"""
 function is_hermitian(p::Pauli)
     real1 = iseven(p.θ)
     real2 = iseven(count_ones(p.x & p.z)) 
     return ~(real1 ⊻ real2)
 end
+
+
 

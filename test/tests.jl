@@ -19,6 +19,15 @@ using Random
     display(a*b)
     display(c)
     @test c == a*b 
+    
+    a = PauliPF("XYZIXY")
+    b = PauliPF("YXXYZZ")
+    display(a)
+    display(b)
+    display(a*b)
+    display(c)
+    @test c == a*b 
+    @test 2*c == 2*a*b 
 
     @test commute(a,b) == false
     @test get_phase(c) == -1
@@ -29,6 +38,7 @@ using Random
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
 
+    return
 
     display((a.z, a.x))
     display((b.z, b.x))

@@ -223,37 +223,6 @@ function Base.hash(p::Pauli{N}) where N
 end
 
 """
-    Base.Matrix(p::Pauli{N}) where N
-
-Create dense matrix representation 
-"""
-function Base.Matrix(p::Pauli{N}) where N
-    mat = ones(Int8,1,1)
-    str = string(p)
-    X = [0 1; 1 0]
-    y = [0 1; -1 0]
-    Z = [1 0; 0 -1]
-    I = [1 0; 0 1]
-    for i in reverse(1:N)
-        # println(i, " ", typeof(str[i]))
-        # println(str[i] == "X"[1])
-        if str[i] == "X"[1] 
-            mat = kron(X,mat)
-        elseif str[i] == "y"[1]
-            mat = kron(y,mat)
-        elseif str[i] == "Z"[1]
-            mat = kron(Z,mat)
-        elseif str[i] == "I"[1]
-            mat = kron(I,mat)
-        else
-            throw(ErrorException)
-        end
-    end
-
-    return mat .* get_phase(p)
-end
-
-"""
     get_phase(p::Pauli)
 
 Return the phase of the `Pauli`, i^θ
@@ -294,39 +263,8 @@ end
 
 
 
-"""
-    Base.display(p::Pauli)
-
-Display, y = iY
-"""
-function Base.string(p::Pauli{N}) where N
-    Iloc = get_on_bits(p.x ⊽ p.z)
-    yloc = get_on_bits(p.x & p.z)
-    Xloc = get_on_bits(p.x & ~p.z)
-    Zloc = get_on_bits(p.z & ~p.x)
-    out = ["I" for i in 1:128]
-
-    for i in Xloc
-        out[i] = "X"
-    end
-    for i in yloc
-        out[i] = "y"
-    end
-    for i in Zloc
-        out[i] = "Z"
-    end
-    return join(out[1:N])
-end
 
 
-"""
-    commute(p1::Pauli{N}, p2::Pauli{N}) where {N}
-
-Check if they commute, return true or false
-"""
-function commute(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    return iseven(count_ones(p1.x & p2.z) - count_ones(p1.z & p2.x)) 
-end
 
 
 """

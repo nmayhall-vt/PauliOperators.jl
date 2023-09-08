@@ -4,7 +4,7 @@
 
 Simply a combination of a `Pauli` with a coefficient. When sorted, only `pauli` is considered for the comparisons.
 """
-struct ScaledPauli{T,N}
+struct ScaledPauli{T,N} <: AbstractPauli{N}
     coeff::T
     pauli::Pauli{N}
 end

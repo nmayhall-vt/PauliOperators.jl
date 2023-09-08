@@ -77,6 +77,29 @@ function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
 end
 
 """
+    Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+
+Multiply two `PauliPF`'s together
+"""
+function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+    x = p1.x ⊻ p2.x
+    z = p1.z ⊻ p2.z
+    θ = (phase(p1) + phase(p2)) % 4
+    θ += (2*count_ones(p1.x & p2.z)) % 4
+    return Pauli{N}(θ, z,x)
+end
+
+"""
+    Base.:*(p::Pauli{N}, c::Number) where {N}
+
+Multiply a `Pauli` with a number. This returns a `PauliSum` 
+"""
+function Base.:*(p::PauliPF{N}, c::T) where {N,T<:Number}
+    return ScaledPauli{T,N}(c,p)
+end
+Base.:*(c::Number, p::PauliPF) = p*c
+
+"""
     Base.:*(p::Pauli{N}, c::Number) where {N}
 
 Multiply a `Pauli` with a number. This returns a `PauliSum` 

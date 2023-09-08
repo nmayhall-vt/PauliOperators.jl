@@ -3,7 +3,9 @@ module PauliOperators
 using Printf
 
 include("helpers.jl")
+include("type_AbstractPauli.jl")
 include("type_Pauli.jl")
+include("type_PauliPF.jl")
 include("type_ScaledPauli.jl")
 include("type_PauliSum.jl")
 include("type_KetBitString.jl")
@@ -15,6 +17,7 @@ include("function_base.jl")
 
 # Exports
 export Pauli
+export PauliPF
 export ScaledPauli
 export PauliSum
 export KetBitString
