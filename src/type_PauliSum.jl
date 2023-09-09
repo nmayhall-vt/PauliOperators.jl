@@ -1,5 +1,8 @@
 using LinearAlgebra
 
+
+PauliIndex = Tuple{Int128, Int128}
+
 """
     ops::Dict{Pauli{N},ComplexF64}
 
@@ -8,8 +11,9 @@ This uses a `Dict` to store them, however, the specific use cases should probabl
 so this will probably be removed.
 """
 struct PauliSum{N}  
-    ops::Dict{Pauli{N},ComplexF64}
+    ops::Dict{PauliIndex,ComplexF64}
 end
+
 
 """
     PauliSum(N)
@@ -17,7 +21,7 @@ end
 TBW
 """
 function PauliSum(N)
-    return PauliSum{N}(Dict{Pauli{N},ComplexF64}())
+    return PauliSum{N}(Dict{PauliIndex,ComplexF64}())
 end
 
 
@@ -26,16 +30,19 @@ end
 
 TBW
 """
-function Base.display(ps::PauliSum)
+function Base.display(ps::PauliSum{N}) where N
     for (key,val) in ps.ops
-        @printf(" %12.8f +%12.8fi θ:%1i %s\n", real(val), imag(val), key.θ, key)
+        # @printf(" %12.8f +%12.8fi θ:%1i %s\n", real(val), imag(val), key.θ, key)
+        @printf(" %12.8f +%12.8fi %s\n", real(val), imag(val), string(Pauli{N}(0,key[1],key[2])))
     end
 end
 
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, phasefree(p), zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
+Base.getindex(ps::PauliSum{N}, p::PauliIndex) where N = ps.ops[p]
 Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[phasefree(p)]
 Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[phasefree(p)] = v*get_phase(p)
+Base.setindex!(ps::PauliSum{N}, v, p::PauliIndex) where N = ps.ops[p] = v
 
 """
     Base.+(p1::PauliSum{N}, p2::PauliSum{N}) where {N}

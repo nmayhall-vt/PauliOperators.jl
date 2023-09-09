@@ -147,7 +147,8 @@ end
 TBW
 """
 function phasefree(p::Pauli)
-    return rotate_phase(p, -p.θ)
+    return (p.z, p.x) 
+    # return rotate_phase(p, -p.θ)
 end
 
 """
