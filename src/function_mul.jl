@@ -77,7 +77,7 @@ function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
 end
 
 
-function Base.:*(p1::Pauli{N}, p2::PauliPF{N}) where {N}
+function Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
     θ = (p1.θ + phase(p2)) % 4
@@ -85,7 +85,7 @@ function Base.:*(p1::Pauli{N}, p2::PauliPF{N}) where {N}
     return Pauli{N}(θ, z, x)
 end
 
-function Base.:*(p1::PauliPF{N}, p2::Pauli{N}) where {N}
+function Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
     θ = (phase(p1) + p2.θ) % 4
@@ -93,31 +93,21 @@ function Base.:*(p1::PauliPF{N}, p2::Pauli{N}) where {N}
     return Pauli{N}(θ, z, x)
 end
 
-Base.:*(p1::PauliPF{N}, p2::ScaledPauli{T,N}) where {T,N} = ScaledPauli{T,N}(get_phase(p1) * p2.coeff, p1 * p2.pauli)
-Base.:*(p1::ScaledPauli{T,N}, p2::PauliPF{N}) where {T,N} = ScaledPauli{T,N}(p1.coeff, p1.pauli * p2)
+Base.:*(p1::FixedPhasePauli{N}, p2::ScaledPauli{N}) where {T,N} = ScaledPauli{N}(get_phase(p1) * p2.coeff, p1 * p2.pauli)
+Base.:*(p1::ScaledPauli{N}, p2::FixedPhasePauli{N}) where {T,N} = ScaledPauli{N}(p1.coeff, p1.pauli * p2)
 
-
-"""
-    Base.:*(p::PauliPF{N}, c::T) where {N,T<:Number}
-
-Multiply a `PauliPF` with a number. This returns a `ScaledPauli` 
-"""
-function Base.:*(p::PauliPF{N}, c::T) where {N,T<:Number}
-    return ScaledPauli{T,N}(c, p)
-end
-Base.:*(c::Number, p::PauliPF) = p*c
 
 """
     Base.:*(p::Pauli{N}, c::Number) where {N}
 
 Multiply a `Pauli` with a number. This returns a `PauliSum` 
 """
-function Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}
-    return ScaledPauli{Complex{T},N}(c*get_phase(p), phasefree(p))
-end
-Base.:*(p::PauliPF{N}, c::T) where {N,T<:Real} = ScaledPauli{Complex{T},N}(c, p)
-Base.:*(p::PauliPF{N}, c::T) where {N,T<:Complex} = ScaledPauli{T,N}(c, p)
+Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}             = ScaledPauli{N}(c*get_phase(p), p)
+Base.:*(p::FixedPhasePauli{N}, c::T) where {N,T<:Number}   = ScaledPauli{N}(c, p)
+Base.:*(p::ScaledPauli{N}, c::T) where {N,T<:Number}       = ScaledPauli{N}(p.coeff*c, p.pauli) 
 Base.:*(c::Number, p::Pauli) = p*c
+Base.:*(c::Number, p::FixedPhasePauli) = p*c
+Base.:*(c::Number, p::ScaledPauli) = p*c
 
 
 """
@@ -131,20 +121,20 @@ function Base.:*(p::Pauli{N}, ψ::KetBitString{N}) where N
     return get_phase(p)*(-1)^sign, KetBitString{N}(tmp)
 end
 
-function Base.:*(p1::ScaledPauli{T,N}, p2::ScaledPauli{T,N}) where {T,N}
-    return ScaledPauli{T,N}(p1.coeff*p2.coeff, p1.pauli*p2.pauli)
+function Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}
+    return ScaledPauli{N}(p1.coeff*p2.coeff * get_phase(p1.pauli, p2.pauli), p1.pauli*p2.pauli)
 end
 
-function Base.:*(p1::ScaledPauli{T,N}, p2::Pauli{N}) where {T,N}
-    return ScaledPauli{T,N}(p1.coeff, p1.pauli*p2)
+function Base.:*(p1::ScaledPauli{N}, p2::Pauli{N}) where {T,N}
+    return ScaledPauli{N}(p1.coeff * get_phase(p1.pauli, phasefree(p2)), p1.pauli*p2)
 end
 
-function Base.:*(p1::Pauli{N}, p2::ScaledPauli{T,N}) where {T,N}
-    return ScaledPauli{T,N}(p2.coeff, p1*p2.pauli)
+function Base.:*(p1::Pauli{N}, p2::ScaledPauli{N}) where {T,N}
+    return ScaledPauli{N}(p2.coeff * get_phase(p2.pauli, phasefree(p1)), p1*p2.pauli)
 end
 
-function Base.:*(p::ScaledPauli{T,N}, a::Number) where {T,N}
-    return ScaledPauli{T,N}(p.coeff*a, p.pauli)
-end
+# function Base.:*(p::ScaledPauli{N}, a::Number) where {T,N}
+#     return ScaledPauli{N}(p.coeff*a, p.pauli)
+# end
 
-Base.:*(a::Number, p::ScaledPauli{T,N}) where {T,N} = p*a
+# Base.:*(a::Number, p::ScaledPauli{N}) where {T,N} = p*a

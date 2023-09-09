@@ -6,7 +6,6 @@ using LinearAlgebra
 using Random
 
 @testset "Pauli" begin
-
     Random.seed!(1)
 
     println() 
@@ -14,20 +13,24 @@ using Random
     b = Pauli("YXXYZZ")
     c = Pauli("ZZYYYX")
     c = rotate_phase(c,1)
-    display(a)
-    display(b)
-    display(a*b)
-    display(c)
+    # display(a)
+    # display(b)
+    # display(a*b)
+    # display(c)
     @test c == a*b 
-    
-    a = PauliPF("XYZIXY")
-    b = PauliPF("YXXYZZ")
+  
+    println(" Now PF")
+    a = FixedPhasePauli("XYZIXY")
+    b = FixedPhasePauli("YXXYZZ")
     display(a)
     display(b)
     display(a*b)
+    display(get_phase(a,b)*a*b)
+    display(1*c)
     display(c)
-    @test c == a*b*get_phase(a,b) 
-    @test 2*c == 2*a*b 
+    @test c == Pauli{6}(PauliOperators.phase(a,b), (a*b).z, (a*b).x) 
+    @test 1*c == get_phase(a,b)*a*b 
+    @test 2*c == 2*a*b*get_phase(a,b) 
 
     @test commute(a,b) == false
     @test get_phase(c) == -1
@@ -38,7 +41,7 @@ using Random
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
 
-    a = PauliPF("ZXYI"); b = PauliPF("YZXX");
+    a = FixedPhasePauli("ZXYI"); b = FixedPhasePauli("YZXX");
     @test norm(Matrix(a*b)*get_phase(a,b) - Matrix(a)*Matrix(b)) ≈ 0
 
     display((a.z, a.x))
@@ -104,7 +107,7 @@ using Random
         @test all(Matrix(s1) * Matrix(s2) - Matrix(s1 * s2) .≈ 0)
     end
 
-    return
+
     a = random_Pauli(6)
     b = random_Pauli(6)
     s = a + b
@@ -170,7 +173,7 @@ using Random
         a *= 2.3
         b *= 3.2
 
-        @test get_coeff(a * b) ≈ get_coeff(a) * get_coeff(b) * get_phase(a.pauli * b.pauli)
+        @test get_coeff(a * b) ≈ get_coeff(a) * get_coeff(b) * get_phase(a.pauli, b.pauli)
     end
 
     # Test unique!

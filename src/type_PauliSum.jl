@@ -8,7 +8,7 @@ This uses a `Dict` to store them, however, the specific use cases should probabl
 so this will probably be removed.
 """
 struct PauliSum{N}  
-    ops::Dict{PauliPF{N},ComplexF64}
+    ops::Dict{FixedPhasePauli{N},ComplexF64}
 end
 
 """
@@ -17,7 +17,7 @@ end
 TBW
 """
 function PauliSum(N)
-    return PauliSum{N}(Dict{PauliPF{N},ComplexF64}())
+    return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}())
 end
 
 
@@ -34,10 +34,11 @@ end
 
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, phasefree(p), zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
-Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[phasefree(p)]
-Base.getindex(ps::PauliSum{N}, p::PauliPF{N}) where N = ps.ops[p]
-Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[phasefree(p)] = v*get_phase(p)
-Base.setindex!(ps::PauliSum{N}, v, p::PauliPF{N}) where N = ps.ops[p] = v*get_phase(p)
+Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p]
+Base.getindex(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = ps.ops[p]
+Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p] = v*get_phase(p)
+Base.setindex!(ps::PauliSum{N}, v, p::FixedPhasePauli{N}) where N = ps.ops[p] = v
+Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
 
 """
     Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
@@ -99,7 +100,12 @@ function Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
     for (op1, coeff1) in ps1.ops 
         for (op2, coeff2) in ps2.ops
             prod = op1 * op2
-            out[phasefree(prod)] = get(out, prod) + get_phase(prod)*coeff1*coeff2 
+            if haskey(out, prod)
+                out[prod] += get_phase(op1, op2)*coeff1*coeff2
+            else
+                out[prod] = get_phase(op1, op2)*coeff1*coeff2
+            end
+            # out.ops[prod] = get(out.ops, prod) + get_phase(prod)*coeff1*coeff2 
         end
     end 
     return out
@@ -174,11 +180,24 @@ TBW
 """
 function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
     for (op, coeff) in p1.ops
-        get(p2, op) .≈ coeff || return false
-    end
+        if haskey(p2, op)
+            coeff ≈ p2[op] || return false
+        else
+            return false
+        end
+    end 
     for (op, coeff) in p2.ops
-        get(p1, op) .≈ coeff || return false
-    end
+        if haskey(p1, op)
+            coeff ≈ p1[op] || return false
+        else
+            return false
+        end
+    end 
+    #     get(p2, op) .≈ coeff || return false
+    # end
+    # for (op, coeff) in p2.ops
+    #     get(p1, op) .≈ coeff || return false
+    # end
     return true
 end
 

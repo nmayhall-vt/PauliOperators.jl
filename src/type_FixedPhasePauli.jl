@@ -1,5 +1,5 @@
 """
-Phase-fixed Pauli. In this representation, the PauliPF string operator is represented as two binary strings, one for x and one for z.
+Phase-fixed Pauli. In this representation, the FixedPhasePauli string operator is represented as two binary strings, one for x and one for z.
 We do not keep track of the phase inside of this type
 
 The format is as follows: 
@@ -24,42 +24,42 @@ where,
 However, in this case the phase, θ, is fixed to ensure each Pauli string is Hermitian. 
 The phase angle can be obtained from the function `phase()`
 
-Because the phase is fixed, a product of `PauliPF` types does not yield another `PauliPF` type. 
-This is because each pauli product creates a new phase. As such, the product of two `PauliPF`'s yields 
+Because the phase is fixed, a product of `FixedPhasePauli` types does not yield another `FixedPhasePauli` type. 
+This is because each pauli product creates a new phase. As such, the product of two `FixedPhasePauli`'s yields 
 a `Pauli` type.
 
 See also [`Pauli`](@ref), [`ScaledPauli`](@ref).
 """
-struct PauliPF{N} <: AbstractPauli{N}
+struct FixedPhasePauli{N} <: AbstractPauli{N}
     z::Int128
     x::Int128
 end
 
 
 """
-    PauliPF(z::I, x::I) where I<:Integer
+    FixedPhasePauli(z::I, x::I) where I<:Integer
 
 TBW
 """
-function PauliPF(z::I, x::I, N) where I<:Integer
+function FixedPhasePauli(z::I, x::I, N) where I<:Integer
     # N = maximum(map(i -> ndigits(i, base=2), [x, z]))
     z < 2^N || throw(DimensionMismatch)
     x < 2^N || throw(DimensionMismatch)
     # θ = count_ones(z & x)*3 % 4
-    return PauliPF{N}(z, x)
+    return FixedPhasePauli{N}(z, x)
 end
 
 
 """
-    PauliPF(str::String)
+    FixedPhasePauli(str::String)
 
-Create a `PauliPF` from a string, e.g., 
+Create a `FixedPhasePauli` from a string, e.g., 
 
-    a = PauliPF("XXYZIZ")
+    a = FixedPhasePauli("XXYZIZ")
 
 This is convieniant for manual manipulations, but is not type-stable so will be slow.
 """
-function PauliPF(str::String)
+function FixedPhasePauli(str::String)
     for i in str
         i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
     end
@@ -86,17 +86,17 @@ function PauliPF(str::String)
         idx += 1
     end
     θ = 3*ny%4
-    # return PauliPF{N}(z,x), 1im^θ
-    return PauliPF{N}(z,x)
+    # return FixedPhasePauli{N}(z,x), 1im^θ
+    return FixedPhasePauli{N}(z,x)
 end
 
 
 """
-    PauliPF(N::Integer; X=[], Y=[], Z=[])
+    FixedPhasePauli(N::Integer; X=[], Y=[], Z=[])
 
-constructor for creating a `PauliPF`` by specifying the qubits where each X, Y, and Z gates exist 
+constructor for creating a `FixedPhasePauli`` by specifying the qubits where each X, Y, and Z gates exist 
 """
-function PauliPF(N::Integer; X=[], Y=[], Z=[])
+function FixedPhasePauli(N::Integer; X=[], Y=[], Z=[])
     for i in X
         i ∉ Y || throw(DimensionMismatch)
         i ∉ Z || throw(DimensionMismatch)
@@ -116,24 +116,24 @@ function PauliPF(N::Integer; X=[], Y=[], Z=[])
         str[i] = "Z"
     end
    
-    return PauliPF(join(str))
+    return FixedPhasePauli(join(str))
 end
 
 
 
 """
-    Base.show(io::IO, P::PauliPFMask)
+    Base.show(io::IO, P::FixedPhasePauliMask)
 
 TBW
 """
-Base.show(io::IO, p::PauliPF) = println(string(p)) 
+Base.show(io::IO, p::FixedPhasePauli) = println(string(p)) 
 
 """
     Base.display(p::Pauli)
 
 Display, y = iY
 """
-function Base.string(p::PauliPF{N}) where N
+function Base.string(p::FixedPhasePauli{N}) where N
     yloc = get_on_bits(p.x & p.z)
     Xloc = get_on_bits(p.x & ~p.z)
     Zloc = get_on_bits(p.z & ~p.x)
@@ -143,7 +143,7 @@ function Base.string(p::PauliPF{N}) where N
         out[i] = "X"
     end
     for i in yloc
-        out[i] = "Y"
+        out[i] = "y"
     end
     for i in Zloc
         out[i] = "Z"
@@ -152,23 +152,22 @@ function Base.string(p::PauliPF{N}) where N
 end
 
 """
-    random_PauliPF(N)
+    random_FixedPhasePauli(N)
 
 TBW
 """
-function random_PauliPF(N)
-    return PauliPF{N}(rand(1:2^N-1),rand(1:2^N-1))
+function random_FixedPhasePauli(N)
+    return FixedPhasePauli{N}(rand(1:2^N-1),rand(1:2^N-1))
 end
 
 """
-    is_hermitian(p::PauliPF)
+    is_hermitian(p::FixedPhasePauli)
 
 TBW
 """
-is_hermitian(p::PauliPF) = true
-
-@inline phase(p::PauliPF) = 3*nY(p)%4
-@inline get_phase(p::PauliPF) = 1im^phase(p) 
+is_hermitian(p::FixedPhasePauli) = iseven(nY(p)) 
+# @inline phase(p::FixedPhasePauli) = 3*nY(p)%4
+# @inline get_phase(p::FixedPhasePauli) = 1im^phase(p) 
 
 
 """
@@ -176,10 +175,10 @@ is_hermitian(p::PauliPF) = true
 
 Check if they are equal, return true or false
 """
-# function Base.:(==)(p1::PauliPF, p2::PauliPF) 
+# function Base.:(==)(p1::FixedPhasePauli, p2::FixedPhasePauli) 
 #     return p1.x == p2.x && p1.z == p2.z
 # end
-function Base.isequal(p1::PauliPF, p2::PauliPF) 
+function Base.isequal(p1::FixedPhasePauli, p2::FixedPhasePauli) 
     return p1.x == p2.x && p1.z == p2.z
 end
 
@@ -189,7 +188,7 @@ end
 
 Check if `p1` > `p2`
 """
-function Base.:>(p1::PauliPF, p2::PauliPF)
+function Base.:>(p1::FixedPhasePauli, p2::FixedPhasePauli)
     return p1.z > p2.z || p1.z == p2.z && p1.x > p2.x
 end
 
@@ -199,13 +198,13 @@ end
 
 Check if `p1` < `p2`
 """
-function Base.:<(p1::PauliPF, p2::PauliPF)
+function Base.:<(p1::FixedPhasePauli, p2::FixedPhasePauli)
     return p1.z < p2.z || p1.z == p2.z && p1.x < p2.x
 end
 
 
 
-function Base.Matrix(p::PauliPF{N}) where N
+function Base.Matrix(p::FixedPhasePauli{N}) where N
     mat = ones(Int8,1,1)
     str = string(p)
     X = [0 1; 1 0]
@@ -216,7 +215,7 @@ function Base.Matrix(p::PauliPF{N}) where N
     for i in reverse(1:N)
         if str[i] == "X"[1] 
             mat = kron(X,mat)
-        elseif str[i] == "Y"[1]
+        elseif str[i] == "y"[1]
             mat = kron(y,mat)
         elseif str[i] == "Z"[1]
             mat = kron(Z,mat)
@@ -227,34 +226,34 @@ function Base.Matrix(p::PauliPF{N}) where N
         end
     end
 
-    return mat .* get_phase(p)
+    return mat
 end
 
 """
-    Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+    Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
 
-Multiply two `PauliPF`'s together
+Multiply two `FixedPhasePauli`'s together
 """
-function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
-    return PauliPF{N}(z,x)
+    return FixedPhasePauli{N}(z,x)
 end
 
 """
-    get_phase(p1::PauliPF{N}, p2::PauliPF{N})
+    get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N})
 
-Get the phase arising from the multiplication of two `PauliPF`'s
+Get the phase arising from the multiplication of two `FixedPhasePauli`'s
 """
-function get_phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
+function get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
     return 1im^phase(p1,p2) 
 end
-function phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
-    return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4 + (4 - phase(p1*p2))%4 
-    # return (2*count_ones(p1.x & p2.z)) % 4
+function phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
+    # return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4 + (4 - phase(p1*p2))%4 
+    return 2*count_ones(p1.x & p2.z) % 4
 end
 
-# function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+# function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
 #     x = p1.x ⊻ p2.x
 #     z = p1.z ⊻ p2.z
 #     θ = (phase(p1) + phase(p2)) % 4
