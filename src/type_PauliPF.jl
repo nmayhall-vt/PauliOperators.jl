@@ -1,5 +1,5 @@
 """
-In this representation, the PauliPF string operator is represented as two binary strings, one for x and one for z.
+Phase-fixed Pauli. In this representation, the PauliPF string operator is represented as two binary strings, one for x and one for z.
 We do not keep track of the phase inside of this type
 
 The format is as follows: 
@@ -21,9 +21,14 @@ where,
 
     σ ∈ {X, iY, Z, I}
 
-However, in this case the phase, θ, is fixed to undo the effect of using "iY". 
-This means that every `PauliPF` is Hermitian.
+However, in this case the phase, θ, is fixed to ensure each Pauli string is Hermitian. 
 The phase angle can be obtained from the function `phase()`
+
+Because the phase is fixed, a product of `PauliPF` types does not yield another `PauliPF` type. 
+This is because each pauli product creates a new phase. As such, the product of two `PauliPF`'s yields 
+a `Pauli` type.
+
+See also [`Pauli`](@ref), [`ScaledPauli`](@ref).
 """
 struct PauliPF{N} <: AbstractPauli{N}
     z::Int128
@@ -89,7 +94,7 @@ end
 """
     PauliPF(N::Integer; X=[], Y=[], Z=[])
 
-constructor for creating PauliPFBoolVec by specifying the qubits where each X, Y, and Z gates exist 
+constructor for creating a `PauliPF`` by specifying the qubits where each X, Y, and Z gates exist 
 """
 function PauliPF(N::Integer; X=[], Y=[], Z=[])
     for i in X
@@ -121,11 +126,8 @@ end
 
 TBW
 """
-function Base.show(io::IO, p::PauliPF{N}) where N
-    # println(@sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p)) 
-    # println(@sprintf "%s" string(p)) 
-    println(@sprintf "%s" string(p)) 
-end
+Base.show(io::IO, p::PauliPF) = println(string(p)) 
+
 """
     Base.display(p::Pauli)
 
@@ -163,15 +165,10 @@ end
 
 TBW
 """
-function is_hermitian(p::PauliPF)
-    return iseven(count_ones(p.x & p.z)) 
-end
+is_hermitian(p::PauliPF) = true
 
-
-
-# @inline get_phase(p::PauliPF) = 1im^phase(p) 
-@inline get_phase(p::PauliPF) = 1 
 @inline phase(p::PauliPF) = 3*nY(p)%4
+@inline get_phase(p::PauliPF) = 1im^phase(p) 
 
 
 """
@@ -179,9 +176,9 @@ end
 
 Check if they are equal, return true or false
 """
-function Base.:(==)(p1::PauliPF, p2::PauliPF) 
-    return p1.x == p2.x && p1.z == p2.z
-end
+# function Base.:(==)(p1::PauliPF, p2::PauliPF) 
+#     return p1.x == p2.x && p1.z == p2.z
+# end
 function Base.isequal(p1::PauliPF, p2::PauliPF) 
     return p1.x == p2.x && p1.z == p2.z
 end
@@ -205,3 +202,62 @@ Check if `p1` < `p2`
 function Base.:<(p1::PauliPF, p2::PauliPF)
     return p1.z < p2.z || p1.z == p2.z && p1.x < p2.x
 end
+
+
+
+function Base.Matrix(p::PauliPF{N}) where N
+    mat = ones(Int8,1,1)
+    str = string(p)
+    X = [0 1; 1 0]
+    y = [0 1; -1 0]
+    Y = [0 -1im; 1im 0]
+    Z = [1 0; 0 -1]
+    I = [1 0; 0 1]
+    for i in reverse(1:N)
+        if str[i] == "X"[1] 
+            mat = kron(X,mat)
+        elseif str[i] == "Y"[1]
+            mat = kron(y,mat)
+        elseif str[i] == "Z"[1]
+            mat = kron(Z,mat)
+        elseif str[i] == "I"[1]
+            mat = kron(I,mat)
+        else
+            throw(ErrorException)
+        end
+    end
+
+    return mat .* get_phase(p)
+end
+
+"""
+    Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+
+Multiply two `PauliPF`'s together
+"""
+function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+    x = p1.x ⊻ p2.x
+    z = p1.z ⊻ p2.z
+    return PauliPF{N}(z,x)
+end
+
+"""
+    get_phase(p1::PauliPF{N}, p2::PauliPF{N})
+
+Get the phase arising from the multiplication of two `PauliPF`'s
+"""
+function get_phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
+    return 1im^phase(p1,p2) 
+end
+function phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
+    return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4
+    # return (2*count_ones(p1.x & p2.z)) % 4
+end
+
+# function Base.:*(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
+#     x = p1.x ⊻ p2.x
+#     z = p1.z ⊻ p2.z
+#     θ = (phase(p1) + phase(p2)) % 4
+#     θ += (2*count_ones(p1.x & p2.z)) % 4
+#     return Pauli{N}(θ, z,x)
+# end

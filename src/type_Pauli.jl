@@ -211,3 +211,11 @@ end
 
 
 
+"""
+    Base.:-(p::Pauli{N}) where {N}
+
+TBW
+"""
+function Base.:-(p::Pauli{N}) where {N}
+    return rotate_phase(p,2) 
+end

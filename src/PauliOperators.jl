@@ -32,6 +32,8 @@ export negate
 export commute
 export phasefree 
 export random_Pauli 
+export random_PauliPF 
+export random_ScaledPauli 
 export boson_binary_transformation
 export jordan_wigner
 export otimes

@@ -5,7 +5,7 @@ abstract type AbstractPauli{N} end
 @inline nY(p::AbstractPauli) = count_ones(p.x & p.z)
 
 """
-    Base.Matrix(p::Pauli{N}) where N
+    Base.Matrix(p::AbstractPauli)
 
 Create dense matrix representation 
 """

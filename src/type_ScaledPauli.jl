@@ -6,13 +6,17 @@ Simply a combination of a `Pauli` with a coefficient. When sorted, only `pauli` 
 """
 struct ScaledPauli{T,N} <: AbstractPauli{N}
     coeff::T
-    pauli::Pauli{N}
+    pauli::PauliPF{N}
 end
 
 ScaledPauliVector{T,N} = Vector{ScaledPauli{T,N}}
 
 function Base.convert(::Type{ScaledPauli{T,N}}, p::Pauli{N}) where {T,N}
-    return ScaledPauli{T,N}(get_phase(p), phase(phasefree(p)))
+    return ScaledPauli{T,N}(get_phase(p), PauliPF{N}(p))
+end
+
+function Base.convert(::Type{ScaledPauli{T,N}}, p::PauliPF{N}) where {T,N}
+    return ScaledPauli{T,N}(T(1), p)
 end
 
 function ScaledPauli(p::Pauli{N}) where N
@@ -20,15 +24,7 @@ function ScaledPauli(p::Pauli{N}) where N
 end
 
 function Base.display(sp::ScaledPauli)
-    if sp.pauli.θ == 0
-        @printf(" %12.8f %12.8fi   1  %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
-    elseif sp.pauli.θ == 1                                        
-        @printf(" %12.8f %12.8fi   i  %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
-    elseif sp.pauli.θ == 2                                        
-        @printf(" %12.8f %12.8fi  -1  %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
-    elseif sp.pauli.θ == 3                                        
-        @printf(" %12.8f %12.8fi  -i  %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
-    end
+    @printf(" %12.8f %12.8fi   %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
 end
 function Base.display(sv::Vector{ScaledPauli{T,N}}) where {T,N}
     for i in sv
@@ -50,9 +46,6 @@ Negate the `p`. We could either change the coeff or the pauli. Not sure which is
 """
 function Base.:-(p::ScaledPauli{T,N}) where {T,N}
     return ScaledPauli{T,N}(-p.coeff, p.pauli)
-end
-function Base.:-(p::Pauli{N}) where {N}
-    return rotate_phase(p,2) 
 end
 
 

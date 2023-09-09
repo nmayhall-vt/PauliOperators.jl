@@ -136,7 +136,7 @@ Create a dense Matrix of type `T`
 function Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
     out = zeros(T, 2^N, 2^N)
     for (op, coeff) in ps.ops
-        out .+= Matrix(op) .* coeff
+        out .+= Matrix(op) .* coeff 
     end
     return out
 end
