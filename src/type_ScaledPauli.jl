@@ -11,13 +11,6 @@ end
 
 ScaledPauliVector{T,N} = Vector{ScaledPauli{T,N}}
 
-function Base.convert(::Type{ScaledPauli{T,N}}, p::Pauli{N}) where {T,N}
-    return ScaledPauli{T,N}(get_phase(p), PauliPF{N}(p))
-end
-
-function Base.convert(::Type{ScaledPauli{T,N}}, p::PauliPF{N}) where {T,N}
-    return ScaledPauli{T,N}(T(1), p)
-end
 
 function ScaledPauli(p::Pauli{N}) where N
     return ScaledPauli{ComplexF64, N}(get_phase(p), phasefree(p)) 

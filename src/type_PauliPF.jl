@@ -250,7 +250,7 @@ function get_phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
     return 1im^phase(p1,p2) 
 end
 function phase(p1::PauliPF{N}, p2::PauliPF{N}) where N
-    return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4
+    return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4 + (4 - phase(p1*p2))%4 
     # return (2*count_ones(p1.x & p2.z)) % 4
 end
 

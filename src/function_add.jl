@@ -39,23 +39,7 @@ function Base.:+(p1::PauliPF{N}, p2::PauliPF{N}) where {N}
         return PauliSum{N}(Dict(p1=>1, p2=>1))
     end
 end
-function Base.:+(p1::Pauli{N}, p2::ScaledPauli{T,N}) where {T,N}
-    if phasefree(p1) == phasefree(p2) 
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1)+get_phase(p2.pauli)*p2.coeff))
-    else
-        return PauliSum{N}(Dict(phasefree(p1)=>get_phase(p1), phasefree(p2)=>get_phase(p2.pauli)*p2.coeff))
-    end
-end
-function Base.:+(p1::PauliPF{N}, p2::ScaledPauli{T,N}) where {T,N}
-    if p1 == p2.pauli 
-        return PauliSum{N}(Dict(p1 => 1 + p2.coeff))
-    else
-        return PauliSum{N}(Dict(p1 => 1, p2.pauli => p2.coeff))
-    end
-end
 
-Base.:+(p1::ScaledPauli{T,N}, p2::Pauli{N}) where {T,N} = p2 + p1
-Base.:+(p1::ScaledPauli{T,N}, p2::PauliPF{N}) where {T,N} = p2 + p1
 
 function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
     out = deepcopy(ps)

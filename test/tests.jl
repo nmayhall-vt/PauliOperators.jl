@@ -26,7 +26,7 @@ using Random
     display(b)
     display(a*b)
     display(c)
-    @test c == a*b 
+    @test c == a*b*get_phase(a,b) 
     @test 2*c == 2*a*b 
 
     @test commute(a,b) == false
@@ -38,6 +38,8 @@ using Random
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
 
+    a = PauliPF("ZXYI"); b = PauliPF("YZXX");
+    @test norm(Matrix(a*b)*get_phase(a,b) - Matrix(a)*Matrix(b)) ≈ 0
 
     display((a.z, a.x))
     display((b.z, b.x))
