@@ -166,8 +166,8 @@ end
 TBW
 """
 is_hermitian(p::FixedPhasePauli) = iseven(nY(p)) 
-# @inline phase(p::FixedPhasePauli) = 3*nY(p)%4
-# @inline get_phase(p::FixedPhasePauli) = 1im^phase(p) 
+@inline phase(p::FixedPhasePauli) = 3*nY(p)%4
+@inline get_phase(p::FixedPhasePauli) = 1im^phase(p) 
 
 
 """

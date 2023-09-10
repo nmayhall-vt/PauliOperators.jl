@@ -23,8 +23,7 @@ where,
 """
 struct Pauli{N} <: AbstractPauli{N}
     θ::UInt8
-    z::Int128
-    x::Int128
+    p::FixedPhasePauli{N}
 end
 
 
@@ -38,7 +37,7 @@ function Pauli(z::I, x::I, N) where I<:Integer
     z < 2^N || throw(DimensionMismatch)
     x < 2^N || throw(DimensionMismatch)
     θ = count_ones(z & x)*3 % 4
-    return Pauli{N}(θ, z, x)
+    return Pauli{N}(θ, FixedPhasePauli{N}(z, x))
 end
 
 
@@ -52,33 +51,8 @@ Create a `Pauli` from a string, e.g.,
 This is convieniant for manual manipulations, but is not type-stable so will be slow.
 """
 function Pauli(str::String)
-    for i in str
-        i in ['I', 'Z', 'X', 'Y'] || error("Bad string: ", str)
-    end
-
-    x = Int128(0)
-    z = Int128(0)
-    ny = 0 
-    N = length(str)
-    idx = Int128(1)
-    two = Int128(2)
-    one = Int128(1)
-
-    for i in str
-        # println(i, " ", idx, typeof(idx))
-        if i in ['X', 'Y']
-            x |= two^(idx-one)
-            if i == 'Y'
-                ny += 1
-            end
-        end
-        if i in ['Z', 'Y']
-            z |= two^(idx-one)
-        end
-        idx += 1
-    end
-    θ = 3*ny%4
-    return Pauli{N}(θ, z,x) 
+    p = FixedPhasePauli(str)
+    return Pauli{nqubits(p)}(phase(p), p) 
 end
 
 
@@ -152,7 +126,7 @@ function PauliNew(N::Integer; X=[], Y=[], Z=[])
     end
     
     θ = 3*length(Y)%4 
-    return PauliNew{N,M}(θ, ntuple(zints->zints, M), ntuple(xints->xints, M))
+    return PauliNew{N,M}(θ, FixedPhasePauli{N}(ntuple(zints->zints, M), ntuple(xints->xints, M)))
 end
 
 
@@ -170,24 +144,7 @@ end
 
 Display, y = iY
 """
-function Base.string(p::Pauli{N}) where N
-    Iloc = get_on_bits(p.x ⊽ p.z)
-    yloc = get_on_bits(p.x & p.z)
-    Xloc = get_on_bits(p.x & ~p.z)
-    Zloc = get_on_bits(p.z & ~p.x)
-    out = ["I" for i in 1:128]
-
-    for i in Xloc
-        out[i] = "X"
-    end
-    for i in yloc
-        out[i] = "y"
-    end
-    for i in Zloc
-        out[i] = "Z"
-    end
-    return join(out[1:N])
-end
+Base.string(p::Pauli{N}) where N = string(p.p)
 
 """
     random_Pauli(N)
@@ -195,7 +152,7 @@ end
 TBW
 """
 function random_Pauli(N)
-    return Pauli{N}(rand(0:3), rand(1:2^N-1),rand(1:2^N-1))
+    return Pauli{N}(rand(0:3), random_FixedPhasePauli(N))
 end
 
 """
@@ -204,9 +161,7 @@ end
 TBW
 """
 function is_hermitian(p::Pauli)
-    real1 = iseven(p.θ)
-    real2 = iseven(count_ones(p.x & p.z)) 
-    return ~(real1 ⊻ real2)
+    return ~(iseven(p.θ) ⊻ is_hermitian(p.p))
 end
 
 

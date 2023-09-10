@@ -28,7 +28,7 @@ using Random
     display(get_phase(a,b)*a*b)
     display(1*c)
     display(c)
-    @test c == Pauli{6}(PauliOperators.phase(a,b), (a*b).z, (a*b).x) 
+    @test c == Pauli{6}(PauliOperators.phase(a,b), a*b) 
     @test 1*c == get_phase(a,b)*a*b 
     @test 2*c == 2*a*b*get_phase(a,b) 
 
@@ -46,7 +46,7 @@ using Random
 
     display((a.z, a.x))
     display((b.z, b.x))
-    display((c.z, c.x))
+    display((c.p.z, c.p.x))
 
     println()
     a = Pauli("XYZIXY")

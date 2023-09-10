@@ -200,11 +200,11 @@ Transform a single fermionic creation operator to `PauliSum`.
 function jordan_wigner(f::Integer, N::Integer)
     # 
     # For X, we just need to turn on the correct bits
-    x = Pauli{N}(0, 2^(f-1)-1, 2^(f-1))
+    x = Pauli{N}(0, FixedPhasePauli{N}(2^(f-1)-1, 2^(f-1)))
    
     # 
     # For Y, we need to do the same, but also account for the phase
     # coming from storing things as iY instead of Y
-    y = Pauli{N}(0, 2^(f)-1, 2^(f-1))
+    y = Pauli{N}(0, FixedPhasePauli{N}(2^(f)-1, 2^(f-1)))
     return .5*x + .5im*rotate_phase(y,1)
 end

@@ -6,9 +6,9 @@ function Base.:+(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}
     #     return Vector{ScaledPauli{N}}([p1, p2])
     # end
     if isequal(p1.pauli, p2.pauli)
-        return PauliSum{N}(Dict(phasefree(p1)=>p1.coeff+p2.coeff))
+        return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}(p1.pauli=>p1.coeff+p2.coeff))
     else
-        return PauliSum{N}(Dict(phasefree(p1)=>p1.coeff, phasefree(p2)=>p2.coeff))
+        return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}(p1.pauli=>p1.coeff, p2.pauli=>p2.coeff))
     end
 end
 function Base.:+(p::ScaledPauli{N}, a::Number) where {T,N}

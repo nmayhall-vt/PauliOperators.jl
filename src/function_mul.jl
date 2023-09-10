@@ -69,28 +69,29 @@ end
 Multiply two `Pauli`'s together
 """
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    x = p1.x ⊻ p2.x
-    z = p1.z ⊻ p2.z
-    θ = (p1.θ + p2.θ ) % 4
-    θ = (θ + 2*count_ones(p1.x & p2.z)) % 4
-    return Pauli{N}(θ,z,x)
+    θ = (p1.θ + p2.θ + phase(p1.p) + phase(p2.p) + phase(p1.p, p2.p)) % 4
+    return Pauli{N}(θ, p1.p*p2.p)
 end
 
 
 function Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where {N}
-    x = p1.x ⊻ p2.x
-    z = p1.z ⊻ p2.z
-    θ = (p1.θ + phase(p2)) % 4
-    θ += (2*count_ones(p1.x & p2.z)) % 4
-    return Pauli{N}(θ, z, x)
+    # x = p1.x ⊻ p2.x
+    # z = p1.z ⊻ p2.z
+    # θ = (p1.θ + phase(p2)) % 4
+    # θ += (2*count_ones(p1.x & p2.z)) % 4
+    # return Pauli{N}(θ, z, x)
+    θ = (p1.θ + phase(p1.p) + phase(p2) + phase(p1.p, p2)) % 4
+    return Pauli{N}(θ, p1.p*p2)
 end
 
 function Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where {N}
-    x = p1.x ⊻ p2.x
-    z = p1.z ⊻ p2.z
-    θ = (phase(p1) + p2.θ) % 4
-    θ += (2*count_ones(p1.x & p2.z)) % 4
-    return Pauli{N}(θ, z, x)
+    # x = p1.x ⊻ p2.x
+    # z = p1.z ⊻ p2.z
+    # θ = (phase(p1) + p2.θ) % 4
+    # θ += (2*count_ones(p1.x & p2.z)) % 4
+    # return Pauli{N}(θ, z, x)
+    θ = (p2.θ + phase(p1) + phase(p2.p) + phase(p1, p2.p)) % 4
+    return Pauli{N}(θ,p1*p2.p)
 end
 
 Base.:*(p1::FixedPhasePauli{N}, p2::ScaledPauli{N}) where {T,N} = ScaledPauli{N}(get_phase(p1) * p2.coeff, p1 * p2.pauli)
@@ -116,8 +117,8 @@ Base.:*(c::Number, p::ScaledPauli) = p*c
 TBW
 """
 function Base.:*(p::Pauli{N}, ψ::KetBitString{N}) where N
-    tmp = p.x ⊻ ψ.v
-    sign = count_ones(p.z & tmp) % 2
+    tmp = p.p.x ⊻ ψ.v
+    sign = count_ones(p.p.z & tmp) % 2
     return get_phase(p)*(-1)^sign, KetBitString{N}(tmp)
 end
 
