@@ -23,7 +23,7 @@ where,
 """
 struct Pauli{N} <: AbstractPauli{N}
     θ::UInt8
-    p::FixedPhasePauli{N}
+    pauli::FixedPhasePauli{N}
 end
 
 
@@ -144,7 +144,7 @@ end
 
 Display, y = iY
 """
-Base.string(p::Pauli{N}) where N = string(p.p)
+Base.string(p::Pauli{N}) where N = string(p.pauli)
 
 """
     random_Pauli(N)
@@ -161,7 +161,7 @@ end
 TBW
 """
 function is_hermitian(p::Pauli)
-    return ~(iseven(p.θ) ⊻ is_hermitian(p.p))
+    return ~(iseven(p.θ) ⊻ is_hermitian(p.pauli))
 end
 
 

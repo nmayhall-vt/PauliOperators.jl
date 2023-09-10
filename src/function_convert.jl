@@ -1,6 +1,6 @@
 
 function Base.convert(::Type{Pauli{N}}, p::FixedPhasePauli{N}) where {N}
-    return Pauli{N}(phase(p), p.p)
+    return Pauli{N}(phase(p), p.pauli)
 end
 
 function Pauli(p::FixedPhasePauli{N}) where {N}
@@ -12,7 +12,7 @@ function Base.convert(::Type{ScaledPauli{N}}, p::Pauli{N}) where {T,N}
 end
 
 function Base.convert(::Type{FixedPhasePauli{N}}, p::Pauli{N}) where {T,N}
-    return p.p
+    return p.pauli
 end
 
 function Base.convert(::Type{ScaledPauli{N}}, p::FixedPhasePauli{N}) where {T,N}
@@ -20,5 +20,5 @@ function Base.convert(::Type{ScaledPauli{N}}, p::FixedPhasePauli{N}) where {T,N}
 end
 
 phasefree(p::FixedPhasePauli) = p 
-phasefree(p::Pauli{N}) where N = p.p 
+phasefree(p::Pauli) = p.pauli 
 phasefree(p::ScaledPauli) = p.pauli

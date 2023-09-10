@@ -5,7 +5,7 @@
 TBW
 """
 function otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M}
-    return Pauli{N+M}((p1.θ + p2.θ)%4, p1.p ⊗ p2.p)
+    return Pauli{N+M}((p1.θ + p2.θ)%4, p1.pauli ⊗ p2.pauli)
 end
 function otimes(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{M}) where {N,M}
     return FixedPhasePauli{N+M}(p1.z | p2.z << N, p1.x | p2.x << N)
@@ -20,7 +20,7 @@ TBW
 function otimes(ps::PauliSum{N}, p::Pauli{M}) where {N,M}
     out = PauliSum(N+M)
     for (op,coeff) in ps.ops
-        out.ops[op ⊗ p.p] = coeff * get_phase(p)
+        out.ops[op ⊗ p.pauli] = coeff * get_phase(p)
     end
     return out 
 end
@@ -32,7 +32,7 @@ TBW
 function otimes(p::Pauli{N}, ps::PauliSum{M}) where {N,M}
     out = PauliSum(N+M)
     for (op,coeff) in ps.ops
-        out.ops[p.p ⊗ op] = coeff * get_phase(p)
+        out.ops[p.pauli ⊗ op] = coeff * get_phase(p)
     end
     return out 
 end
@@ -97,10 +97,10 @@ end
 Check if they are equal, return true or false
 """
 function Base.:(==)(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    return p1.p == p2.p && p1.θ == p2.θ
+    return p1.pauli == p2.pauli && p1.θ == p2.θ
 end
 function Base.isequal(p1::Pauli{N}, p2::Pauli{N}) where N
-    return p1.p == p2.p
+    return p1.pauli == p2.pauli
     # return p1.x == p2.x && p1.z == p2.z
 end
 
@@ -111,7 +111,7 @@ end
 Check if `p1` > `p2`
 """
 function Base.:>(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    return p1.p > p2.p 
+    return p1.pauli > p2.pauli 
     # return p1.z > p2.z || p1.z == p2.z && p1.x > p2.x
 end
 
@@ -122,7 +122,7 @@ end
 Check if `p1` < `p2`
 """
 function Base.:<(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    return p1.p < p2.p 
+    return p1.pauli < p2.pauli 
     # return p1.z < p2.z || p1.z == p2.z && p1.x < p2.x
 end
 
@@ -211,7 +211,7 @@ Rotate phase in units of π/2. In otherwords, multiply the phase by i^θ.
 E.g., mutliplication by -1 is obtained with θ=2.
 """
 function rotate_phase(p::Pauli{N}, θ::Integer) where N
-    return Pauli{N}((p.θ + θ)%4, p.p)
+    return Pauli{N}((p.θ + θ)%4, p.pauli)
 end
 
 

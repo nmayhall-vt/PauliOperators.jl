@@ -13,7 +13,7 @@ ScaledPauliVector{T,N} = Vector{ScaledPauli{N}}
 
 
 function ScaledPauli(p::Pauli{N}) where N
-    return ScaledPauli{N}(get_phase(p), p.p) 
+    return ScaledPauli{N}(get_phase(p), p.pauli) 
 end
 
 function Base.display(sp::ScaledPauli)

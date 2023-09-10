@@ -46,7 +46,7 @@ using Random
 
     display((a.z, a.x))
     display((b.z, b.x))
-    display((c.p.z, c.p.x))
+    display((c.pauli.z, c.pauli.x))
 
     println()
     a = Pauli("XYZIXY")
