@@ -121,3 +121,15 @@ Create dense matrix representation
 function Base.Matrix(p::ScaledPauli{N}) where {T,N}
     return Matrix(p.pauli) .* p.coeff 
 end
+
+
+"""
+    random_ScaledPauli(N)
+
+TBW
+"""
+function random_ScaledPauli(N)
+    return ScaledPauli{N}(rand(ComplexF64), random_FixedPhasePauli(N))
+end
+
+Base.adjoint(sp::ScaledPauli{N}) where {N} = is_hermitian(sp.pauli) ? ScaledPauli{N}(adjoint(sp.coeff), sp.pauli) : ScaledPauli{N}(-adjoint(sp.coeff), sp.pauli)

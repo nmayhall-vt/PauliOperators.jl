@@ -212,7 +212,8 @@ function Base.Matrix(p::FixedPhasePauli{N}) where N
     Y = [0 -1im; 1im 0]
     Z = [1 0; 0 -1]
     I = [1 0; 0 1]
-    for i in reverse(1:N)
+    # for i in reverse(1:N)
+    for i in 1:N
         if str[i] == "X"[1] 
             mat = kron(X,mat)
         elseif str[i] == "y"[1]

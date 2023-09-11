@@ -147,6 +147,13 @@ Display, y = iY
 Base.string(p::Pauli{N}) where N = string(p.pauli)
 
 """
+    Base.Matrix(p::Pauli)
+
+TBW
+"""
+Base.Matrix(p::Pauli) = Matrix(p.pauli) .* get_phase(p)
+
+"""
     random_Pauli(N)
 
 TBW
@@ -174,3 +181,6 @@ TBW
 function Base.:-(p::Pauli{N}) where {N}
     return rotate_phase(p,2) 
 end
+
+
+Base.adjoint(p::Pauli) = is_hermitian(p) ? p : -p

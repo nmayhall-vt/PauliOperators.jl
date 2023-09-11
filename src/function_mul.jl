@@ -6,7 +6,7 @@ Multiply dense vectors in `in` with `p`, storing the result in `out`.
 I think this should be much faster if we were to store vectors as rows, 
 so that summing over states acts on contiguous data 
 """
-function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}) where {T,N}
+function LinearAlgebra.mul!(out::Matrix{T}, p::AbstractPauli{N}, in::Matrix{T}) where {T,N}
     fill!(out, T(0))
     ndim = size(in,1)
     nvec = size(in,2)
@@ -28,26 +28,64 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}) where {T
 end
 
 """
+    LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where {T,N}
+
+Multiply dense vectors in `in` with `p`, storing the result in `out`. 
+
+I think this should be much faster if we were to store vectors as rows, 
+so that summing over states acts on contiguous data 
+"""
+function LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where {T,N}
+    fill!(out, T(0))
+    ndim = size(in,1)
+    nvec = size(in,2)
+    
+    # Check dimensions 
+    size(in) == size(out) || throw(DimensionMismatch)
+    ndim == 2^N || throw(DimensionMismatch)
+
+    for (op,coeff) in p.ops
+        mul!(out, op, in, coeff, 1.0)
+    end
+end
+
+"""
     LinearAlgebra.mul!(C::Matrix{T}, A::Pauli{N}, B::Matrix{T}, α, β) where {T,N}
 
     mul!(C, A, B, α, β) -> C
 
 ABα+Cβ. The result is stored in C by overwriting it. Note that C must not be aliased with either A or B.
 """
-function LinearAlgebra.mul!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}, α, β) where {T,N}
-    scale!(C, β)
-    ndim = size(in,1)
+function LinearAlgebra.mul!(C::Matrix{T}, A::AbstractPauli{N}, B::Matrix{T}, α, β) where {T,N}
+    # scale!(C, β)
+    for i in 1:size(C,1)
+        C[i,:] .= C[i,:] .* β
+    end
+
+    ndim = size(B,1)
     
     # Check dimensions 
-    size(in) == size(out) || throw(DimensionMismatch)
+    size(B) == size(C) || throw(DimensionMismatch)
     ndim == 2^N || throw(DimensionMismatch)
 
     # loop over states and do multiplication
     # need to go from 0:N-1 because we convert to binary
     for i in 0:ndim-1                           
-        (phase, j) = p * KetBitString{N}(i)
-        C[j.v+1,:] .+= phase*in[i+1,:] .* α
+        (coeff, j) = A * KetBitString{N}(i)
+        C[j.v+1,:] .+= (coeff * α) .* B[i+1,:] 
     end
+end
+
+
+"""
+    Base.:*(p::PauliSum{N}, in::Array{T}) where {T,N}
+
+TBW
+"""
+function Base.:*(p::PauliSum{N}, in::Array{T}) where {T,N}
+    out = zeros(T, size(in))
+    mul!(out, p, in)
+    return out
 end
 
 
@@ -56,7 +94,7 @@ end
 
 TBW
 """
-function Base.:*(p::Pauli{N}, in::Array{T}) where {T<:Complex,N}
+function Base.:*(p::AbstractPauli{N}, in::Array{T}) where {T<:Complex,N}
     out = zeros(T, size(in))
     mul!(out, p, in)
     return out
@@ -120,6 +158,11 @@ function Base.:*(p::Pauli{N}, ψ::KetBitString{N}) where N
     tmp = p.pauli.x ⊻ ψ.v
     sign = count_ones(p.pauli.z & tmp) % 2
     return get_phase(p)*(-1)^sign, KetBitString{N}(tmp)
+end
+function Base.:*(p::FixedPhasePauli{N}, ψ::KetBitString{N}) where N
+    tmp = p.x ⊻ ψ.v
+    # sign = count_ones(p.pauli.z & tmp) % 2
+    return iseven(count_ones(p.z & tmp)) ? 1 : -1, KetBitString{N}(tmp)
 end
 
 function Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}

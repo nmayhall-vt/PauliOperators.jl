@@ -115,10 +115,10 @@ using Random
     @test all(c*Matrix(s) - Matrix(c * s) .≈ 0)
     println()
 
-    ZX = [0+0im  1+0im   0+0im   0+0im
-    1+0im  0+0im   0+0im   0+0im
-    0+0im  0+0im   0+0im  -1+0im
-    0+0im  0+0im  -1+0im   0+0im]
+    ZX = [0+0im  0+0im   1+0im   0+0im
+          0+0im  0+0im   0+0im  -1+0im
+          1+0im  0+0im   0+0im   0+0im
+          0+0im -1+0im   0+0im   0+0im]
 
     @test all(ZX .== Matrix(Pauli("ZX")))
 
@@ -198,4 +198,6 @@ using Random
     mat2 = Matrix(unique(w))
 
     @test norm(mat1-mat2) ≈ 0
+
+
 end
