@@ -15,6 +15,7 @@ include("function_mul.jl")
 include("function_add.jl")
 include("function_base.jl")
 include("function_convert.jl")
+include("function_commute.jl")
 
 
 # Exports

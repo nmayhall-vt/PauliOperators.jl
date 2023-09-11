@@ -43,20 +43,6 @@ end
 Base.:≈(p::ScaledPauli{N}, q::ScaledPauli{N}) where {N} = (p.pauli == q.pauli) & (p.coeff ≈ q.coeff)
 
 
-"""
-    commute(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}
-
-TBW
-"""
-function commute(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {N}
-    return commute(p1.pauli, p2.pauli)
-end
-function commute(p1::Pauli{N}, p2::ScaledPauli{N}) where {N}
-    return commute(p1, p2.pauli)
-end
-function commute(p1::ScaledPauli{N}, p2::Pauli{N}) where {N}
-    return commute(p1.pauli, p2)
-end
 
 
 get_coeff(p::ScaledPauli{N}) where {T,N} = p.coeff
