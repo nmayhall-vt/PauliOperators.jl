@@ -52,7 +52,7 @@ This is convieniant for manual manipulations, but is not type-stable so will be 
 """
 function Pauli(str::String)
     p = FixedPhasePauli(str)
-    return Pauli{nqubits(p)}(phase(p), p) 
+    return Pauli{nqubits(p)}(0, p) 
 end
 
 
@@ -173,4 +173,13 @@ TBW
 """
 function Base.:-(p::Pauli{N}) where {N}
     return rotate_phase(p,2) 
+end
+
+"""
+    get_phase(p::Pauli)
+
+Return the phase of the `Pauli`, i^θ
+"""
+function get_phase(p::Pauli)
+    return 1im^p.θ
 end

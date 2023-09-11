@@ -195,14 +195,6 @@ end
 #     return hash((p.θ, p.z, p.x))
 # end
 
-"""
-    get_phase(p::Pauli)
-
-Return the phase of the `Pauli`, i^θ
-"""
-function get_phase(p::Pauli)
-    return 1im^p.θ
-end
 
 """
     rotate_phase(p::Pauli{N}, θ::Integer) where N

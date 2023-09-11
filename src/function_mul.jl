@@ -69,8 +69,10 @@ end
 Multiply two `Pauli`'s together
 """
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    prod = p1.pauli*p2.pauli
+    # θ = (p1.θ + p2.θ + phase(p1.pauli) + phase(p2.pauli) + phase(p1.pauli, p2.pauli) + 4 - phase(prod)) % 4
     θ = (p1.θ + p2.θ + phase(p1.pauli) + phase(p2.pauli) + phase(p1.pauli, p2.pauli)) % 4
-    return Pauli{N}(θ, p1.pauli*p2.pauli)
+    return Pauli{N}(θ, prod)
 end
 
 

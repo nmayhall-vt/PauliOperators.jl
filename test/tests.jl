@@ -13,12 +13,12 @@ using Random
     b = Pauli("YXXYZZ")
     c = Pauli("ZZYYYX")
     c = rotate_phase(c,1)
-    # display(a)
-    # display(b)
-    # display(a*b)
-    # display(c)
+    display(a)
+    display(b)
+    display(a*b)
+    display(c)
     @test c == a*b 
-  
+
     println(" Now PF")
     a = FixedPhasePauli("XYZIXY")
     b = FixedPhasePauli("YXXYZZ")
@@ -28,22 +28,25 @@ using Random
     display(get_phase(a,b)*a*b)
     display(1*c)
     display(c)
+    display(Pauli{6}(PauliOperators.phase(a,b), a*b))
     @test c == Pauli{6}(PauliOperators.phase(a,b), a*b) 
     @test 1*c == get_phase(a,b)*a*b 
     @test 2*c == 2*a*b*get_phase(a,b) 
 
     @test commute(a,b) == false
-    @test get_phase(c) == -1
-    @test get_phase(negate(c)) == 1
-    @test get_phase(rotate_phase(c,0)) == -1
-    @test get_phase(rotate_phase(c,1)) == -1im
-    @test get_phase(rotate_phase(c,2)) == 1
-    @test get_phase(rotate_phase(c,3)) == 1im
-    @test get_phase(rotate_phase(c,5)) == -1im
+    @test get_phase(c) == 1im
+    @test get_phase(negate(c)) == -1im
+    @test get_phase(rotate_phase(c,0)) == 1im
+    @test get_phase(rotate_phase(c,1)) == -1
+    @test get_phase(rotate_phase(c,2)) == -1im
+    @test get_phase(rotate_phase(c,3)) == 1 
+    @test get_phase(rotate_phase(c,5)) == -1
 
     a = FixedPhasePauli("ZXYI"); b = FixedPhasePauli("YZXX");
     @test norm(Matrix(a*b)*get_phase(a,b) - Matrix(a)*Matrix(b)) ≈ 0
 
+
+    return
     display((a.z, a.x))
     display((b.z, b.x))
     display((c.pauli.z, c.pauli.x))

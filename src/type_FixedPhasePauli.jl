@@ -143,7 +143,7 @@ function Base.string(p::FixedPhasePauli{N}) where N
         out[i] = "X"
     end
     for i in yloc
-        out[i] = "y"
+        out[i] = "Y"
     end
     for i in Zloc
         out[i] = "Z"
@@ -167,7 +167,32 @@ TBW
 """
 is_hermitian(p::FixedPhasePauli) = iseven(nY(p)) 
 @inline phase(p::FixedPhasePauli) = 3*nY(p)%4
+# @inline phase(p::FixedPhasePauli) = 0
 @inline get_phase(p::FixedPhasePauli) = 1im^phase(p) 
+
+"""
+    get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N})
+
+Get the phase arising from the multiplication of two `FixedPhasePauli`'s
+"""
+function get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
+    return 1im^phase(p1,p2) 
+end
+"""
+    phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
+
+P1 = i^(α1 + θ1) ⨷_i Z^zi1 X^xi1 
+P2 = i^(α2 + θ2) ⨷_i Z^zi2 X^xi2
+
+P3 = i^(α1 + α2) i^(θ1 + θ2)  ⨷_i Z^zi1 X^xi1 Z^zi2 X^xi2
+   = i^(α1 + α2) i^(θ1 + θ2)  ⨷_i Z^zi1 Z^zi2 X^xi1 X^xi2  -1^ϕ
+   = i^(α1 + α2) i^(θ1 + θ2)  ⨷_i Z^(zi1 + zi2) X^(xi1 + xi2)  -1^ϕ
+"""
+function phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
+    # return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4 + (4 - phase(p1*p2))%4 
+    # return (2*count_ones(p1.x & p2.z) + 4 - phase(p1*p2)) % 4
+    return (2*count_ones(p1.x & p2.z) + 8 - phase(p1) - phase(p2)) % 4
+end
 
 
 """
@@ -215,7 +240,7 @@ function Base.Matrix(p::FixedPhasePauli{N}) where N
     for i in reverse(1:N)
         if str[i] == "X"[1] 
             mat = kron(X,mat)
-        elseif str[i] == "y"[1]
+        elseif str[i] == "Y"[1]
             mat = kron(y,mat)
         elseif str[i] == "Z"[1]
             mat = kron(Z,mat)
@@ -226,7 +251,7 @@ function Base.Matrix(p::FixedPhasePauli{N}) where N
         end
     end
 
-    return mat
+    return mat .* get_phase(p)
 end
 
 """
@@ -240,18 +265,6 @@ function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
     return FixedPhasePauli{N}(z,x)
 end
 
-"""
-    get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N})
-
-Get the phase arising from the multiplication of two `FixedPhasePauli`'s
-"""
-function get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
-    return 1im^phase(p1,p2) 
-end
-function phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N
-    # return (phase(p1) + phase(p2) + 2*count_ones(p1.x & p2.z)) % 4 + (4 - phase(p1*p2))%4 
-    return 2*count_ones(p1.x & p2.z) % 4
-end
 
 # function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
 #     x = p1.x ⊻ p2.x
