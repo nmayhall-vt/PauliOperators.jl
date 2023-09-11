@@ -4,11 +4,12 @@ using Random
 using Test
 using BlockDavidson
 # using LinearMaps
+using BenchmarkTools
 
-@testset "matvec" begin
-# function run(N)
+# @testset "matvec" begin
+function run()
 
-    N = 8
+    N = 8 
     Random.seed!(2)
 
     a = Pauli(N)
@@ -54,9 +55,16 @@ using BlockDavidson
     @test abs(tr(abs.(v1'*v0)) - M) < 1e-4
     
     
-    function mymatvec(v) 
-        return H*v
+    scr = deepcopy(v0)
+    function mymatvec(v)
+        fill!(scr,0.0) 
+        mul!(scr, H, v)
+        return scr 
     end
+    # @btime $mymatvec($v0, $scr)
+    # function mymatvec(v) 
+    #     return H*v
+    # end
 
     lmat = LinOpMat{ComplexF64}(mymatvec, 2^N, true)
     
@@ -66,4 +74,4 @@ using BlockDavidson
     @show abs(tr(abs.(v2'*v0)) - M)     
     @test abs(tr(abs.(v2'*v0)) - M) < 1e-4
 end
-# run(4)
+run()

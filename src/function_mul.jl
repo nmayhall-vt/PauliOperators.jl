@@ -36,7 +36,7 @@ I think this should be much faster if we were to store vectors as rows,
 so that summing over states acts on contiguous data 
 """
 function LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where {T,N}
-    fill!(out, T(0))
+    # fill!(out, T(0))
     ndim = size(in,1)
     nvec = size(in,2)
     
@@ -45,7 +45,14 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where
     ndim == 2^N || throw(DimensionMismatch)
 
     for (op,coeff) in p.ops
-        mul!(out, op, in, coeff, 1.0)
+        # mul!(out, op, in, coeff, 1.0)
+        for i in 0:ndim-1                           
+            (phase, j) = op * KetBitString{N}(i)
+            tmp = phase * coeff 
+            @inbounds @simd for k in 1:nvec
+                out[j.v+1, k] += tmp * in[i+1, k]
+            end
+        end
     end
 end
 
@@ -58,11 +65,13 @@ ABα+Cβ. The result is stored in C by overwriting it. Note that C must not be a
 """
 function LinearAlgebra.mul!(C::Matrix{T}, A::AbstractPauli{N}, B::Matrix{T}, α, β) where {T,N}
     # scale!(C, β)
-    for i in 1:size(C,1)
-        C[i,:] .= C[i,:] .* β
-    end
+    # for i in 1:size(C,1)
+    #     # C[i,:] .= C[i,:] .* β
+    # end
 
+    C .*= β
     ndim = size(B,1)
+    nvec = size(B,2)
     
     # Check dimensions 
     size(B) == size(C) || throw(DimensionMismatch)
@@ -72,7 +81,11 @@ function LinearAlgebra.mul!(C::Matrix{T}, A::AbstractPauli{N}, B::Matrix{T}, α,
     # need to go from 0:N-1 because we convert to binary
     for i in 0:ndim-1                           
         (coeff, j) = A * KetBitString{N}(i)
-        C[j.v+1,:] .+= (coeff * α) .* B[i+1,:] 
+        # @views C[j.v+1,:] .+= (coeff * α) .* B[i+1,:] 
+        tmp = coeff * α 
+        @simd for k in 1:nvec
+            @inbounds C[j.v+1, k] += tmp * B[i+1, k]
+        end
     end
 end
 
