@@ -58,20 +58,8 @@ using BlockDavidson
         return H*v
     end
 
-    struct MatVec{T} <: AbstractMatrix{T} 
-        matvec
-        dim::Int
-        sym::Bool
-    end
-    
-    Base.size(lop::MatVec{T}) where {T} = return (lop.dim,lop.dim)
-    Base.:(*)(lop::MatVec{T}, v::AbstractVector{T}) where {T} = return lop.matvec(v)
-    Base.:(*)(lop::MatVec{T}, v::AbstractMatrix{T}) where {T} = return lop.matvec(v)
-    issymmetric(lop::MatVec{T}) where {T} = return lop.sym
-
-
-    # LinearMap(mymatvec)V 
     lmat = LinOpMat{ComplexF64}(mymatvec, 2^N, true)
+    
     dav = Davidson(Hmat, T=ComplexF64, nroots=M)
     @time e2, v2 = eigs(dav)
     
