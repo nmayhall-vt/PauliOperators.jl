@@ -60,7 +60,7 @@ using BlockDavidson
 
     lmat = LinOpMat{ComplexF64}(mymatvec, 2^N, true)
     
-    dav = Davidson(Hmat, T=ComplexF64, nroots=M)
+    dav = Davidson(lmat, T=ComplexF64, nroots=M)
     @time e2, v2 = eigs(dav)
     
     @show abs(tr(abs.(v2'*v0)) - M)     
