@@ -45,17 +45,24 @@ function Base.:+(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
 end
 
 
-function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
-    out = deepcopy(ps)
-    sum!(out, p)
-    return out
-end
 function Base.:+(ps::PauliSum{N}, p::FixedPhasePauli{N}) where {N}
     out = deepcopy(ps)
     sum!(out, p)
     return out
 end
+function Base.:+(ps::PauliSum{N}, p::Pauli{N}) where {N}
+    out = deepcopy(ps)
+    sum!(out, p)
+    return out
+end
+function Base.:+(ps::PauliSum{N}, p::ScaledPauli{N}) where {N}
+    out = deepcopy(ps)
+    sum!(out, p)
+    return out
+end
+Base.:+(p::FixedPhasePauli{N}, ps::PauliSum{N}) where {N} = ps + p
 Base.:+(p::Pauli{N}, ps::PauliSum{N}) where {N} = ps + p
+Base.:+(p::ScaledPauli{N}, ps::PauliSum{N}) where {N} = ps + p
 Base.:+(p::FixedPhasePauli{N}, ps::Pauli{N}) where {N} = ps + p
 Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N} = PauliSum{N}(mergewith(+, ps1.ops, ps2.ops))
 
@@ -65,8 +72,9 @@ Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N} = PauliSum{N}(mergewith(+,
 
 Add a `Pauli` to a PauliSum. 
 """
-Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N} = ps[phasefree(p)] = get(ps, p) + get_phase(p) 
 Base.sum!(ps::PauliSum{N}, p::FixedPhasePauli{N}) where {N} = ps[p] = get(ps, p) + 1 
+Base.sum!(ps::PauliSum{N}, p::Pauli{N}) where {N} = ps[p.pauli] = get(ps, p.pauli) + get_phase(p) 
+Base.sum!(ps::PauliSum{N}, p::ScaledPauli{N}) where {N} = ps[p.pauli] = get(ps, p.pauli) + p.coeff 
 Base.sum!(ps::Vector{ScaledPauli{N}}, p::ScaledPauli{N}) where {T,N} = push!(ps, p)
 Base.sum!(ps::Vector{ScaledPauli{N}}, p::Pauli{N}) where {T,N} = push!(ps, ScaledPauli(p))
 Base.sum!(ps::Vector{ScaledPauli{N}}, p::FixedPhasePauli{N}) where {T,N} = push!(ps, ScaledPauli(p))
