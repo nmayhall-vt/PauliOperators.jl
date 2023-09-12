@@ -6,8 +6,8 @@ using BlockDavidson
 # using LinearMaps
 using BenchmarkTools
 
-# @testset "matvec" begin
-function run()
+@testset "matvec" begin
+# function run()
 
     N = 8 
     Random.seed!(2)
@@ -74,4 +74,4 @@ function run()
     @show abs(tr(abs.(v2'*v0)) - M)     
     @test abs(tr(abs.(v2'*v0)) - M) < 1e-4
 end
-run()
+# run()

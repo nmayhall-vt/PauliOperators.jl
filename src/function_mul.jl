@@ -1,3 +1,5 @@
+using InteractiveUtils
+
 """
     mult!(out::Matrix{T}, p::Pauli{N}, in::Matrix{T}) where {T,N}
 
@@ -39,22 +41,94 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where
     # fill!(out, T(0))
     ndim = size(in,1)
     nvec = size(in,2)
+  
+    # if nvec == 1
+    #     mul!(@view out[:,1], p, in[:,1])
+    #     return
+    # end
     
     # Check dimensions 
     size(in) == size(out) || throw(DimensionMismatch)
     ndim == 2^N || throw(DimensionMismatch)
 
-    for (op,coeff) in p.ops
-        # mul!(out, op, in, coeff, 1.0)
-        for i in 0:ndim-1                           
-            (phase, j) = op * KetBitString{N}(i)
-            tmp = phase * coeff 
-            @inbounds @simd for k in 1:nvec
-                out[j.v+1, k] += tmp * in[i+1, k]
+    if nvec == 1
+        for (op,coeff) in p.ops
+            # mul!(out, op, in, coeff, 1.0)
+            @inbounds @simd for i in 0:ndim-1                           
+                (phase, j) = op * KetBitString{N}(i)
+                tmp = phase * coeff 
+                k = 1
+                out[j.v+1] += tmp * in[i+1]
+            end
+        end
+    elseif nvec > 1
+        for (op,coeff) in p.ops
+            # mul!(out, op, in, coeff, 1.0)
+            @inbounds @simd for i in 0:ndim-1                           
+                (phase, j) = op * KetBitString{N}(i)
+                tmp = phase * coeff 
+                for k in 1:nvec
+                    # out[j.v+1 + k*ndim] += tmp * in[i+1, k]
+                    out[j.v+1 + (k-1)*ndim] += tmp * in[i+1 + (k-1)*ndim]
+                end
             end
         end
     end
 end
+
+
+# function mul2!(C::Matrix{T}, A::PauliSum{N}, B::Matrix{T}) where {T,N}
+#     ndim = size(B,1)
+#     nvec = size(B,2)
+  
+#     _B = zeros(T, size(B'))
+#     _C = zeros(T, size(C'))
+#     _B .= transpose(B)
+#     _C .= transpose(C)
+   
+#     # Check dimensions 
+#     size(B) == size(C) || throw(DimensionMismatch)
+#     ndim == 2^N || throw(DimensionMismatch)
+
+#     for (op,coeff) in A.ops
+#         # mul!(out, op, in, coeff, 1.0)
+#         for i in 0:ndim-1                           
+#             (phase, j) = op * KetBitString{N}(i)
+#             tmp = phase * coeff 
+#             # _C[:, j.v+1] .+= tmp .* _B[:, i+1]
+#             @inbounds @simd for k in 1:nvec
+#                 _C[k, j.v+1] += tmp * _B[k, i+1]
+#             end
+#         end
+#     end
+#     C .= transpose(_C)
+# end
+
+function _mymultiply(C, B, ndim, op::FixedPhasePauli{N}, coeff) where {N}
+    @inbounds @simd for i in 0:ndim-1
+    # for i in 0:ndim-1
+        (phase, j) = op * KetBitString{N}(i)
+        C[j.v+1] += phase * coeff * B[i+1]
+    end
+end
+function LinearAlgebra.mul!(C::Vector{T}, A::PauliSum{N}, B::Vector{T}) where {T,N}
+    ndim = size(B,1)
+  
+    # Check dimensions 
+    size(B) == size(C) || throw(DimensionMismatch)
+    ndim == 2^N || throw(DimensionMismatch)
+
+    for (op,coeff) in A.ops
+        # mul!(out, op, in, coeff, 1.0)
+        # @code_warntype _mymultiply(C, B, ndim, op, coeff) 
+         _mymultiply(C, B, ndim, op, coeff) 
+        # @inbounds @simd for i in 0:ndim-1                           
+        #     (phase, j) = op * KetBitString{N}(i)
+        #     C[j.v+1] += phase * coeff * B[i+1]
+        # end
+    end
+end
+
 
 """
     LinearAlgebra.mul!(C::Matrix{T}, A::Pauli{N}, B::Matrix{T}, α, β) where {T,N}
