@@ -9,7 +9,6 @@ I think this should be much faster if we were to store vectors as rows,
 so that summing over states acts on contiguous data 
 """
 function LinearAlgebra.mul!(out::Matrix{T}, p::AbstractPauli{N}, in::Matrix{T}) where {T,N}
-    fill!(out, T(0))
     ndim = size(in,1)
     nvec = size(in,2)
     
@@ -104,13 +103,6 @@ end
 #     C .= transpose(_C)
 # end
 
-function _mymultiply(C, B, ndim, op::FixedPhasePauli{N}, coeff) where {N}
-    @inbounds @simd for i in 0:ndim-1
-    # for i in 0:ndim-1
-        (phase, j) = op * KetBitString{N}(i)
-        C[j.v+1] += phase * coeff * B[i+1]
-    end
-end
 function LinearAlgebra.mul!(C::Vector{T}, A::PauliSum{N}, B::Vector{T}) where {T,N}
     ndim = size(B,1)
   
@@ -119,13 +111,26 @@ function LinearAlgebra.mul!(C::Vector{T}, A::PauliSum{N}, B::Vector{T}) where {T
     ndim == 2^N || throw(DimensionMismatch)
 
     for (op,coeff) in A.ops
-        # mul!(out, op, in, coeff, 1.0)
-        # @code_warntype _mymultiply(C, B, ndim, op, coeff) 
-         _mymultiply(C, B, ndim, op, coeff) 
-        # @inbounds @simd for i in 0:ndim-1                           
-        #     (phase, j) = op * KetBitString{N}(i)
-        #     C[j.v+1] += phase * coeff * B[i+1]
-        # end
+        @inbounds @simd for i in 0:ndim-1                           
+            (phase, j) = op * KetBitString{N}(i)
+            C[j.v+1] += phase * coeff * B[i+1]
+        end
+    end
+end
+
+
+function LinearAlgebra.mul!(C::Vector{T}, A::ScaledPauliVector{N}, B::Vector{T}) where {T,N}
+    ndim = size(B,1)
+  
+    # Check dimensions 
+    size(B) == size(C) || throw(DimensionMismatch)
+    ndim == 2^N || throw(DimensionMismatch)
+
+    for op in A
+        @inbounds @simd for i in 0:ndim-1                           
+            (coeff, j) = op * KetBitString{N}(i)
+            C[j.v+1] += coeff * B[i+1]
+        end
     end
 end
 
@@ -170,6 +175,11 @@ end
 TBW
 """
 function Base.:*(p::PauliSum{N}, in::Array{T}) where {T,N}
+    out = zeros(T, size(in))
+    mul!(out, p, in)
+    return out
+end
+function Base.:*(p::ScaledPauliVector{N}, in::Array{T}) where {T,N}
     out = zeros(T, size(in))
     mul!(out, p, in)
     return out
@@ -219,8 +229,11 @@ function Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where {N}
     return Pauli{N}(θ,p1*p2.pauli)
 end
 
-Base.:*(p1::FixedPhasePauli{N}, p2::ScaledPauli{N}) where {T,N} = ScaledPauli{N}(get_phase(p1) * p2.coeff, p1 * p2.pauli)
-Base.:*(p1::ScaledPauli{N}, p2::FixedPhasePauli{N}) where {T,N} = ScaledPauli{N}(p1.coeff, p1.pauli * p2)
+Base.:*(p1::FixedPhasePauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p1 * p2.coeff, p1 * p2.pauli)
+Base.:*(p1::ScaledPauli{N}, p2::FixedPhasePauli{N}) where N = ScaledPauli{N}(p1.coeff, p1.pauli * p2)
+Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p1.coeff*p2.coeff * get_phase(p1.pauli, p2.pauli), p1.pauli*p2.pauli)
+Base.:*(p1::ScaledPauli{N}, p2::Pauli{N}) where N = ScaledPauli{N}(p1.coeff * get_phase(p1.pauli, phasefree(p2)), p1.pauli*p2)
+Base.:*(p1::Pauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p2.coeff * get_phase(p2.pauli, phasefree(p1)), p1*p2.pauli)
 
 
 """
@@ -234,6 +247,15 @@ Base.:*(p::ScaledPauli{N}, c::T) where {N,T<:Number}       = ScaledPauli{N}(p.co
 Base.:*(c::Number, p::Pauli) = p*c
 Base.:*(c::Number, p::FixedPhasePauli) = p*c
 Base.:*(c::Number, p::ScaledPauli) = p*c
+
+
+
+
+# function Base.:*(p::ScaledPauli{N}, a::Number) where {T,N}
+#     return ScaledPauli{N}(p.coeff*a, p.pauli)
+# end
+
+# Base.:*(a::Number, p::ScaledPauli{N}) where {T,N} = p*a
 
 
 """
@@ -251,21 +273,8 @@ function Base.:*(p::FixedPhasePauli{N}, ψ::KetBitString{N}) where N
     # sign = count_ones(p.pauli.z & tmp) % 2
     return iseven(count_ones(p.z & tmp)) ? 1 : -1, KetBitString{N}(tmp)
 end
-
-function Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}
-    return ScaledPauli{N}(p1.coeff*p2.coeff * get_phase(p1.pauli, p2.pauli), p1.pauli*p2.pauli)
+function Base.:*(p::ScaledPauli{N}, ψ::KetBitString{N}) where N
+    tmp = p.pauli.x ⊻ ψ.v
+    sign = count_ones(p.pauli.z & tmp) % 2
+    return p.coeff*(-1)^sign, KetBitString{N}(tmp)
 end
-
-function Base.:*(p1::ScaledPauli{N}, p2::Pauli{N}) where {T,N}
-    return ScaledPauli{N}(p1.coeff * get_phase(p1.pauli, phasefree(p2)), p1.pauli*p2)
-end
-
-function Base.:*(p1::Pauli{N}, p2::ScaledPauli{N}) where {T,N}
-    return ScaledPauli{N}(p2.coeff * get_phase(p2.pauli, phasefree(p1)), p1*p2.pauli)
-end
-
-# function Base.:*(p::ScaledPauli{N}, a::Number) where {T,N}
-#     return ScaledPauli{N}(p.coeff*a, p.pauli)
-# end
-
-# Base.:*(a::Number, p::ScaledPauli{N}) where {T,N} = p*a

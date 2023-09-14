@@ -9,11 +9,15 @@ struct ScaledPauli{N} <: AbstractPauli{N}
     pauli::FixedPhasePauli{N}
 end
 
-ScaledPauliVector{T,N} = Vector{ScaledPauli{N}}
 
 
 function ScaledPauli(p::Pauli{N}) where N
     return ScaledPauli{N}(get_phase(p), p.pauli) 
+end
+
+ScaledPauliVector{N} = Vector{ScaledPauli{N}}
+function ScaledPauliVector(N)
+    return Vector{ScaledPauli{N}}([])
 end
 
 function Base.display(sp::ScaledPauli)

@@ -16,12 +16,14 @@ include("function_add.jl")
 include("function_base.jl")
 include("function_convert.jl")
 include("function_commute.jl")
+include("function_otimes.jl")
 
 
 # Exports
 export Pauli
 export FixedPhasePauli
 export ScaledPauli
+export ScaledPauliVector
 export PauliSum
 export KetBitString
 export rotate_phase 

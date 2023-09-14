@@ -199,5 +199,37 @@ using Random
 
     @test norm(mat1-mat2) ≈ 0
 
+    ##      test matvec
+    N = 8
+    H = random_Pauli(N)
+    for i in 1:40
+        H += rand()*random_Pauli(N)
+    end
+   
+    # Vector as Matrix
+    v = rand(ComplexF64, 2^N,1)
+    v .= v ./ norm(v) 
+    @test norm(Matrix(H)*v - H*v) < 1e-13 
+    
+    # Matrix
+    v = rand(ComplexF64, 2^N,3)
+    v = v *  sqrt(inv(v'*v)) 
+    @test norm(Matrix(H)*v - H*v) < 1e-13 
+    
+    
+    # Vector 
+    v = rand(ComplexF64, 2^N)
+    v .= v ./ norm(v) 
+    @show norm(Matrix(H)*v - H*v) 
+    @test norm(Matrix(H)*v - H*v) < 1e-13 
 
+    
+    ##      test matvec with a scaled pauli vector
+    N = 8
+    H = ScaledPauliVector(N) 
+    for i in 1:40
+        push!(H, random_ScaledPauli(N))
+    end
+    @show norm(Matrix(H)*v - H*v) 
+    @test norm(Matrix(H)*v - H*v) < 1e-13 
 end
