@@ -17,7 +17,7 @@ include("function_base.jl")
 include("function_convert.jl")
 include("function_commute.jl")
 include("function_otimes.jl")
-
+include("function_osum.jl")
 
 # Exports
 export Pauli
