@@ -26,6 +26,9 @@ jobs:
         arch:
           - x64
             #- x86
+        allow_failures:
+          - julia_version: 'nightly' 
+
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
