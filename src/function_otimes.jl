@@ -1,7 +1,7 @@
 otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M} = Pauli{N+M}((p1.θ + p2.θ)%4, p1.pauli ⊗ p2.pauli)
 otimes(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{M}) where {N,M} = FixedPhasePauli{N+M}(p1.z | p2.z << N, p1.x | p2.x << N)
-otimes(p::Pauli{N}, fpp::FixedPhasePauli{M}) where {N,M} = otimes(p, Pauli{M}(0,fpp.z, fpp.x))
-otimes(fpp::FixedPhasePauli{M}, p::Pauli{N}) where {N,M} = otimes(Pauli{M}(0,fpp.z, fpp.x), p)
+otimes(p::Pauli{N}, fpp::FixedPhasePauli{M}) where {N,M} = otimes(p, Pauli{M}(0,fpp))
+otimes(fpp::FixedPhasePauli{M}, p::Pauli{N}) where {N,M} = otimes(Pauli{M}(0,fpp), p)
 
 function otimes(ps::PauliSum{N}, p::Pauli{M}) where {N,M}
     out = PauliSum(N+M)

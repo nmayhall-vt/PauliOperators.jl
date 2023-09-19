@@ -204,7 +204,7 @@ end
 Multiply two `Pauli`'s together
 """
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
-    θ = (p1.θ + p2.θ + phase(p1.pauli) + phase(p2.pauli) + phase(p1.pauli, p2.pauli)) % 4
+    θ = (p1.θ + p2.θ + phase(p1.pauli, p2.pauli)) % 4
     return Pauli{N}(θ, p1.pauli*p2.pauli)
 end
 
@@ -215,7 +215,7 @@ function Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where {N}
     # θ = (p1.θ + phase(p2)) % 4
     # θ += (2*count_ones(p1.x & p2.z)) % 4
     # return Pauli{N}(θ, z, x)
-    θ = (p1.θ + phase(p1.pauli) + phase(p2) + phase(p1.pauli, p2)) % 4
+    θ = (p1.θ + phase(p1.pauli, p2)) % 4
     return Pauli{N}(θ, p1.pauli*p2)
 end
 
@@ -225,7 +225,7 @@ function Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where {N}
     # θ = (phase(p1) + p2.θ) % 4
     # θ += (2*count_ones(p1.x & p2.z)) % 4
     # return Pauli{N}(θ, z, x)
-    θ = (p2.θ + phase(p1) + phase(p2.pauli) + phase(p1, p2.pauli)) % 4
+    θ = (p2.θ + phase(p1, p2.pauli)) % 4
     return Pauli{N}(θ,p1*p2.pauli)
 end
 

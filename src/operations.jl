@@ -138,7 +138,7 @@ end
 Check if operator is diagonal in the computational (z) basis. E.g., does this operator consist of only I and/or Z?
 """
 function is_diagonal(p::Pauli)
-    return count_ones(p.x) == 0
+    return count_ones(p.pauli.x) == 0
 end
 
 
@@ -158,6 +158,6 @@ function expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N
     
     println(p)
 
-    count_ones(p.z & ket.v) % 2 == 0 || return -(1im)^p.θ
+    count_ones(p.pauli.z & ket.v) % 2 == 0 || return -(1im)^p.θ
     return (1im)^p.θ 
 end
