@@ -95,19 +95,31 @@ using Random
         N = 8
         a = random_Pauli(N)
         b = random_Pauli(N)
+
+        display(a * b)
+        # println()
+        # display(s2)
+
+        @test all(Matrix(a) * Matrix(b) - Matrix(a * b) .≈ 0)
+    end
+
+
+    println("Test Addition")
+    for i in 1:10
+        N = 8
+        a = random_Pauli(N)
+        b = random_Pauli(N)
         c = random_Pauli(N)
         d = random_Pauli(N)
 
         s1 = a + b + d
         s2 = a + c + d
-        display(s1 * s2)
-        # println()
-        # display(s2)
 
-        @test all(Matrix(s1) * Matrix(s2) - Matrix(s1 * s2) .≈ 0)
+        @test all(Matrix(s1) + Matrix(s2) - Matrix(s1 + s2) .≈ 0)
     end
+    
 
-
+    
     a = random_Pauli(6)
     b = random_Pauli(6)
     s = a + b
