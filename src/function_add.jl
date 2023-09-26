@@ -12,7 +12,7 @@ function Base.:+(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N}
     end
 end
 function Base.:+(p::ScaledPauli{N}, a::Number) where {T,N}
-    return p + ScaledPauli{N}(a, Pauli{N}(0,0,0))
+    return p + ScaledPauli{N}(a, Pauli{N}(0,FixedPhasePauli{N}(0,0)))
 end
 Base.:+(p::ScaledPauli{N}, a::Pauli{N}) where {T,N} = p + ScaledPauli{N}(1, a)
 Base.:+(a::Pauli{N}, p::ScaledPauli{N}) where {T,N} = p + a 
