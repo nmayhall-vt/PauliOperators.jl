@@ -16,8 +16,11 @@ end
 
 TBW
 """
-function PauliSum(N)
+function PauliSum(N::Integer)
     return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}())
+end
+function PauliSum(o::Pauli{N}) where N
+    return PauliSum{N}(Dict(o.pauli => get_phase(o)))
 end
 
 
