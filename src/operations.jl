@@ -156,8 +156,6 @@ compute expectation value of Pauli `o` for a product state `ket`
 function expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N
     is_diagonal(p) || return 0.0
     
-    println(p)
-
     count_ones(p.pauli.z & ket.v) % 2 == 0 || return -(1im)^p.θ
     return (1im)^p.θ 
 end
