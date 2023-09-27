@@ -167,15 +167,7 @@ end
 Delete Pauli's with coeffs smaller than thresh
 """
 function clip!(ps::PauliSum; thresh=1e-16)
-    to_delete = []
-    for (op,coeff) in ps.ops
-        if abs(coeff) < thresh
-            push!(to_delete, op)
-        end
-    end
-    for k in to_delete
-        delete!(ps.ops, k)
-    end
+    filter!(p->abs(p.second) > thresh, ps.ops)
 end
 
 """
