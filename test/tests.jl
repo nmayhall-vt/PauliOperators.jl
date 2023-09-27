@@ -70,6 +70,12 @@ using Random
     display(sum1)
     println()
 
+    display(a)
+    display(sum1[a])
+    display(sum1[a.pauli])
+    sum1[a] = 3
+    display(a)
+
     sum2 = a + d
     display(sum2)
 

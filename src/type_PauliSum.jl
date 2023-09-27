@@ -39,9 +39,9 @@ Base.get(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = get(ps.ops, p, zero(C
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
 Base.get(ps::PauliSum{N}, p::ScaledPauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
-Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p]
+Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p.pauli]
 Base.getindex(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = ps.ops[p]
-Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p] = v*get_phase(p)
+Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p.pauli] = v*get_phase(p)
 Base.setindex!(ps::PauliSum{N}, v, p::FixedPhasePauli{N}) where N = ps.ops[p] = v
 Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
 
