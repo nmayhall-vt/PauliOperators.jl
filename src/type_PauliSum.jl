@@ -16,8 +16,11 @@ end
 
 TBW
 """
-function PauliSum(N)
+function PauliSum(N::Integer)
     return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}())
+end
+function PauliSum(o::Pauli{N}) where N
+    return PauliSum{N}(Dict(o.pauli => get_phase(o)))
 end
 
 
@@ -36,9 +39,9 @@ Base.get(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = get(ps.ops, p, zero(C
 Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
 Base.get(ps::PauliSum{N}, p::ScaledPauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
 Base.keys(ps::PauliSum) = keys(ps.ops)
-Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p]
+Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p.pauli]
 Base.getindex(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = ps.ops[p]
-Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p] = v*get_phase(p)
+Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p.pauli] = v*get_phase(p)
 Base.setindex!(ps::PauliSum{N}, v, p::FixedPhasePauli{N}) where N = ps.ops[p] = v
 Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
 
@@ -164,15 +167,7 @@ end
 Delete Pauli's with coeffs smaller than thresh
 """
 function clip!(ps::PauliSum; thresh=1e-16)
-    to_delete = []
-    for (op,coeff) in ps.ops
-        if abs(coeff) < thresh
-            push!(to_delete, op)
-        end
-    end
-    for k in to_delete
-        delete!(ps.ops, k)
-    end
+    filter!(p->abs(p.second) > thresh, ps.ops)
 end
 
 """

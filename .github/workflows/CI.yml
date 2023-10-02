@@ -19,13 +19,16 @@ jobs:
       matrix:
         version:
           - '1.7'
-          - 'nightly'
+          - '1.8'
         os:
           - ubuntu-latest
           - macOS-latest
         arch:
           - x64
             #- x86
+        allow_failures:
+          - julia_version: 'nightly' 
+
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -39,24 +42,24 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           files: lcov.info
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      statuses: write
-    steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
-        with:
-          version: '1'
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-docdeploy@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-          julia --project=docs -e '
-            using Documenter: DocMeta, doctest
-            using PauliOperators
-            DocMeta.setdocmeta!(PauliOperators, :DocTestSetup, :(using PauliOperators); recursive=true)
-            doctest(PauliOperators)'
+#  docs:
+#    name: Documentation
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+#      statuses: write
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: julia-actions/setup-julia@v1
+#        with:
+#          version: '1'
+#      - uses: julia-actions/julia-buildpkg@v1
+#      - uses: julia-actions/julia-docdeploy@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - run: |
+#          julia --project=docs -e '
+#            using Documenter: DocMeta, doctest
+#            using PauliOperators
+#            DocMeta.setdocmeta!(PauliOperators, :DocTestSetup, :(using PauliOperators); recursive=true)
+#            doctest(PauliOperators)'

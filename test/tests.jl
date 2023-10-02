@@ -70,6 +70,12 @@ using Random
     display(sum1)
     println()
 
+    display(a)
+    display(sum1[a])
+    display(sum1[a.pauli])
+    sum1[a] = 3
+    display(a)
+
     sum2 = a + d
     display(sum2)
 
@@ -175,6 +181,19 @@ using Random
     @test Pauli("YZYZ") * KetBitString([1,1,1,0]) == (1, KetBitString([0,1,0,0]))
     @test Pauli("YZXZ") * KetBitString([1,1,1,0]) == (1im, KetBitString([0,1,0,0]))
     @test Pauli("XZXZ") * KetBitString([1,1,1,0]) == (-1, KetBitString([0,1,0,0]))
+
+    for i in 1:50
+        N = 8
+        # o = Pauli("XYZI")
+        # v = KetBitString([1,0,0,0])
+        o = random_Pauli(N)
+        v = KetBitString{N}(rand(1:2^N-1))
+        @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
+        
+        o = random_FixedPhasePauli(N)
+        v = KetBitString{N}(rand(1:2^N-1))
+        @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
+    end
 
     # ScaledPauli
     N=8

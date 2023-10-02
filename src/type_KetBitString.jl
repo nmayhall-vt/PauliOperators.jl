@@ -56,3 +56,15 @@ function Base.string(p::KetBitString{N}) where N
     end
     return join(out[1:N])
 end
+
+
+"""
+    Base.Vector(k::KetBitString{N}) where N
+
+TBW
+"""
+function Base.Vector(k::KetBitString{N}) where N
+    vec = zeros(Int8,2^N)
+    vec[k.v+1] = 1
+    return vec 
+end
