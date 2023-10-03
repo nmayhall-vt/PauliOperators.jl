@@ -169,7 +169,6 @@ Delete Pauli's with coeffs smaller than thresh
 """
 function clip!(ps::PauliSum{N}; thresh=1e-16) where {N}
     filter!(p->abs(p.second) > thresh, ps.ops)
-    return ps
 end
 
 """
