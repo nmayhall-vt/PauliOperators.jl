@@ -136,7 +136,8 @@ TBW
 function LinearAlgebra.mul!(ps::PauliSum, a::Number)
     for (op, coeff) in ps.ops 
         ps[op] = coeff * a
-    end 
+    end
+    return ps
 end
 
 """
@@ -166,8 +167,9 @@ end
 
 Delete Pauli's with coeffs smaller than thresh
 """
-function clip!(ps::PauliSum; thresh=1e-16)
+function clip!(ps::PauliSum{N}; thresh=1e-16) where {N}
     filter!(p->abs(p.second) > thresh, ps.ops)
+    return ps
 end
 
 """
