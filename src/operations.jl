@@ -133,13 +133,15 @@ function negate(p::Pauli{N}) where N
 end
 
 """
-    is_diagonal(p::Pauli)
+    is_diagonal(p::FixedPhasePauli)
 
 Check if operator is diagonal in the computational (z) basis. E.g., does this operator consist of only I and/or Z?
 """
-function is_diagonal(p::Pauli)
-    return count_ones(p.pauli.x) == 0
+function is_diagonal(p::FixedPhasePauli)
+    return count_ones(p.x) == 0
 end
+is_diagonal(p::Pauli) = is_diagonal(p.pauli)
+is_diagonal(p::ScaledPauli) = is_diagonal(p.pauli)
 
 
 
@@ -153,9 +155,20 @@ end
 
 compute expectation value of Pauli `o` for a product state `ket`
 """
-function expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N
+
+function expectation_value(p::FixedPhasePauli{N}, ket::KetBitString{N}) where N
+    is_diagonal(p) || return 0.0
+    
+    count_ones(p.z & ket.v) % 2 == 0 || return -1
+    return 1
+end
+
+function expectation_value(p::Pauli{N}, ket::KetBitString{N}) where N
     is_diagonal(p) || return 0.0
     
     count_ones(p.pauli.z & ket.v) % 2 == 0 || return -(1im)^p.θ
     return (1im)^p.θ 
 end
+
+expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N = expectation_value(p::Pauli{N}, ket::KetBitString{N}) where N
+expectation_value_sign(p::FixedPhasePauli{N}, ket::KetBitString{N}) where N = expectation_value(p::FixedPhasePauli{N}, ket::KetBitString{N}) where N

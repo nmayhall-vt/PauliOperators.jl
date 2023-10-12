@@ -44,6 +44,7 @@ export otimes
 export clip! 
 export ⊗
 export ⊕
+export expectation_value
 
 end
 
