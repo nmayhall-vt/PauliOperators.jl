@@ -278,3 +278,16 @@ function Base.:*(p::ScaledPauli{N}, ψ::KetBitString{N}) where N
     sign = count_ones(p.pauli.z & tmp) % 2
     return p.coeff*(-1)^sign, KetBitString{N}(tmp)
 end
+
+"""
+    Base.:*(p::Pauli{N}, KetBitString{N}) where N
+
+TBW
+"""
+function Base.:*(p::Union{Pauli{N}, FixedPhasePauli{N}, ScaledPauli{N}}, ψ::SparseKetBasis{N,T}) where {N,T}
+
+    for (ket,coeff) in ψ
+        coeff2, ket2 = p * ket
+
+    end
+end

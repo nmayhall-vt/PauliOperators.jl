@@ -90,3 +90,6 @@ end
 
 
 
+
+Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}) where {N,T} = vs[k] = get(vs, k, 0)+1 
+Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}, c) where {N,T} = vs[k] = get(vs, k, 0)+c 

@@ -4,7 +4,15 @@ An occupation number vector, up to 128 qubits
 struct KetBitString{N} 
     v::Int128
 end
-           
+          
+
+SparseKetBasis{N, T} = Dict{KetBitString{N}, T}
+function SparseKetBasis(N; T=Float64)
+    return Dict{KetBitString{N}, T}()
+end
+
+
+
 """
     KetBitString(vec::Vector{T}) where T<:Union{Bool, Integer}
 
@@ -42,6 +50,17 @@ TBW
 """
 function Base.show(io::IO, P::KetBitString{N}) where N
     print(io, string(P))
+end
+
+"""
+    Base.show(io::IO, P::Pauli{N}) where N
+
+TBW
+"""
+function Base.show(io::IO, v::SparseKetBasis{N,T}) where {N,T}
+    for (ket,coeff) in v
+        print(io, string(ket), coeff)
+    end
 end
 
 """

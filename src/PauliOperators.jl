@@ -26,6 +26,7 @@ export ScaledPauli
 export ScaledPauliVector
 export PauliSum
 export KetBitString
+export SparseKetBasis
 export rotate_phase 
 export get_phase
 export get_coeff
