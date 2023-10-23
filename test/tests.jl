@@ -263,4 +263,23 @@ using Random
     end
     @show norm(Matrix(H)*v - H*v) 
     @test norm(Matrix(H)*v - H*v) < 1e-13 
+
+
+    ##      diag
+    H = PauliSum(N)
+    for i in 1:100
+        sum!(H, random_ScaledPauli(N))
+    end
+    test = true
+    for (op,coeff) in diag(H).ops
+        test = test && is_diagonal(op)
+    end
+    H = PauliSum(N)
+    for i in 1:100
+        sum!(H, FixedPhasePauli{N}(rand(1:2^N-1),0))
+    end
+    @test length(diag(H)) == length(H)
+
+    @test tr(Pauli(N)) == 2^N
+
 end

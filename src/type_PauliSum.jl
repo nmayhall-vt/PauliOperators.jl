@@ -200,8 +200,31 @@ function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
 end
 
 
+"""
+    matvec(ps::PauliSum{N}, v::Matrix) where N
+
+TBW
+"""
 function matvec(ps::PauliSum{N}, v::Matrix) where N
 
     σ = zeros(T,size(v))
 
+end
+
+function LinearAlgebra.diag(ps::PauliSum{N}) where N
+    out = PauliSum(N)
+    for (op,coeff) in ps.ops
+        if is_diagonal(op)
+            out[op] = coeff
+        end
+    end
+    return out
+end
+
+function LinearAlgebra.tr(p::PauliSum{N}) where N 
+    if haskey(p, FixedPhasePauli{N}(0,0))
+        return p[FixedPhasePauli{N}(0,0)] * 2^N
+    else
+        return 0
+    end
 end

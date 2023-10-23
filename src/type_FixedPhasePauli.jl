@@ -261,3 +261,7 @@ end
 #     θ += (2*count_ones(p1.x & p2.z)) % 4
 #     return Pauli{N}(θ, z,x)
 # end
+
+function LinearAlgebra.tr(p::FixedPhasePauli{N}) where N
+    return p.x == 0 ? 2^N : 0
+end

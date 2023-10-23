@@ -184,3 +184,5 @@ end
 
 
 Base.adjoint(p::Pauli) = is_hermitian(p) ? p : -p
+
+LinearAlgebra.tr(p::Pauli) = get_phase(p) * tr(p.pauli)
