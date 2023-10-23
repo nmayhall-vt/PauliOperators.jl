@@ -282,4 +282,35 @@ using Random
 
     @test tr(Pauli(N)) == 2^N
 
+    ##      test SparseKetBasis
+    for i in 1:10
+        v = SparseKetBasis(8)
+        for i in 1:2
+            sum!(v, random_KetBitString(8), rand())
+        end
+        # @show dot(v,v) - Vector(v)'*Vector(v)  
+        @test dot(v,v) - Vector(v)'*Vector(v) < 1e-14 
+  
+        a = rand()
+        @test norm(a*Vector(v) - Vector(a*v)) < 1e-4
+        
+        o = random_Pauli(8)
+        # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
+        @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
+
+        o = random_FixedPhasePauli(8)
+        # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
+        @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
+
+        o = random_ScaledPauli(8)
+        # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
+        @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
+
+        o = random_ScaledPauli(8) + random_ScaledPauli(8)
+        for i in 1:10
+            o += random_ScaledPauli(8)
+        end
+        # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
+        @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
+    end
 end

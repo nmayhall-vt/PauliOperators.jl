@@ -280,14 +280,36 @@ function Base.:*(p::ScaledPauli{N}, ψ::KetBitString{N}) where N
 end
 
 """
-    Base.:*(p::Pauli{N}, KetBitString{N}) where N
+    Base.:*(p::AbstractPauli{N}, ψ::SparseKetBasis{N,T}) where {N,T}
 
 TBW
 """
-function Base.:*(p::Union{Pauli{N}, FixedPhasePauli{N}, ScaledPauli{N}}, ψ::SparseKetBasis{N,T}) where {N,T}
+function Base.:*(p::AbstractPauli{N}, ψ::SparseKetBasis{N,T}) where {N,T}
 
+    σ = SparseKetBasis(N, T=ComplexF64)
     for (ket,coeff) in ψ
         coeff2, ket2 = p * ket
-
+        sum!(σ, ket2, coeff2*coeff)
     end
+    return σ
 end
+
+
+function Base.:*(p::PauliSum{N}, ψ::SparseKetBasis{N,T}) where {N,T}
+
+    σ = SparseKetBasis(N, T=ComplexF64)
+    for (pauli,coeff0) in p.ops
+        for (ket,coeff1) in ψ
+            coeff2, ket2 = pauli * ket
+            sum!(σ, ket2, coeff2*coeff1*coeff0)
+        end
+    end
+    return σ
+end
+
+function Base.:*(v1::SparseKetBasis{N,T}, a::Number) where {N,T}
+    out = deepcopy(v1)
+    scale!(out,a)
+    return out
+end
+Base.:*(a::Number, v1::SparseKetBasis{N,T}) where {N,T} = v1 * a

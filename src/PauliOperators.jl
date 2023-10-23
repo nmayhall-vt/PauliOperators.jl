@@ -38,6 +38,7 @@ export phasefree
 export random_Pauli 
 export random_FixedPhasePauli 
 export random_ScaledPauli 
+export random_KetBitString
 export boson_binary_transformation
 export jordan_wigner
 export otimes
