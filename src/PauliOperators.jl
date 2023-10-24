@@ -1,6 +1,7 @@
 module PauliOperators
 
 using Printf
+using LinearAlgebra
 
 include("helpers.jl")
 include("type_AbstractPauli.jl")
