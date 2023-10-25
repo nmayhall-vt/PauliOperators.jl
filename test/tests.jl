@@ -270,6 +270,7 @@ using Random
     for i in 1:100
         sum!(H, random_ScaledPauli(N))
     end
+
     test = true
     for (op,coeff) in diag(H).ops
         test = test && is_diagonal(op)
@@ -313,4 +314,18 @@ using Random
         # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
         @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
     end
+    
+    
+    ##      sum/Subtract 
+    N = 8
+    H1 = PauliSum(N)
+    H2 = PauliSum(N)
+    for i in 1:100
+        sum!(H1, random_ScaledPauli(N))
+        sum!(H2, random_ScaledPauli(N))
+    end
+    @test norm(Matrix(H1) + Matrix(H2) - Matrix(H1 + H2)) < 1e-8
+    @test norm(Matrix(H1) - Matrix(H2) - Matrix(H1 - H2)) < 1e-8
 end
+
+

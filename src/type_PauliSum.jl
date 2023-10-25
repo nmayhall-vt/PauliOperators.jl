@@ -60,7 +60,12 @@ end
 Subtract two `PauliSum`s. 
 """
 function Base.:-(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    return PauliSum{N}(mergewith(-, ps1.ops, ps2.ops))
+    # out = PauliSum{N}()
+    # merge!(out, ps2)
+    out = deepcopy(ps2)
+    map!(x->-x, values(out.ops))
+    mergewith!(+, out.ops, ps1.ops)
+    return out 
 end
 
 Base.length(ps::PauliSum) = length(ps.ops)
