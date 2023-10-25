@@ -332,6 +332,24 @@ using Random
     ket = random_KetBitString(N)
     @test abs(expectation_value(H1, ket) - Vector(ket)' * Matrix(H1)*Vector(ket)) < 1e-8
     @test abs(expectation_value(H2, ket) - Vector(ket)' * Matrix(H2)*Vector(ket)) < 1e-8
+
+    # KetBitString indexing
+    @test string(KetBitString(4,0)) == "0000"
+    @test string(KetBitString(4,1)) == "1000"
+    @test string(KetBitString(4,2)) == "0100"
+    @test string(KetBitString(4,3)) == "1100"
+    @test string(KetBitString(4,4)) == "0010"
+    @test string(KetBitString(4,5)) == "1010"
+    @test string(KetBitString(4,6)) == "0110"
+    @test string(KetBitString(4,7)) == "1110"
+    @test string(KetBitString(4,8)) == "0001"
+    @test string(KetBitString(4,9)) == "1001"
+    @test string(KetBitString(4,10)) == "0101"
+    @test string(KetBitString(4,11)) == "1101"
+    @test string(KetBitString(4,12)) == "0011"
+    @test string(KetBitString(4,13)) == "1011"
+    @test string(KetBitString(4,14)) == "0111"
+    @test string(KetBitString(4,15)) == "1111"
 end
 
 
