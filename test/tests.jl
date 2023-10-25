@@ -18,6 +18,7 @@ using Random
     # display(a*b)
     # display(c)
     @test c == a*b 
+    @test norm(-Matrix(a) - Matrix(-a)) < 1e-9 
   
     println(" Now PF")
     a = FixedPhasePauli("XYZIXY")
@@ -31,6 +32,7 @@ using Random
     @test c == Pauli{6}(PauliOperators.phase(a,b), a*b) 
     @test 1*c == get_phase(a,b)*a*b 
     @test 2*c == 2*a*b*get_phase(a,b) 
+    
 
     @test commute(a,b) == false
     @test get_phase(c) == -1
