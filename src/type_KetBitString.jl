@@ -36,7 +36,7 @@ end
 TBW
 """
 function KetBitString(N::Integer, v::Integer)
-    for i in N:128
+    for i in N+1:128
         v &= ~(Int128(2)^(i-1))    
     end
     return KetBitString{N}(Int128(v))
