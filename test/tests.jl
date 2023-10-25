@@ -270,6 +270,7 @@ using Random
     for i in 1:100
         sum!(H, random_ScaledPauli(N))
     end
+    @test abs(tr(H) - tr(Matrix(H))) < 1e-9
 
     test = true
     for (op,coeff) in diag(H).ops
@@ -281,7 +282,6 @@ using Random
     end
     @test length(diag(H)) == length(H)
 
-    @test tr(Pauli(N)) == 2^N
 
     ##      test SparseKetBasis
     for i in 1:10
