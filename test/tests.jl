@@ -326,6 +326,10 @@ using Random
     end
     @test norm(Matrix(H1) + Matrix(H2) - Matrix(H1 + H2)) < 1e-8
     @test norm(Matrix(H1) - Matrix(H2) - Matrix(H1 - H2)) < 1e-8
+
+    ket = random_KetBitString(N)
+    @test abs(expectation_value(H1, ket) - Vector(ket)' * Matrix(H1)*Vector(ket)) < 1e-8
+    @test abs(expectation_value(H2, ket) - Vector(ket)' * Matrix(H2)*Vector(ket)) < 1e-8
 end
 
 

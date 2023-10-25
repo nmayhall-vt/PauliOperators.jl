@@ -170,5 +170,14 @@ function expectation_value(p::Pauli{N}, ket::KetBitString{N}) where N
     return (1im)^p.θ 
 end
 
+function expectation_value(p::PauliSum{N}, ket::KetBitString{N}) where N
+    
+    expval = 0.0
+    for (op,coeff) in p.ops
+        expval += coeff * expectation_value(op,ket)
+    end
+    return expval
+end
+
 expectation_value_sign(p::Pauli{N}, ket::KetBitString{N}) where N = expectation_value(p::Pauli{N}, ket::KetBitString{N}) where N
 expectation_value_sign(p::FixedPhasePauli{N}, ket::KetBitString{N}) where N = expectation_value(p::FixedPhasePauli{N}, ket::KetBitString{N}) where N
