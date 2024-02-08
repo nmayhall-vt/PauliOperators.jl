@@ -7,31 +7,6 @@ struct VectorizedPauliSum{N} <: AbstractArray{ComplexF64,1}
     ps::PauliSum{N}
 end
 
-"""
-    ps::PauliSum{N}
-
-A vectorized form of right multiply superoperator that takes `A`` and returns `A*ps` 
-"""
-struct VectorizedRMult{N} <: AbstractArray{ComplexF64,2} 
-    ps::PauliSum{N}
-end
-
-"""
-    ps::PauliSum{N}
-
-A vectorized form of left multiply superoperator that takes `A`` and returns `ps*A` 
-"""
-struct VectorizedLMult{N} <: AbstractArray{ComplexF64,2} 
-    ps::PauliSum{N}
-end
-
-struct VectorizedConjugate{N} <: AbstractArray{ComplexF64,2} 
-    ps::PauliSum{N}
-end
-
-struct VectorizedCommutator{N} <: AbstractArray{ComplexF64,2} 
-    ps::PauliSum{N}
-end
 
 function commutator(a::PauliSum{N}, b::PauliSum{N}) where N
     out = PauliSum(N)
@@ -45,7 +20,48 @@ function commutator(a::PauliSum{N}, b::PauliSum{N}) where N
 end
 
 
-
-function Base.:*(vc::VectorizedCommutator{N}, vps::VectorizedPauliSum{N}) where N
-    return commutator(vc.ps, vps.ps)
+struct SuperOperator{T,N} <: AbstractMatrix{T}
+    matvec
+    dim::Int
+    sym::Bool
 end
+
+Base.size(lop::SuperOperator{T}) where {T} = return (lop.dim,lop.dim)
+Base.:(*)(lop::SuperOperator{T}, v::AbstractVector{T}) where {T} = return lop.matvec(v)
+# Base.:(*)(lop::SuperOperator{T}, v::AbstractMatrix{T}) where {T} = return lop.matvec(v)
+issymmetric(lop::SuperOperator{T}) where {T} = return lop.sym
+    
+function Base.display(L::SuperOperator{T,N}) where {T,N}
+    @printf("SuperOperator: dim = %5i N = %2i\n", L.dim, N)
+end
+Base.show(L::SuperOperator) = display(L)
+
+function vectorized_commutator(H::PauliSum{N}; T=ComplexF64) where N
+
+    function mymatvec(v::VectorizedPauliSum{N})
+        return VectorizedPauliSum(commutator(H, v.ps))
+    end
+
+    return SuperOperator{T, N}(mymatvec, 2^N, false)
+end
+
+
+function vectorized_rmul(H::PauliSum{N}; T=ComplexF64) where N
+
+    function mymatvec(v::VectorizedPauliSum{N})
+        return VectorizedPauliSum(v.ps * H)
+    end
+
+    return SuperOperator{T, N}(mymatvec, 2^N, false)
+end
+
+
+function vectorized_lmul(H::PauliSum{N}; T=ComplexF64) where N
+
+    function mymatvec(v::VectorizedPauliSum{N})
+        return VectorizedPauliSum(H * v.ps)
+    end
+
+    return SuperOperator{T, N}(mymatvec, 2^N, false)
+end
+

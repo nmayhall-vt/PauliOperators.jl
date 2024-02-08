@@ -22,10 +22,6 @@ using BenchmarkTools
     ρ = random_Pauli(N) + random_Pauli(N)
    
     ρv = VectorizedPauliSum(ρ)
-    Hr = VectorizedRMult(H)
-    Hl = VectorizedLMult(H)
-    HU = VectorizedConjugate(H)
-    HC = VectorizedCommutator(H)
 
     ρmat = Matrix(ρ)
     Hmat = Matrix(H)
@@ -39,9 +35,38 @@ using BenchmarkTools
     @show err     
     @test abs(err) < 1e-14     
 
-    err = norm(Matrix(VectorizedCommutator(H)*VectorizedPauliSum(ρ)) + aref)
+    # Commutator
+
+    L = PauliOperators.vectorized_commutator(H)
+
+    # display(L)
+
+    @test abs(err) < 1e-14     
+    a = L*ρv 
+
+    err = norm(Matrix(a.ps) + aref)
     @test abs(err) < 1e-14     
 
-    # Need to finish testing the functions in type_vectorized...
+    # Right Multiply
+
+    L = PauliOperators.vectorized_rmul(H)
+
+    @test abs(err) < 1e-14     
+    a = L*ρv 
+
+    err = norm(Matrix(a.ps) - Matrix(ρmat * Hmat))
+    @test abs(err) < 1e-14     
+
+    # Left Multiply
+
+    L = PauliOperators.vectorized_lmul(H)
+
+    @test abs(err) < 1e-14     
+    a = L*ρv 
+
+    err = norm(Matrix(a.ps) - Matrix(Hmat * ρmat))
+    @test abs(err) < 1e-14     
+
+    display(L)
 end
 # run()
