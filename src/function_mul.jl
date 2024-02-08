@@ -287,7 +287,7 @@ TBW
 function Base.:*(p::AbstractPauli{N}, ψ::SparseKetBasis{N,T}) where {N,T}
 
     σ = SparseKetBasis(N, T=ComplexF64)
-    for (ket,coeff) in ψ
+    for (ket,coeff) in ψ.coeffs
         coeff2, ket2 = p * ket
         sum!(σ, ket2, coeff2*coeff)
     end
@@ -299,7 +299,7 @@ function Base.:*(p::PauliSum{N}, ψ::SparseKetBasis{N,T}) where {N,T}
 
     σ = SparseKetBasis(N, T=ComplexF64)
     for (pauli,coeff0) in p.ops
-        for (ket,coeff1) in ψ
+        for (ket,coeff1) in ψ.coeffs
             coeff2, ket2 = pauli * ket
             sum!(σ, ket2, coeff2*coeff1*coeff0)
         end

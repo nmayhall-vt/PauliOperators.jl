@@ -1,17 +1,27 @@
 """
 An occupation number vector, up to 128 qubits
 """
-struct KetBitString{N} 
+struct KetBitString{N} <: AbstractArray{ComplexF64,1}
     v::Int128
 end
-          
+         
+Base.size(k::KetBitString{N}) where N = (2^N,)
+Base.getindex(k::KetBitString{N}, idx) where N = idx == k.v
 
-SparseKetBasis{N, T} = Dict{KetBitString{N}, T}
-function SparseKetBasis(N; T=Float64)
-    return Dict{KetBitString{N}, T}()
+# SparseKetBasis{N, T} = Dict{KetBitString{N}, T}
+
+struct SparseKetBasis{N,T} <: AbstractArray{T,1}
+    coeffs::Dict{KetBitString{N}, T}
 end
 
+function SparseKetBasis(N::Integer; T=Float64)
+    return SparseKetBasis{N,T}(Dict{KetBitString{N}, T}())
+end
 
+Base.get(skb::SparseKetBasis{N,T}, ket::KetBitString{N}, i) where {N,T} = get(skb.coeffs, ket, i)
+Base.size(skb::SparseKetBasis{N,T}) where {N,T} = (2^N,)
+Base.getindex(k::SparseKetBasis, i) = getindex(k.coeffs, i) 
+Base.setindex!(k::SparseKetBasis, i, j) = setindex!(k.coeffs, i, j) 
 
 """
     KetBitString(vec::Vector{T}) where T<:Union{Bool, Integer}
@@ -66,7 +76,7 @@ end
 TBW
 """
 function Base.show(io::IO, v::SparseKetBasis{N,T}) where {N,T}
-    for (ket,coeff) in v
+    for (ket,coeff) in v.coeffs
         print(io, string(ket), coeff)
     end
 end
@@ -102,7 +112,7 @@ TBW
 """
 function Base.Vector(k::SparseKetBasis{N,T}) where {N,T}
     vec = zeros(T,2^N)
-    for (ket, coeff) in k
+    for (ket, coeff) in k.coeffs
         vec[ket.v+1] = coeff
     end
     return vec 
@@ -116,12 +126,12 @@ TBW
 """
 function LinearAlgebra.dot(v1::SparseKetBasis{N,T}, v2::SparseKetBasis{N,TT}) where {N,T,TT}
     out = 0.0
-    if length(v1) < length(v2)
-        for (ket,coeff) in v1
+    if length(v1.coeffs) < length(v2.coeffs)
+        for (ket,coeff) in v1.coeffs
             out += adjoint(coeff) * get(v2, ket, 0.0)
         end
     else
-        for (ket,coeff) in v2
+        for (ket,coeff) in v2.coeffs
             out += coeff * adjoint(get(v1, ket, 0.0))
         end
     end
@@ -134,6 +144,6 @@ end
 TBW
 """
 function scale!(v1::SparseKetBasis{N,T}, a::Number) where {N,T}
-    map!(x->x*a, values(v1))
+    map!(x->x*a, values(v1.coeffs))
 end
 

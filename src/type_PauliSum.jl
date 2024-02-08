@@ -7,9 +7,11 @@ A collection of `Pauli`s, joined by addition.
 This uses a `Dict` to store them, however, the specific use cases should probably dictate the container type,
 so this will probably be removed.
 """
-struct PauliSum{N}  
+struct PauliSum{N} <: AbstractArray{ComplexF64,2} 
     ops::Dict{FixedPhasePauli{N},ComplexF64}
 end
+
+Base.size(ps::PauliSum{N}) where N = (2^N, 2^N)
 
 """
     PauliSum(N)

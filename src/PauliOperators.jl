@@ -10,6 +10,7 @@ include("type_Pauli.jl")
 include("type_ScaledPauli.jl")
 include("type_PauliSum.jl")
 include("type_KetBitString.jl")
+include("type_vectorized.jl")
 include("operations.jl")
 include("transformations.jl")
 include("function_mul.jl")
@@ -28,6 +29,11 @@ export ScaledPauliVector
 export PauliSum
 export KetBitString
 export SparseKetBasis
+export VectorizedPauliSum
+export VectorizedRMult
+export VectorizedLMult
+export VectorizedConjugate
+export VectorizedCommutator
 export rotate_phase 
 export get_phase
 export get_coeff
