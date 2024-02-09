@@ -7,6 +7,10 @@ struct VectorizedPauliSum{N} <: AbstractArray{ComplexF64,1}
     ps::PauliSum{N}
 end
 
+function Base.display(pv::VectorizedPauliSum{N}) where N
+    display(pv.ps)
+end
+Base.show(pv::VectorizedPauliSum) = display(pv)
 
 function commutator(a::PauliSum{N}, b::PauliSum{N}) where N
     out = PauliSum(N)
