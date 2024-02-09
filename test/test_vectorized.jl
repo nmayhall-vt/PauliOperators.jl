@@ -68,5 +68,6 @@ using BenchmarkTools
     @test abs(err) < 1e-14     
 
     display(L)
+    @test display(ρv) == display(ρ)
 end
 # run()
