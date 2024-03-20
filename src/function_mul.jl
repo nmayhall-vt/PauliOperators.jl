@@ -241,7 +241,7 @@ Base.:*(p1::Pauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p2.coeff * ge
 
 Multiply a `Pauli` with a number. This returns a `PauliSum` 
 """
-Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}             = ScaledPauli{N}(c*get_phase(p), p)
+Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}             = ScaledPauli{N}(c*get_phase(p), p.pauli)
 Base.:*(p::FixedPhasePauli{N}, c::T) where {N,T<:Number}   = ScaledPauli{N}(c, p)
 Base.:*(p::ScaledPauli{N}, c::T) where {N,T<:Number}       = ScaledPauli{N}(p.coeff*c, p.pauli) 
 Base.:*(c::Number, p::Pauli) = p*c

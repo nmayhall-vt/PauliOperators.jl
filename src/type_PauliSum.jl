@@ -1,14 +1,15 @@
 using LinearAlgebra
+using OrderedCollections
 
 """
-    ops::Dict{Pauli{N},ComplexF64}
+    ops::OrderedDict{Pauli{N},ComplexF64}
 
 A collection of `Pauli`s, joined by addition.
-This uses a `Dict` to store them, however, the specific use cases should probably dictate the container type,
+This uses an `OrderedDict` to store them, however, the specific use cases should probably dictate the container type,
 so this will probably be removed.
 """
 struct PauliSum{N} <: AbstractArray{ComplexF64,2} 
-    ops::Dict{FixedPhasePauli{N},ComplexF64}
+    ops::OrderedDict{FixedPhasePauli{N},ComplexF64}
 end
 
 Base.size(ps::PauliSum{N}) where N = (2^N, 2^N)
@@ -19,10 +20,7 @@ Base.size(ps::PauliSum{N}) where N = (2^N, 2^N)
 TBW
 """
 function PauliSum(N::Integer)
-    return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}())
-end
-function PauliSum(o::Pauli{N}) where N
-    return PauliSum{N}(Dict(o.pauli => get_phase(o)))
+    return PauliSum{N}(OrderedDict{FixedPhasePauli{N},ComplexF64}())
 end
 
 

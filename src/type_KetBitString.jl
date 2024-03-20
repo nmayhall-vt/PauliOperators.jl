@@ -8,14 +8,13 @@ end
 Base.size(k::KetBitString{N}) where N = (2^N,)
 Base.getindex(k::KetBitString{N}, idx) where N = idx == k.v
 
-# SparseKetBasis{N, T} = Dict{KetBitString{N}, T}
 
 struct SparseKetBasis{N,T} <: AbstractArray{T,1}
-    coeffs::Dict{KetBitString{N}, T}
+    coeffs::OrderedDict{KetBitString{N}, T}
 end
 
 function SparseKetBasis(N::Integer; T=Float64)
-    return SparseKetBasis{N,T}(Dict{KetBitString{N}, T}())
+    return SparseKetBasis{N,T}(OrderedDict{KetBitString{N}, T}())
 end
 
 Base.get(skb::SparseKetBasis{N,T}, ket::KetBitString{N}, i) where {N,T} = get(skb.coeffs, ket, i)

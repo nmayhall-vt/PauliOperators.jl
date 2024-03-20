@@ -11,9 +11,6 @@ end
 
 
 
-function ScaledPauli(p::Pauli{N}) where N
-    return ScaledPauli{N}(get_phase(p), p.pauli) 
-end
 
 ScaledPauliVector{N} = Vector{ScaledPauli{N}}
 function ScaledPauliVector(N)

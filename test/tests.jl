@@ -33,7 +33,6 @@ using Random
     @test 1*c == get_phase(a,b)*a*b 
     @test 2*c == 2*a*b*get_phase(a,b) 
     
-
     @test commute(a,b) == false
     @test get_phase(c) == -1
     @test get_phase(negate(c)) == 1
@@ -353,3 +352,16 @@ using Random
 end
 
 
+
+@testset "Pauli2" begin
+    a = FixedPhasePauli("XYZIXY")
+
+    ps1 = PauliSum(a)
+    ps2 = PauliSum(ScaledPauli(a))
+    ps3 = PauliSum(Pauli(a))
+
+    display(ps1)
+
+    @test ps1 ≈ ps2
+    @test ps1 ≈ ps3
+end

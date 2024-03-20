@@ -15,7 +15,8 @@ using BenchmarkTools
 
     for i in 1:40
         ai = rand()*random_Pauli(N)
-        H += ai + ai'
+        #H += ai + ai'
+        sum!(H, ai + ai')
     end
 
 
@@ -69,5 +70,6 @@ using BenchmarkTools
 
     display(L)
     @test display(ρv) == display(ρ)
+
 end
 # run()

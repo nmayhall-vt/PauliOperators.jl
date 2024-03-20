@@ -69,3 +69,18 @@ function vectorized_lmul(H::PauliSum{N}; T=ComplexF64) where N
     return SuperOperator{T, N}(mymatvec, 2^N, false)
 end
 
+"""
+    Base.Matrix(so::SuperOperator{T,N}) where {T,N}
+
+Build dense, full dimensional SuperOperator matrix. 
+Be careful, this will generate a matrix of 4^N x 4^N
+"""
+function Base.Matrix(so::SuperOperator{T,N}) where {T,N}
+    mat = zeros(4^N, 4^N)
+    for xi in 1:2^N
+        for zi in 1:2^N  
+            ps = FixedPhasePauli{N}(zi,xi)
+            Lρ = so * PauliSum(ps)
+        end
+    end  
+end

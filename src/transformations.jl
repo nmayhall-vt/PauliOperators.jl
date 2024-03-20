@@ -100,7 +100,7 @@ function boson_binary_transformation(nqubits)
    
     println(" -------- Pauli Representation -------- ")
 
-    rep2 = Dict{Tuple{Int128,Int128},ComplexF64}() 
+    rep2 = OrderedDict{Tuple{Int128,Int128},ComplexF64}() 
     # rep2 = Dict{Pauli{nqubits},Float64}() 
 
     bdag = PauliSum(nqubits)
@@ -151,7 +151,7 @@ function boson_binary_transformation(nqubits)
     end
     println(" Number of operators: ", length(rep2))
 
-    rep3 = Dict{Tuple{Int128,Int128},ComplexF64}() 
+    rep3 = OrderedDict{Tuple{Int128,Int128},ComplexF64}() 
 
     println(" Create Product")
     for prod in Iterators.product(keys(rep2), keys(rep2))
