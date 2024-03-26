@@ -45,28 +45,7 @@ Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p.pauli] = v*ge
 Base.setindex!(ps::PauliSum{N}, v, p::FixedPhasePauli{N}) where N = ps.ops[p] = v
 Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
 
-"""
-    Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
 
-Add two `PauliSum`s. 
-"""
-function Base.sum!(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    mergewith!(+, ps1.ops, ps2.ops)
-end
-
-"""
-    Base.-(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
-
-Subtract two `PauliSum`s. 
-"""
-function Base.:-(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    # out = PauliSum{N}()
-    # merge!(out, ps2)
-    out = deepcopy(ps2)
-    map!(x->-x, values(out.ops))
-    mergewith!(+, out.ops, ps1.ops)
-    return out 
-end
 
 Base.length(ps::PauliSum) = length(ps.ops)
 """

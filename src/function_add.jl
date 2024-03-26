@@ -99,3 +99,19 @@ end
 
 Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}) where {N,T} = vs[k] = get(vs, k, 0)+1 
 Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}, c) where {N,T} = vs[k] = get(vs, k, 0)+c 
+
+
+
+
+
+"""
+    Base.-(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
+
+Subtract two `PauliSum`s. 
+"""
+function Base.:-(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
+    out = deepcopy(ps2)
+    map!(x->-x, values(out.ops))
+    mergewith!(+, out.ops, ps1.ops)
+    return out 
+end
