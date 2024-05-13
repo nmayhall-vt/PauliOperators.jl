@@ -3,6 +3,20 @@ otimes(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{M}) where {N,M} = FixedPhaseP
 otimes(p::Pauli{N}, fpp::FixedPhasePauli{M}) where {N,M} = otimes(p, Pauli{M}(0,fpp))
 otimes(fpp::FixedPhasePauli{M}, p::Pauli{N}) where {N,M} = otimes(Pauli{M}(0,fpp), p)
 
+function otimes(sp::ScaledPauli{N}, p::Pauli{M}) where {N,M}
+    out_pauli = sp.pauli ⊗ p.pauli
+    out_coeff = sp.coeff * get_phase(p)
+    out = ScaledPauli{N+M}(out_coeff, out_pauli)
+    return out 
+end
+
+function otimes(p::Pauli{M}, sp::ScaledPauli{N}) where {M,N}
+    out_pauli = p.pauli ⊗ sp.pauli
+    out_coeff = sp.coeff * get_phase(p)
+    out = ScaledPauli{N+M}(out_coeff, out_pauli)
+    return out 
+end
+
 function otimes(ps::PauliSum{N}, p::Pauli{M}) where {N,M}
     out = PauliSum(N+M)
     for (op,coeff) in ps.ops
