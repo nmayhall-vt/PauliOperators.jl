@@ -35,6 +35,7 @@ export is_diagonal
 export is_hermitian 
 export negate 
 export commute
+export commutator
 export phasefree 
 export random_Pauli 
 export random_FixedPhasePauli 

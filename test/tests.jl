@@ -350,6 +350,21 @@ using Random
     @test string(KetBitString(4,13)) == "1011"
     @test string(KetBitString(4,14)) == "0111"
     @test string(KetBitString(4,15)) == "1111"
+
+    println("Test Commutator")
+    spv1 = (1/2) .* [
+                    ScaledPauli(Pauli(4; X=[1], Y=[3])),
+                   -ScaledPauli(Pauli(4; X=[3], Y=[1]))];
+    spv2 = (1/2) .* [
+                    ScaledPauli(Pauli(4; X=[2], Y=[4])),
+                   -ScaledPauli(Pauli(4; X=[4], Y=[2]))];
+    spv_comm = commutator(spv1,spv2)
+    @test isempty(spv_comm)
+
+    sp1 = ScaledPauli(Pauli("X")); sp2 = ScaledPauli(Pauli("Y"));
+    sp_comm = commutator(sp1,sp2)
+    sp_comm_true = (0.0+2.0im)*[ScaledPauli(Pauli("Z"))]
+    @test sp_comm == sp_comm_true
 end
 
 
