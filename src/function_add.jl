@@ -93,3 +93,22 @@ end
 
 Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}) where {N,T} = vs[k] = get(vs, k, 0)+1 
 Base.sum!(vs::SparseKetBasis{N,T}, k::KetBitString{N}, c) where {N,T} = vs[k] = get(vs, k, 0)+c 
+
+
+
+### Dyads
+function Base.:+(d1::Dyad{N}, d2::Dyad{N}) where {N}
+    if isequal(d1, d2)
+        return Dict{Dyad{N},ComplexF64}(d1=>2)
+    else
+        return Dict{Dyad{N},ComplexF64}(d1=>1, d2=>1)
+    end
+end
+### Dyads
+function Base.:-(d1::Dyad{N}, d2::Dyad{N}) where {N}
+    if isequal(d1, d2)
+        return Dict{Dyad{N},ComplexF64}()
+    else
+        return Dict{Dyad{N},ComplexF64}(d1=>1, d2=>-1)
+    end
+end

@@ -10,6 +10,7 @@ include("type_Pauli.jl")
 include("type_ScaledPauli.jl")
 include("type_PauliSum.jl")
 include("type_KetBitString.jl")
+include("type_Dyad.jl")
 include("operations.jl")
 include("transformations.jl")
 include("function_mul.jl")
@@ -27,7 +28,9 @@ export ScaledPauli
 export ScaledPauliVector
 export PauliSum
 export KetBitString
-export SparseKetBasis
+export Dyad 
+export DyadSum 
+export ScaledDyad 
 export rotate_phase 
 export get_phase
 export get_coeff
@@ -41,6 +44,8 @@ export random_Pauli
 export random_FixedPhasePauli 
 export random_ScaledPauli 
 export random_KetBitString
+export random_Dyad
+export random_ScaledDyad
 export boson_binary_transformation
 export jordan_wigner
 export otimes
