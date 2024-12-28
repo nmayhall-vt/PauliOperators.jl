@@ -251,11 +251,13 @@ Base.:*(c::Number, p::ScaledPauli) = p*c
 
 
 
-# function Base.:*(p::ScaledPauli{N}, a::Number) where {T,N}
-#     return ScaledPauli{N}(p.coeff*a, p.pauli)
-# end
 
-# Base.:*(a::Number, p::ScaledPauli{N}) where {T,N} = p*a
+function Base.:*(ϕ::BraBitString{N}, ψ::KetBitString{N}) where N
+    return ϕ.v == ψ.v 
+end
+function Base.:*(ϕ::KetBitString{N}, ψ::BraBitString{N}) where N
+    return Dyad{N}(ϕ, ψ) 
+end
 
 
 """
@@ -277,6 +279,23 @@ function Base.:*(p::ScaledPauli{N}, ψ::KetBitString{N}) where N
     tmp = p.pauli.x ⊻ ψ.v
     sign = count_ones(p.pauli.z & tmp) % 2
     return p.coeff*(-1)^sign, KetBitString{N}(tmp)
+end
+
+"""
+    Base.:*(ψ::BraBitString{N}, p::FixedPhasePauli{N}) where N
+
+TBW
+"""
+function Base.:*(ψ::BraBitString{N}, p::FixedPhasePauli{N}) where N
+    return iseven(count_ones(ψ.v & p.z)) ? 1 : -1, BraBitString{N}(ψ.v ⊻ p.x)
+end
+function Base.:*(ψ::BraBitString{N}, p::Pauli{N}) where N
+    s, bra = ψ * p.pauli
+    return s*get_phase(p), bra 
+end
+function Base.:*(ψ::BraBitString{N}, p::ScaledPauli{N}) where N
+    s, bra = ψ * p.pauli
+    return s*p.coeff, bra 
 end
 
 """
@@ -351,7 +370,20 @@ function Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where {N}
     c, k = p.pauli * d.dyad.ket
     return ScaledDyad(N, c*p.coeff*d.coeff, k.v, d.dyad.bra.v)
 end
-# function Base.:*(d::Dyad{N}, p::FixedPhasePauli{N}) where {N}
-#     c, k = d.bra * p
-#     return ScaledDyad(N, c, k.v, d.bra.v)
-# end
+
+function Base.:*(d::Dyad{N}, p::FixedPhasePauli{N}) where {N}
+    c, k = d.bra * p
+    return ScaledDyad(N, c, d.ket.v, k.v)
+end
+function Base.:*(d::Dyad{N}, p::Pauli{N}) where {N}
+    c, k = d.bra * p
+    return ScaledDyad(N, c, d.ket.v, k.v)
+end
+function Base.:*(d::ScaledDyad{N}, p::Pauli{N}) where {N}
+    c, k = d.dyad.bra * p.pauli
+    return ScaledDyad(N, c*d.coeff*get_phase(p), d.dyad.ket.v, k.v)
+end
+function Base.:*(d::ScaledDyad{N}, p::ScaledPauli{N}) where {N}
+    c, k = d.dyad.bra * p.pauli
+    return ScaledDyad(N, c*d.coeff*p.coeff, d.dyad.ket.v, k.v)
+end
