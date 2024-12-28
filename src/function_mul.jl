@@ -330,8 +330,23 @@ function Base.:*(d1::ScaledDyad{N,T}, d2::ScaledDyad{N,T}) where {N,T}
     return ScaledDyad{N,T}((d1.dyad.bra==d2.dyad.ket)*d1.coeff*d2.coeff, Dyad{N}(d1.dyad.ket, d2.dyad.bra))
 end
 function Base.:*(d1::Dyad{N}, a::T) where {N,T<:Number}
-    println(typeof(d1))
-    println(typeof(a))
     return Dict{Dyad{N},T}(d1=>a)
 end
 Base.:*(a::T, d1::Dyad{N}) where {N,T} = d1*a
+
+function Base.:*(p::FixedPhasePauli{N}, d::Dyad{N}) where {N}
+    c, k = p * d.ket
+    return ScaledDyad(N, c, k.v, d.bra.v)
+end
+function Base.:*(p::Pauli{N}, d::Dyad{N}) where {N}
+    c, k = p.pauli * d.ket
+    return ScaledDyad(N, c*get_phase(p), k.v, d.bra.v)
+end
+function Base.:*(p::Pauli{N}, d::ScaledDyad{N}) where {N}
+    c, k = p.pauli * d.dyad.ket
+    return ScaledDyad(N, c*get_phase(p)*d.coeff, k.v, d.dyad.bra.v)
+end
+function Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where {N}
+    c, k = p.pauli * d.dyad.ket
+    return ScaledDyad(N, c*p.coeff*d.coeff, k.v, d.dyad.bra.v)
+end

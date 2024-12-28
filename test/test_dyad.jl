@@ -38,7 +38,35 @@ function run()
 
     @show di'*dj 
     @show di*dj 
-    @show di*di' 
+    @show di*di'
 
+
+    # Now test Pauli*Dyad multiplication
+    x = Pauli("X")
+    s = ScaledDyad(1, 1, 0, 0)
+    @show x
+    @show s
+    @show x.pauli * s.dyad
+    @show x * s.dyad
+    @show (2.0*x) * s
+    # @show typeof((x * s.dyad.ket)[1])
+
+    x = Matrix(x)
+    s = Matrix(s)
+    
+    N = 8
+    for i in 1:10
+        x = random_ScaledPauli(N)
+        s = random_ScaledDyad(N)
+        err = Matrix(x)*Matrix(s) - Matrix(x*s)
+        @test isapprox(norm(err),0)
+    end
+    
+    for i in 1:10
+        x = random_Pauli(N)
+        s = random_ScaledDyad(N)
+        err = Matrix(x)*Matrix(s) - Matrix(x*s)
+        @test isapprox(norm(err),0)
+    end
 end
 run()

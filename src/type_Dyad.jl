@@ -41,6 +41,15 @@ function Dyad(N::Integer, k::Integer, b::Integer)
 end
 
 """
+    Dyad(N::Integer, k::Integer, b::Integer)
+
+TBW
+"""
+function ScaledDyad(N::Integer, c::T, k::Integer, b::Integer) where T
+    return ScaledDyad{N,T}(c, Dyad(N, k,b))
+end
+
+"""
     random_Dyad(N::Integer)
 
 TBW
@@ -141,3 +150,20 @@ end
 #     map!(x->x*a, values(v1))
 # end
 
+
+function Base.Matrix(d::Dyad{N}) where N
+    mat = zeros(Bool, size(d))
+    mat[d.ket.v+1, d.bra.v+1] = true
+    return mat 
+end
+
+function Base.size(d::Dyad{N}) where N
+    return (BigInt(2)^N, BigInt(2)^N)
+end
+Base.size(d::ScaledDyad) = size(d.dyad) 
+
+function Base.Matrix(d::ScaledDyad{N,T}) where {N,T}
+    mat = zeros(T, size(d))
+    mat[d.dyad.ket.v+1, d.dyad.bra.v+1] = d.coeff 
+    return mat 
+end
