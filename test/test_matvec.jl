@@ -19,7 +19,7 @@ using BenchmarkTools
 
     # display(v0'*v0)
 
-    H = random_Pauli(N)
+    H = rand(Pauli{N})
     Hmat = Matrix(H)
     
     @test norm(Hmat*v0 - H*v0) < 1e-14
@@ -30,7 +30,7 @@ using BenchmarkTools
     H = a + a'
 
     for i in 1:40
-        ai = rand()*random_Pauli(N)
+        ai = rand()*rand(Pauli{N})
         H += ai + ai'
     end
     Hmat = Matrix(H)

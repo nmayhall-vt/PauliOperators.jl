@@ -49,21 +49,21 @@ Base.:≈(p::ScaledPauli{N}, q::ScaledPauli{N}) where {N} = (p.pauli == q.pauli)
 
 
 
-get_coeff(p::ScaledPauli{N}) where {T,N} = p.coeff
+get_coeff(p::ScaledPauli{N}) where {N} = p.coeff
 get_coeff(p::Pauli{N}) where {N} = get_phase(p)
 # get_coeff(p::ScaledPauli{N}) where {T,N} = p.coeff * get_phase(p.pauli)
 # get_coeff(p::Pauli{N}) where {N} = get_phase(p)
 
 
-Base.isless(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N} = isless(p1.pauli, p2.pauli)
-Base.isequal(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {T,N} = isequal(p1.pauli, p2.pauli)
+Base.isless(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {N} = isless(p1.pauli, p2.pauli)
+Base.isequal(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where {N} = isequal(p1.pauli, p2.pauli)
 
 """
     Base.unique!(spv::Vector{ScaledPauli{N}}) where {T,N}
 
 Sort and add duplicates. This modifies `spv` to be a sorted list of only unique `ScaledPauli`'s
 """
-function Base.unique!(spv::Vector{ScaledPauli{N}}) where {T,N}
+function Base.unique!(spv::Vector{ScaledPauli{N}}) where {N}
     sort!(spv)
     i = 1
     for j in 2:length(spv)
@@ -82,7 +82,7 @@ end
 
 Sort and add duplicates. This returns a sorted list of only unique `ScaledPauli`'s
 """
-function Base.unique(spv::Vector{ScaledPauli{N}}) where {T,N}
+function Base.unique(spv::Vector{ScaledPauli{N}}) where {N}
     out = deepcopy(spv)
     unique!(out)
     return out
@@ -108,18 +108,18 @@ end
 
 Create dense matrix representation 
 """
-function Base.Matrix(p::ScaledPauli{N}) where {T,N}
+function Base.Matrix(p::ScaledPauli{N}) where {N}
     return Matrix(p.pauli) .* p.coeff 
 end
 
 
 """
-    random_ScaledPauli(N)
+    rand(ScaledPauli{N})
 
 TBW
 """
-function random_ScaledPauli(N)
-    return ScaledPauli{N}(rand(ComplexF64), random_FixedPhasePauli(N))
+function Base.rand(T::Type{ScaledPauli{N}}) where N
+    return ScaledPauli{N}(rand(ComplexF64), rand(FixedPhasePauli{N}))
 end
 
 Base.adjoint(sp::ScaledPauli{N}) where {N} = is_hermitian(sp.pauli) ? ScaledPauli{N}(adjoint(sp.coeff), sp.pauli) : ScaledPauli{N}(-adjoint(sp.coeff), sp.pauli)

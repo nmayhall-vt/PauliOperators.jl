@@ -161,12 +161,12 @@ function Base.string(p::FixedPhasePauli{N}) where N
 end
 
 """
-    random_FixedPhasePauli(N)
+    rand(FixedPhasePauli{N})
 
 TBW
 """
-function random_FixedPhasePauli(N)
-    return FixedPhasePauli{N}(rand(0:Int128(2)^N-1),rand(0:Int128(2)^N-1))
+function Base.rand(T::Type{FixedPhasePauli{N}}) where N
+    return FixedPhasePauli{N}(rand(0:Int128(2)^N-1), rand(0:Int128(2)^N-1))
 end
 
 """

@@ -19,7 +19,7 @@ function run(nqubits, nvecs, nops)
     H = a + a'
 
     for i in 1:nops
-        ai = rand()*random_Pauli(N)
+        ai = rand()*rand(Pauli{N})
         H += ai + ai'
     end
     

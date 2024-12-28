@@ -154,12 +154,12 @@ TBW
 Base.Matrix(p::Pauli) = Matrix(p.pauli) .* get_phase(p)
 
 """
-    random_Pauli(N)
+    rand(Pauli{N})
 
 TBW
 """
-function random_Pauli(N)
-    return Pauli{N}(rand(0:3), random_FixedPhasePauli(N))
+function Base.rand(T::Type{Pauli{N}}) where N
+    return Pauli{N}(rand(0:3), rand(FixedPhasePauli{N}))
 end
 
 """

@@ -334,6 +334,7 @@ function Base.:*(d1::Dyad{N}, a::T) where {N,T<:Number}
 end
 Base.:*(a::T, d1::Dyad{N}) where {N,T} = d1*a
 
+### Pauli's with Dyads
 function Base.:*(p::FixedPhasePauli{N}, d::Dyad{N}) where {N}
     c, k = p * d.ket
     return ScaledDyad(N, c, k.v, d.bra.v)
@@ -350,3 +351,7 @@ function Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where {N}
     c, k = p.pauli * d.dyad.ket
     return ScaledDyad(N, c*p.coeff*d.coeff, k.v, d.dyad.bra.v)
 end
+# function Base.:*(d::Dyad{N}, p::FixedPhasePauli{N}) where {N}
+#     c, k = d.bra * p
+#     return ScaledDyad(N, c, k.v, d.bra.v)
+# end

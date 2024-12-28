@@ -4,16 +4,16 @@ using Random
 using Test
 using BenchmarkTools
 
-# @testset "dyad" begin
-function run()
+@testset "dyad" begin
+# function run()
     N = 8 
     Random.seed!(2)
 
     a = Pauli(N)
     di = Dyad([0],[0])
     display(di)
-    di = random_Dyad(8) 
-    dj = random_Dyad(8) 
+    di = rand(Dyad{N}) 
+    dj = rand(Dyad{N}) 
     @show di
     @show dj
 
@@ -33,12 +33,12 @@ function run()
     dl = di*dj*dk
     println(Int(dl.dyad.ket.v))
     println(Int(dl.dyad.bra.v))
-    @test dl.dyad.ket.v == 9
-    @test dl.dyad.bra.v == 57 
+    @test dl.dyad.ket == di.ket 
+    @test dl.dyad.bra == dk.dyad.bra
 
     @show di'*dj 
     @show di*dj 
-    @show di*di'
+    @test (di*di').dyad == Dyad(di.ket, adjoint(di.ket))
 
 
     # Now test Pauli*Dyad multiplication
@@ -56,17 +56,17 @@ function run()
     
     N = 8
     for i in 1:10
-        x = random_ScaledPauli(N)
-        s = random_ScaledDyad(N)
+        x = rand(ScaledPauli{N})
+        s = rand(ScaledDyad{N})
         err = Matrix(x)*Matrix(s) - Matrix(x*s)
-        @test isapprox(norm(err),0)
+        @test isapprox(norm(err),0, atol=1e-14)
     end
     
     for i in 1:10
-        x = random_Pauli(N)
-        s = random_ScaledDyad(N)
+        x = rand(Pauli{N})
+        s = rand(ScaledDyad{N})
         err = Matrix(x)*Matrix(s) - Matrix(x*s)
-        @test isapprox(norm(err),0)
+        @test isapprox(norm(err),0, atol=1e-14)
     end
 end
-run()
+# run()

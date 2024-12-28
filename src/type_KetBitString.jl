@@ -1,10 +1,22 @@
+abstract type AbstractState{N} end
+
 """
 An occupation number vector, up to 128 qubits
 """
-struct KetBitString{N} 
+struct KetBitString{N} <: AbstractState{N}
     v::Int128
 end
-          
+struct BraBitString{N} <: AbstractState{N}
+    v::Int128
+end
+    
+
+Base.adjoint(d::KetBitString{N}) where N = BraBitString{N}(d.v)
+Base.adjoint(d::BraBitString{N}) where N = KetBitString{N}(d.v)
+
+
+Base.rand(T::Type{KetBitString{N}}) where N = T(rand(0:Int128(2)^N-1))
+Base.rand(T::Type{BraBitString{N}}) where N = T(rand(0:Int128(2)^N-1))
 
 SparseKetBasis{N, T} = Dict{KetBitString{N}, T}
 function SparseKetBasis(N; T=Float64)
@@ -29,6 +41,17 @@ function KetBitString(vec::Vector{T}) where T<:Union{Bool, Integer}
     end
     return KetBitString{length(vec)}(v)
 end
+function BraBitString(vec::Vector{T}) where T<:Union{Bool, Integer}
+    two = Int128(2)
+    v = Int128(0)
+
+    for i in 1:length(vec)
+        if vec[i] == 1
+            v |= two^(i-1)
+        end
+    end
+    return BraBitString{length(vec)}(v)
+end
 
 """
     KetBitString(N::Integer, v::Integer)
@@ -41,22 +64,20 @@ function KetBitString(N::Integer, v::Integer)
     end
     return KetBitString{N}(Int128(v))
 end
-
-"""
-    random_KetBitString(N::Integer)
-
-TBW
-"""
-function random_KetBitString(N::Integer)
-    return KetBitString(N, rand(0:Int128(2)^N-1))
+function BraBitString(N::Integer, v::Integer)
+    for i in N+1:128
+        v &= ~(Int128(2)^(i-1))    
+    end
+    return BraBitString{N}(Int128(v))
 end
+
 
 """
     Base.show(io::IO, P::Pauli{N}) where N
 
 TBW
 """
-function Base.show(io::IO, P::KetBitString{N}) where N
+function Base.show(io::IO, P::AbstractState{N}) where N
     print(io, string(P))
 end
 
@@ -71,17 +92,19 @@ function Base.show(io::IO, v::SparseKetBasis{N,T}) where {N,T}
     end
 end
 
-"""
-    Base.string(p::KetBitString{N}) where N
-
-Display, y = iY
-"""
 function Base.string(p::KetBitString{N}) where N
     out = [0 for i in 1:128]
     for i in get_on_bits(p.v)
         out[i] = 1
     end
-    return join(out[1:N])
+    return "|"*join(out[1:N])*">"
+end
+function Base.string(p::BraBitString{N}) where N
+    out = [0 for i in 1:128]
+    for i in get_on_bits(p.v)
+        out[i] = 1
+    end
+    return "<"*join(out[1:N])*"|"
 end
 
 

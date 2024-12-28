@@ -3,7 +3,7 @@ An occupation number vectors, up to 128 qubits
 """
 struct Dyad{N} 
     ket::KetBitString{N}
-    bra::KetBitString{N} # should this be a different type?
+    bra::BraBitString{N} # should this be a different type?
 end
           
 struct ScaledDyad{N,T}
@@ -17,8 +17,8 @@ function DyadSum(N; T=Float64)
     return Dict{Dyad{N}, T}()
 end
 
-Base.adjoint(d::Dyad{N}) where N = Dyad{N}(d.bra,d.ket)
-Base.adjoint(d::ScaledDyad{N,T}) where {N,T} = ScaledDyad{N,T}(adjoint(d.coeff)adjoint(d.dyad))
+Base.adjoint(d::Dyad{N}) where N = Dyad{N}(adjoint(d.bra), adjoint(d.ket))
+Base.adjoint(d::ScaledDyad{N,T}) where {N,T} = ScaledDyad{N,T}(adjoint(d.coeff), adjoint(d.dyad))
 
 """
     Dyad(ket::Vector{T}, bra::Vector{T}) where T<:Union{Bool, Integer}
@@ -28,7 +28,7 @@ TBW
 function Dyad(ket::Vector{T}, bra::Vector{T}) where T<:Union{Bool, Integer}
     @assert length(ket) == length(bra)
     N = length(ket) 
-    return Dyad{N}(KetBitString(ket),KetBitString(bra))
+    return Dyad{N}(KetBitString(ket),BraBitString(bra))
 end
 
 """
@@ -37,7 +37,7 @@ end
 TBW
 """
 function Dyad(N::Integer, k::Integer, b::Integer)
-    return Dyad{N}(KetBitString{N}(Int128(k)), KetBitString{N}(Int128(b)))
+    return Dyad{N}(KetBitString{N}(Int128(k)), BraBitString{N}(Int128(b)))
 end
 
 """
@@ -49,23 +49,18 @@ function ScaledDyad(N::Integer, c::T, k::Integer, b::Integer) where T
     return ScaledDyad{N,T}(c, Dyad(N, k,b))
 end
 
-"""
-    random_Dyad(N::Integer)
-
-TBW
-"""
-function random_Dyad(N::Integer)
-    return Dyad{N}(KetBitString(N, rand(1:Int128(2)^N)),KetBitString(N, rand(1:Int128(2)^N)))
+function Base.rand(T::Type{Dyad{N}}) where N
+    return Dyad{N}(rand(KetBitString{N}), rand(BraBitString{N}))
 end
 
-"""
-    random_Dyad(N::Integer)
-
-TBW
-"""
-function random_ScaledDyad(N::Integer)
-    return ScaledDyad(rand(), random_Dyad(N))
+function Base.rand(T::Type{ScaledDyad{N,TT}}) where {N,TT}
+    return ScaledDyad{N,TT}(rand(TT), rand(Dyad{N}))
 end
+
+function Base.rand(T::Type{ScaledDyad{N}}) where N
+    return ScaledDyad{N,ComplexF64}(rand(ComplexF64), rand(Dyad{N}))
+end
+
 
 """
     Base.show(io::IO, P::Dyad{N}) where N

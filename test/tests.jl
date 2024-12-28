@@ -101,8 +101,8 @@ using Random
     println("Test Multiply")
     for i in 1:10
         N = 8
-        a = random_Pauli(N)
-        b = random_Pauli(N)
+        a = rand(Pauli{N})
+        b = rand(Pauli{N})
 
         display(a * b)
         # println()
@@ -115,10 +115,10 @@ using Random
     println("Test Addition")
     for i in 1:10
         N = 8
-        a = random_Pauli(N)
-        b = random_Pauli(N)
-        c = random_Pauli(N)
-        d = random_Pauli(N)
+        a = rand(Pauli{N})
+        b = rand(Pauli{N})
+        c = rand(Pauli{N})
+        d = rand(Pauli{N})
 
         s1 = a + b + d
         s2 = a + c + d
@@ -128,8 +128,8 @@ using Random
     
 
     
-    a = random_Pauli(6)
-    b = random_Pauli(6)
+    a = rand(Pauli{6})
+    b = rand(Pauli{6})
     s = a + b
     c = 1.23
     @test all(c*Matrix(s) - Matrix(c * s) .≈ 0)
@@ -188,11 +188,11 @@ using Random
         N = 8
         # o = Pauli("XYZI")
         # v = KetBitString([1,0,0,0])
-        o = random_Pauli(N)
+        o = rand(Pauli{N})
         v = KetBitString{N}(rand(0:Int128(2)^N-1))
         @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
         
-        o = random_FixedPhasePauli(N)
+        o = rand(FixedPhasePauli{N})
         v = KetBitString{N}(rand(0:Int128(2)^N-1))
         @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
     end
@@ -200,8 +200,8 @@ using Random
     # ScaledPauli
     N=8
     for i in 1:10
-        a = ScaledPauli(random_Pauli(N))
-        b = ScaledPauli(random_Pauli(N))
+        a = ScaledPauli(rand(Pauli{N}))
+        b = ScaledPauli(rand(Pauli{N}))
 
         a *= 2.3
         b *= 3.2
@@ -211,7 +211,7 @@ using Random
 
     # Test unique!
     # Create vector of scaled paulis
-    v = [ScaledPauli(random_Pauli(8)) for i in 1:10]
+    v = [ScaledPauli(rand(Pauli{8})) for i in 1:10]
    
     # add duplicates
     w = deepcopy(v)
@@ -234,9 +234,9 @@ using Random
 
     ##      test matvec
     N = 8
-    H = random_Pauli(N)
+    H = rand(Pauli{N})
     for i in 1:40
-        H += rand()*random_Pauli(N)
+        H += rand()*rand(Pauli{N})
     end
    
     # Vector as Matrix
@@ -261,7 +261,7 @@ using Random
     N = 8
     H = ScaledPauliVector(N) 
     for i in 1:40
-        push!(H, random_ScaledPauli(N))
+        push!(H, rand(ScaledPauli{N}))
     end
     @show norm(Matrix(H)*v - H*v) 
     @test norm(Matrix(H)*v - H*v) < 1e-13 
@@ -270,7 +270,7 @@ using Random
     ##      diag
     H = PauliSum(N)
     for i in 1:100
-        sum!(H, random_ScaledPauli(N))
+        sum!(H, rand(ScaledPauli{N}))
     end
     @test abs(tr(H) - tr(Matrix(H))) < 1e-9
 
@@ -289,7 +289,7 @@ using Random
     for i in 1:10
         v = SparseKetBasis(8)
         for i in 1:2
-            sum!(v, random_KetBitString(8), rand())
+            sum!(v, rand(KetBitString{8}), rand())
         end
         # @show dot(v,v) - Vector(v)'*Vector(v)  
         @test dot(v,v) - Vector(v)'*Vector(v) < 1e-14 
@@ -297,21 +297,21 @@ using Random
         a = rand()
         @test norm(a*Vector(v) - Vector(a*v)) < 1e-4
         
-        o = random_Pauli(8)
+        o = rand(Pauli{8})
         # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
         @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
 
-        o = random_FixedPhasePauli(8)
+        o = rand(FixedPhasePauli{8})
         # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
         @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
 
-        o = random_ScaledPauli(8)
+        o = rand(ScaledPauli{8})
         # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
         @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
 
-        o = random_ScaledPauli(8) + random_ScaledPauli(8)
+        o = rand(ScaledPauli{8}) + rand(ScaledPauli{8})
         for i in 1:10
-            o += random_ScaledPauli(8)
+            o += rand(ScaledPauli{8})
         end
         # @show norm(Matrix(o)*Vector(v) - Vector(o*v)) 
         @test norm(Matrix(o)*Vector(v) - Vector(o*v)) < 1e-13 
@@ -323,33 +323,33 @@ using Random
     H1 = PauliSum(N)
     H2 = PauliSum(N)
     for i in 1:100
-        sum!(H1, random_ScaledPauli(N))
-        sum!(H2, random_ScaledPauli(N))
+        sum!(H1, rand(ScaledPauli{N}))
+        sum!(H2, rand(ScaledPauli{N}))
     end
     @test norm(Matrix(H1) + Matrix(H2) - Matrix(H1 + H2)) < 1e-8
     @test norm(Matrix(H1) - Matrix(H2) - Matrix(H1 - H2)) < 1e-8
 
-    ket = random_KetBitString(N)
+    ket = rand(KetBitString{N})
     @test abs(expectation_value(H1, ket) - Vector(ket)' * Matrix(H1)*Vector(ket)) < 1e-8
     @test abs(expectation_value(H2, ket) - Vector(ket)' * Matrix(H2)*Vector(ket)) < 1e-8
 
     # KetBitString indexing
-    @test string(KetBitString(4,0)) == "0000"
-    @test string(KetBitString(4,1)) == "1000"
-    @test string(KetBitString(4,2)) == "0100"
-    @test string(KetBitString(4,3)) == "1100"
-    @test string(KetBitString(4,4)) == "0010"
-    @test string(KetBitString(4,5)) == "1010"
-    @test string(KetBitString(4,6)) == "0110"
-    @test string(KetBitString(4,7)) == "1110"
-    @test string(KetBitString(4,8)) == "0001"
-    @test string(KetBitString(4,9)) == "1001"
-    @test string(KetBitString(4,10)) == "0101"
-    @test string(KetBitString(4,11)) == "1101"
-    @test string(KetBitString(4,12)) == "0011"
-    @test string(KetBitString(4,13)) == "1011"
-    @test string(KetBitString(4,14)) == "0111"
-    @test string(KetBitString(4,15)) == "1111"
+    @test string(KetBitString(4,0)) == "|0000>"
+    @test string(KetBitString(4,1)) == "|1000>"
+    @test string(KetBitString(4,2)) == "|0100>"
+    @test string(KetBitString(4,3)) == "|1100>"
+    @test string(KetBitString(4,4)) == "|0010>"
+    @test string(KetBitString(4,5)) == "|1010>"
+    @test string(KetBitString(4,6)) == "|0110>"
+    @test string(KetBitString(4,7)) == "|1110>"
+    @test string(KetBitString(4,8)) == "|0001>"
+    @test string(KetBitString(4,9)) == "|1001>"
+    @test string(KetBitString(4,10)) == "|0101>"
+    @test string(KetBitString(4,11)) == "|1101>"
+    @test string(KetBitString(4,12)) == "|0011>"
+    @test string(KetBitString(4,13)) == "|1011>"
+    @test string(KetBitString(4,14)) == "|0111>"
+    @test string(KetBitString(4,15)) == "|1111>"
 
     println("Test Commutator")
     spv1 = (1/2) .* [
