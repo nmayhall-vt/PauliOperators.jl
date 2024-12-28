@@ -2,7 +2,7 @@
 
 julia_version = "1.11.2"
 manifest_format = "2.0"
-project_hash = "e2e39588f49a51d268a4ce756f7f51863a4e63fb"
+project_hash = "9d75d2c21333a84791e291e15266bc37cd5ae3de"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -48,7 +48,7 @@ version = "1.5.0"
 deps = ["Arpack", "InteractiveUtils", "LinearAlgebra", "LinearMaps", "Printf", "Random"]
 git-tree-sha1 = "181fe1ffc1f9adb45e558be29f9a76d1a4b17757"
 repo-rev = "main"
-repo-url = "https://github.com/nmayhall-vt/BlockDavidson.jl"
+repo-url = "git@github.com:nmayhall-vt/BlockDavidson.jl.git"
 uuid = "b4c031f8-e7c9-4879-896c-063a10ff8103"
 version = "0.1.0"
 

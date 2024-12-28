@@ -17,8 +17,8 @@ function DyadSum(N; T=Float64)
     return Dict{Dyad{N}, T}()
 end
 
-Base.adjoint(d::Dyad{N}) = Dyad{N}(d.bra,d.ket)
-Base.adjoint(d::ScaledDyad{N,T}) = ScaledDyad{N,T}(adjoint(d.coeff)adjoint(d.dyad))
+Base.adjoint(d::Dyad{N}) where N = Dyad{N}(d.bra,d.ket)
+Base.adjoint(d::ScaledDyad{N,T}) where {N,T} = ScaledDyad{N,T}(adjoint(d.coeff)adjoint(d.dyad))
 
 """
     Dyad(ket::Vector{T}, bra::Vector{T}) where T<:Union{Bool, Integer}

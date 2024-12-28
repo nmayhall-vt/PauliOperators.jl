@@ -28,6 +28,7 @@ export ScaledPauli
 export ScaledPauliVector
 export PauliSum
 export KetBitString
+export SparseKetBasis
 export Dyad 
 export DyadSum 
 export ScaledDyad 

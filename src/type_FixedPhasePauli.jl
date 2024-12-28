@@ -33,6 +33,15 @@ See also [`Pauli`](@ref), [`ScaledPauli`](@ref).
 struct FixedPhasePauli{N} <: AbstractPauli{N}
     z::Int128
     x::Int128
+    function FixedPhasePauli{N}(z,x) where N 
+        if (x < Int128(2)^N) & (z < Int128(2)^N) 
+            new(z,x)
+        else
+            display(x)
+            display(z)
+            error("integers too large")
+        end
+    end
 end
 
 
@@ -43,8 +52,8 @@ TBW
 """
 function FixedPhasePauli(z::I, x::I, N) where I<:Integer
     # N = maximum(map(i -> ndigits(i, base=2), [x, z]))
-    z < 2^N || throw(DimensionMismatch)
-    x < 2^N || throw(DimensionMismatch)
+    z < Int128(2)^N || throw(DimensionMismatch)
+    x < Int128(2)^N || throw(DimensionMismatch)
     # θ = count_ones(z & x)*3 % 4
     return FixedPhasePauli{N}(z, x)
 end
@@ -157,7 +166,7 @@ end
 TBW
 """
 function random_FixedPhasePauli(N)
-    return FixedPhasePauli{N}(rand(1:2^N-1),rand(1:2^N-1))
+    return FixedPhasePauli{N}(rand(1:Int128(2)^N-1),rand(1:Int128(2)^N-1))
 end
 
 """
@@ -263,5 +272,5 @@ end
 # end
 
 function LinearAlgebra.tr(p::FixedPhasePauli{N}) where N
-    return p.x == 0 ? 2^N : 0
+    return p.x == 0 ? Int128(2)^N : 0
 end
