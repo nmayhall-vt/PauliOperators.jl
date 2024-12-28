@@ -48,7 +48,7 @@ end
 TBW
 """
 function random_KetBitString(N::Integer)
-    return KetBitString(N, rand(1:2^N-1))
+    return KetBitString(N, rand(0:Int128(2)^N-1))
 end
 
 """
@@ -91,7 +91,7 @@ end
 TBW
 """
 function Base.Vector(k::KetBitString{N}) where N
-    vec = zeros(Int8,2^N)
+    vec = zeros(Int8,Int128(2)^N)
     vec[k.v+1] = 1
     return vec 
 end
@@ -101,7 +101,7 @@ end
 TBW
 """
 function Base.Vector(k::SparseKetBasis{N,T}) where {N,T}
-    vec = zeros(T,2^N)
+    vec = zeros(T,Int128(2)^N)
     for (ket, coeff) in k
         vec[ket.v+1] = coeff
     end

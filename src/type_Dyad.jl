@@ -46,7 +46,16 @@ end
 TBW
 """
 function random_Dyad(N::Integer)
-    return Dyad{N}(KetBitString(N, rand(1:2^N-1)), KetBitString(N, rand(1:2^N-1)))
+    return Dyad{N}(KetBitString(N, rand(1:Int128(2)^N)),KetBitString(N, rand(1:Int128(2)^N)))
+end
+
+"""
+    random_Dyad(N::Integer)
+
+TBW
+"""
+function random_ScaledDyad(N::Integer)
+    return ScaledDyad(rand(), random_Dyad(N))
 end
 
 """
@@ -71,7 +80,9 @@ function Base.show(io::IO, v::DyadSum{N,T}) where {N,T}
 end
 
 function Base.string(d::Dyad{N}) where N
-    return "|"*join(get_on_bits(d.ket.v))*"><"*join(get_on_bits(d.bra.v))*"|"
+    return "|"*string(d.ket.v)*"><"*string(d.bra.v)*"|"
+    # return "|"*string(d.ket)*"><"*string(d.bra)*"|"
+    # return "|"*join(get_on_bits(d.ket.v))*"><"*join(get_on_bits(d.bra.v))*"|"
 end
 function Base.string(d::ScaledDyad)
     return string(d.coeff)*string(d.dyad)
@@ -84,7 +95,7 @@ end
 # TBW
 # """
 # function Base.Vector(k::KetBitString{N}) where N
-#     vec = zeros(Int8,2^N)
+#     vec = zeros(Int8,Int128(2)^N)
 #     vec[k.v+1] = 1
 #     return vec 
 # end
@@ -94,7 +105,7 @@ end
 # TBW
 # """
 # function Base.Vector(k::SparseKetBasis{N,T}) where {N,T}
-#     vec = zeros(T,2^N)
+#     vec = zeros(T,Int128(2)^N)
 #     for (ket, coeff) in k
 #         vec[ket.v+1] = coeff
 #     end

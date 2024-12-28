@@ -14,7 +14,7 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::AbstractPauli{N}, in::Matrix{T}) 
     
     # Check dimensions 
     size(in) == size(out) || throw(DimensionMismatch)
-    ndim == 2^N || throw(DimensionMismatch)
+    ndim == Int128(2)^N || throw(DimensionMismatch)
 
     # loop over states and do multiplication
 
@@ -48,7 +48,7 @@ function LinearAlgebra.mul!(out::Matrix{T}, p::PauliSum{N}, in::Matrix{T}) where
     
     # Check dimensions 
     size(in) == size(out) || throw(DimensionMismatch)
-    ndim == 2^N || throw(DimensionMismatch)
+    ndim == Int128(2)^N || throw(DimensionMismatch)
 
     if nvec == 1
         for (op,coeff) in p.ops
@@ -87,7 +87,7 @@ end
    
 #     # Check dimensions 
 #     size(B) == size(C) || throw(DimensionMismatch)
-#     ndim == 2^N || throw(DimensionMismatch)
+#     ndim == Int128(2)^N || throw(DimensionMismatch)
 
 #     for (op,coeff) in A.ops
 #         # mul!(out, op, in, coeff, 1.0)
@@ -108,7 +108,7 @@ function LinearAlgebra.mul!(C::Vector{T}, A::PauliSum{N}, B::Vector{T}) where {T
   
     # Check dimensions 
     size(B) == size(C) || throw(DimensionMismatch)
-    ndim == 2^N || throw(DimensionMismatch)
+    ndim == Int128(2)^N || throw(DimensionMismatch)
 
     for (op,coeff) in A.ops
         @inbounds @simd for i in 0:ndim-1                           
@@ -124,7 +124,7 @@ function LinearAlgebra.mul!(C::Vector{T}, A::ScaledPauliVector{N}, B::Vector{T})
   
     # Check dimensions 
     size(B) == size(C) || throw(DimensionMismatch)
-    ndim == 2^N || throw(DimensionMismatch)
+    ndim == Int128(2)^N || throw(DimensionMismatch)
 
     for op in A
         @inbounds @simd for i in 0:ndim-1                           
@@ -154,7 +154,7 @@ function LinearAlgebra.mul!(C::Matrix{T}, A::AbstractPauli{N}, B::Matrix{T}, α,
     
     # Check dimensions 
     size(B) == size(C) || throw(DimensionMismatch)
-    ndim == 2^N || throw(DimensionMismatch)
+    ndim == Int128(2)^N || throw(DimensionMismatch)
 
     # loop over states and do multiplication
     # need to go from 0:N-1 because we convert to binary

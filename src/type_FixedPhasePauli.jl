@@ -166,7 +166,7 @@ end
 TBW
 """
 function random_FixedPhasePauli(N)
-    return FixedPhasePauli{N}(rand(1:Int128(2)^N-1),rand(1:Int128(2)^N-1))
+    return FixedPhasePauli{N}(rand(0:Int128(2)^N-1),rand(0:Int128(2)^N-1))
 end
 
 """

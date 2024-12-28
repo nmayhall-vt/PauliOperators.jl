@@ -151,7 +151,7 @@ end
 Create a dense Matrix of type `T`
 """
 function Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
-    out = zeros(T, 2^N, 2^N)
+    out = zeros(T, Int128(2)^N, Int128(2)^N)
     for (op, coeff) in ps.ops
         out .+= Matrix(op) .* coeff 
     end
@@ -228,7 +228,7 @@ end
 
 function LinearAlgebra.tr(p::PauliSum{N}) where N 
     if haskey(p, FixedPhasePauli{N}(0,0))
-        return p[FixedPhasePauli{N}(0,0)] * 2^N
+        return p[FixedPhasePauli{N}(0,0)] * Int128(2)^N
     else
         return 0
     end

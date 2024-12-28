@@ -95,7 +95,7 @@ end
 TBW
 """
 function Base.Matrix(spv::Vector{ScaledPauli{N}}; T=ComplexF64) where {N}
-    out = zeros(T, 2^N, 2^N)
+    out = zeros(T, Int128(2)^N, Int128(2)^N)
     for spvi in spv 
         out .+= Matrix(spvi.pauli) .* spvi.coeff
     end

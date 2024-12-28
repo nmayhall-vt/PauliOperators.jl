@@ -12,7 +12,7 @@ function run(nqubits, nvecs, nops)
 
     Random.seed!(2)
 
-    v0 = rand(ComplexF64,2^N,nvecs)
+    v0 = rand(ComplexF64,Int128(2)^N,nvecs)
     v0 = v0 * sqrt(inv(v0'*v0))
 
     a = Pauli(N)

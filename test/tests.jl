@@ -189,11 +189,11 @@ using Random
         # o = Pauli("XYZI")
         # v = KetBitString([1,0,0,0])
         o = random_Pauli(N)
-        v = KetBitString{N}(rand(1:2^N-1))
+        v = KetBitString{N}(rand(0:Int128(2)^N-1))
         @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
         
         o = random_FixedPhasePauli(N)
-        v = KetBitString{N}(rand(1:2^N-1))
+        v = KetBitString{N}(rand(0:Int128(2)^N-1))
         @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
     end
 
@@ -240,18 +240,18 @@ using Random
     end
    
     # Vector as Matrix
-    v = rand(ComplexF64, 2^N,1)
+    v = rand(ComplexF64, Int128(2)^N,1)
     v .= v ./ norm(v) 
     @test norm(Matrix(H)*v - H*v) < 1e-13 
     
     # Matrix
-    v = rand(ComplexF64, 2^N,3)
+    v = rand(ComplexF64, Int128(2)^N,3)
     v = v *  sqrt(inv(v'*v)) 
     @test norm(Matrix(H)*v - H*v) < 1e-13 
     
     
     # Vector 
-    v = rand(ComplexF64, 2^N)
+    v = rand(ComplexF64, Int128(2)^N)
     v .= v ./ norm(v) 
     @show norm(Matrix(H)*v - H*v) 
     @test norm(Matrix(H)*v - H*v) < 1e-13 
@@ -280,7 +280,7 @@ using Random
     end
     H = PauliSum(N)
     for i in 1:100
-        sum!(H, FixedPhasePauli{N}(rand(1:2^N-1),0))
+        sum!(H, FixedPhasePauli{N}(rand(0:Int128(2)^N-1),0))
     end
     @test length(diag(H)) == length(H)
 

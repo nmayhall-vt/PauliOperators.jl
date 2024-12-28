@@ -14,7 +14,7 @@ using BenchmarkTools
 
     a = Pauli(N)
 
-    v0 = rand(ComplexF64,2^N,3)
+    v0 = rand(ComplexF64,Int128(2)^N,3)
     v0 = v0 * sqrt(inv(v0'*v0))
 
     # display(v0'*v0)
@@ -50,10 +50,12 @@ using BenchmarkTools
 
     dav = Davidson(Hmat, T=ComplexF64, nroots=M)
     @time e1, v1 = eigs(dav)
+    for i in 1:M
+        display(e1[i])
+    end
 
-    @show abs(tr(abs.(v1'*v0)) - M)     
-    @test abs(tr(abs.(v1'*v0)) - M) < 1e-4
-    
+    @show abs(det(v1'*v0))
+    @test isapprox(abs(det(v1'*v0)), 1)
     
     scr = deepcopy(v0)
     function mymatvec(v)
@@ -66,12 +68,12 @@ using BenchmarkTools
     #     return H*v
     # end
 
-    lmat = LinOpMat{ComplexF64}(mymatvec, 2^N, true)
+    lmat = LinOpMat{ComplexF64}(mymatvec, Int128(2)^N, true)
     
     dav = Davidson(lmat, T=ComplexF64, nroots=M)
     @time e2, v2 = eigs(dav)
     
-    @show abs(tr(abs.(v2'*v0)) - M)     
-    @test abs(tr(abs.(v2'*v0)) - M) < 1e-4
+    @show abs(det(v2'*v0))
+    @test isapprox(abs(det(v2'*v0)), 1)
 end
 # run()

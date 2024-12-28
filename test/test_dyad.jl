@@ -33,10 +33,12 @@ function run()
     dl = di*dj*dk
     println(Int(dl.dyad.ket.v))
     println(Int(dl.dyad.bra.v))
-    @test dl.dyad.ket.v == 1
-    @test dl.dyad.bra.v == 174 
+    @test dl.dyad.ket.v == 9
+    @test dl.dyad.bra.v == 57 
 
-    @show di'*d2 
+    @show di'*dj 
+    @show di*dj 
+    @show di*di' 
 
 end
 run()

@@ -3,5 +3,5 @@ struct StateVectorDense
 end
 
 function StateVectorDense(N; nstates=1)
-    return StateVectorDense(zeros(ComplexF64), 2^N, nstates)
+    return StateVectorDense(zeros(ComplexF64), Int128(2)^N, nstates)
 end
