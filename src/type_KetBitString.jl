@@ -10,6 +10,13 @@ struct BraBitString{N} <: AbstractState{N}
     v::Int128
 end
     
+function Base.size(d::KetBitString{N}) where N
+    return (BigInt(2)^N, 1)
+end
+
+function Base.size(d::BraBitString{N}) where N
+    return (1, BigInt(2)^N)
+end
 
 Base.adjoint(d::KetBitString{N}) where N = BraBitString{N}(d.v)
 Base.adjoint(d::BraBitString{N}) where N = KetBitString{N}(d.v)
@@ -160,3 +167,9 @@ function scale!(v1::SparseKetBasis{N,T}, a::Number) where {N,T}
     map!(x->x*a, values(v1))
 end
 
+
+function Base.Matrix(d::AbstractState{N}) where N
+    mat = zeros(Bool, size(d))
+    mat[d.v+1] = true
+    return mat 
+end

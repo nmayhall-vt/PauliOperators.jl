@@ -81,5 +81,13 @@ using BenchmarkTools
         err = Matrix(s)*Matrix(x) - Matrix(s*x)
         @test isapprox(norm(err),0, atol=1e-14)
     end
+    
+    # for i in 1:10
+    #     p = rand(ScaledPauli{N})
+    #     k = rand(KetBitString{N})
+    #     b = rand(BraBitString{N})
+    #     err = Matrix(b)*Matrix(p)*Matrix(k) - Matrix(b*p*k)
+    #     @test isapprox(norm(err),0, atol=1e-14)
+    # end
 end
 # run()
