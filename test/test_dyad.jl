@@ -4,8 +4,8 @@ using Random
 using Test
 using BenchmarkTools
 
-# @testset "dyad" begin
-function run()
+@testset "dyad" begin
+# function run()
     N = 8 
     Random.seed!(2)
 
@@ -78,6 +78,8 @@ function run()
     @test isapprox(norm(err),0, atol=1e-14)
     err = Matrix(d)-Matrix(e) - Matrix(d-e)
     @test isapprox(norm(err),0, atol=1e-14)
+    err = -Matrix(d) - Matrix(-d)
+    @test isapprox(norm(err),0, atol=1e-14)
     
     # return
     N = 8
@@ -110,4 +112,4 @@ function run()
     #     @test isapprox(norm(err),0, atol=1e-14)
     # end
 end
-run()
+# run()
