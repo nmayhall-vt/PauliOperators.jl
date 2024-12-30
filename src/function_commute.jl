@@ -38,3 +38,18 @@ function commutator(spv1::Vector{ScaledPauli{N}}, spv2::Vector{ScaledPauli{N}}) 
     unique!(res); filter!(sp->abs(sp.coeff) > 1.0e-10, res)
     return res      # return type: Vector{Vector{ScaledPauli{N}}}
 end
+
+
+# function commutator(sdA::ScaledDyad{N,T}, sdB::ScaledDyad{N,T}) where {N,T}
+#     res = ScaledDyad{N}[]
+#     if commute(spA.pauli, spB.pauli)
+#         return res
+#     else
+#         comm = ScaledPauli{N}[]
+#         comm1 = spA*spB; comm2 = -spB*spA;
+#         push!(comm, comm1); push!(comm, comm2)
+#         res = unique(comm)
+#     end
+#     unique!(res); filter!(sp->abs(sp.coeff) > 1.0e-10, res)
+#     return res    # return type: Vector{ScaledPauli{N}}
+# end

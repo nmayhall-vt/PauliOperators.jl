@@ -4,8 +4,8 @@ using Random
 using Test
 using BenchmarkTools
 
-@testset "dyad" begin
-# function run()
+# @testset "dyad" begin
+function run()
     N = 8 
     Random.seed!(2)
 
@@ -59,6 +59,26 @@ using BenchmarkTools
     @show x.pauli * s.dyad
     @show s.dyad * x.pauli
    
+    # sum
+    a = rand(Dyad{N})
+    b = rand(Dyad{N})
+    err = Matrix(a)+Matrix(b) - Matrix(a+b)
+    @test isapprox(norm(err),0, atol=1e-14)
+    err = Matrix(a)-Matrix(b) - Matrix(a-b)
+    @test isapprox(norm(err),0, atol=1e-14)
+    d = rand(Dyad{N}) + rand(Dyad{N})
+    e = rand(Dyad{N}) + rand(Dyad{N})
+    @show d
+    @show e
+    println()
+    # return
+    @show d + e
+    @show d - e
+    err = Matrix(d)+Matrix(e) - Matrix(d+e)
+    @test isapprox(norm(err),0, atol=1e-14)
+    err = Matrix(d)-Matrix(e) - Matrix(d-e)
+    @test isapprox(norm(err),0, atol=1e-14)
+    
     # return
     N = 8
     for i in 1:10
@@ -90,4 +110,4 @@ using BenchmarkTools
     #     @test isapprox(norm(err),0, atol=1e-14)
     # end
 end
-# run()
+run()

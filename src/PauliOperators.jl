@@ -31,8 +31,8 @@ export KetBitString
 export BraBitString
 export SparseKetBasis
 export Dyad 
-export DyadSum 
 export ScaledDyad 
+export DyadSum 
 export rotate_phase 
 export get_phase
 export get_coeff

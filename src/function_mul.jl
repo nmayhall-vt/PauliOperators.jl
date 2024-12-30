@@ -335,23 +335,6 @@ Base.:*(a::Number, v1::SparseKetBasis{N,T}) where {N,T} = v1 * a
 
 
 
-### Dyads
-# function Base.:*(d1::Dyad{N}, d2::Dyad{N}) where {N}
-#     return ScaledDyad{N,Bool}(d1.bra==d2.ket, Dyad{N}(d1.ket, d2.bra))
-# end
-function Base.:*(d1::Dyad{N}, d2::Dyad{N}) where {N}
-    return ScaledDyad{N,Bool}(d1.bra==d2.ket, Dyad{N}(d1.ket, d2.bra))
-end
-function Base.:*(d1::Dyad{N}, d2::ScaledDyad{N,T}) where {N,T}
-    return ScaledDyad{N,T}((d1.bra==d2.dyad.ket)*d2.coeff, Dyad{N}(d1.ket, d2.dyad.bra))
-end
-function Base.:*(d1::ScaledDyad{N,T}, d2::ScaledDyad{N,T}) where {N,T}
-    return ScaledDyad{N,T}((d1.dyad.bra==d2.dyad.ket)*d1.coeff*d2.coeff, Dyad{N}(d1.dyad.ket, d2.dyad.bra))
-end
-function Base.:*(d1::Dyad{N}, a::T) where {N,T<:Number}
-    return Dict{Dyad{N},T}(d1=>a)
-end
-Base.:*(a::T, d1::Dyad{N}) where {N,T} = d1*a
 
 ### Pauli's with Dyads
 function Base.:*(p::FixedPhasePauli{N}, d::Dyad{N}) where {N}

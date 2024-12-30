@@ -10,12 +10,13 @@ struct ScaledDyad{N,T}
     coeff::T 
     dyad::Dyad{N}
 end
-          
 
-DyadSum{N, T} = Dict{Dyad{N}, T}
-function DyadSum(N; T=Float64)
-    return Dict{Dyad{N}, T}()
-end
+
+DyadSum{N,T} = Dict{Dyad{N},T}
+DyadSum(N::Integer; T=Float64) = return Dict{Dyad{N}, T}()
+DyadSum(d::Dyad{N}; T=Float64) where N = Dict{Dyad{N}, T}(d=>T(1))
+DyadSum(d::ScaledDyad{N,T}) where {N,T} = Dict{Dyad{N}, T}(d.dyad=>d.coeff)
+
 
 Base.adjoint(d::Dyad{N}) where N = Dyad{N}(adjoint(d.bra), adjoint(d.ket))
 Base.adjoint(d::ScaledDyad{N,T}) where {N,T} = ScaledDyad{N,T}(adjoint(d.coeff), adjoint(d.dyad))
@@ -48,6 +49,7 @@ TBW
 function ScaledDyad(N::Integer, c::T, k::Integer, b::Integer) where T
     return ScaledDyad{N,T}(c, Dyad(N, k,b))
 end
+ScaledDyad(d::Dyad{N}; T=Bool) where N = ScaledDyad{N,T}(T(1), d)
 
 function Base.rand(T::Type{Dyad{N}}) where N
     return Dyad{N}(rand(KetBitString{N}), rand(BraBitString{N}))
@@ -61,6 +63,72 @@ function Base.rand(T::Type{ScaledDyad{N}}) where N
     return ScaledDyad{N,ComplexF64}(rand(ComplexF64), rand(Dyad{N}))
 end
 
+function Base.:+(d1::ScaledDyad{N}, d2::ScaledDyad{N}) where {N}
+    if isequal(d1.dyad, d2.dyad)
+        return Dict{Dyad{N},ComplexF64}(d1.dyad=>d1.coeff+d2.coeff)
+    else
+        return Dict{Dyad{N},ComplexF64}(d1.dyad=>d1.coeff, d2.dyad=>d2.coeff)
+    end
+end
+function Base.:+(a::Dyad{N}, b::ScaledDyad{N,T}) where {N,T}
+    return  ScaledDyad(a, T=T) + b 
+end
+function Base.:+(a::ScaledDyad{N,T}, b::Dyad{N}) where {N,T}
+    return  a + ScaledDyad(b, T=T)
+end
+function Base.:+(a::Dyad{N}, b::Dyad{N}; T=Bool) where {N}
+    return  ScaledDyad(a, T=T) + ScaledDyad(b, T=T)
+end
+function Base.:+(a::DyadSum{N,T}, b::DyadSum{N,T}) where {N,T}
+    return mergewith(+,a,b)
+end
+function Base.:+(a::Dyad{N}, b::DyadSum{N,T}) where {N,T}
+    return mergewith(+,DyadSum(a,T=T),b)
+end
+
+function Base.:-(d1::ScaledDyad{N}, d2::ScaledDyad{N}) where {N}
+    if isequal(d1.dyad, d2.dyad)
+        return Dict{Dyad{N},ComplexF64}(d1.dyad=>d1.coeff-d2.coeff)
+    else
+        return Dict{Dyad{N},ComplexF64}(d1.dyad=>d1.coeff, d2.dyad=>-d2.coeff)
+    end
+end
+function Base.:-(a::Dyad{N}, b::ScaledDyad{N,T}) where {N,T}
+    return  ScaledDyad(a, T=T) - b 
+end
+function Base.:-(a::ScaledDyad{N,T}, b::Dyad{N}) where {N,T}
+    return  a - ScaledDyad(b, T=T)
+end
+function Base.:-(a::Dyad{N}, b::Dyad{N}; T=Bool) where {N}
+    return  ScaledDyad(a, T=T) - ScaledDyad(b, T=T)
+end
+function Base.:-(a::DyadSum{N,T}, b::DyadSum{N,T}) where {N,T}
+    return mergewith(+,a,-b)
+end
+Base.:-(a::Dyad{N}) where {N} = ScaledDyad{N,Bool}(false, a) 
+Base.:-(a::ScaledDyad{N,T}) where {N,T} = ScaledDyad{N,T}(-a.coeff, a.dyad) 
+function Base.:-(a::DyadSum{N,T}) where {N,T} 
+    b = deepcopy(a)
+    map!(x->-x, values(b))
+    return b
+end
+
+
+
+### Multiplication 
+function Base.:*(d1::Dyad{N}, d2::Dyad{N}) where {N}
+    return ScaledDyad{N,Bool}(d1.bra.v==d2.ket.v, Dyad{N}(d1.ket, d2.bra))
+end
+function Base.:*(d1::Dyad{N}, d2::ScaledDyad{N,T}) where {N,T}
+    return ScaledDyad{N,T}((d1.bra.v==d2.dyad.ket.v)*d2.coeff, Dyad{N}(d1.ket, d2.dyad.bra))
+end
+function Base.:*(d1::ScaledDyad{N,T}, d2::ScaledDyad{N,T}) where {N,T}
+    return ScaledDyad{N,T}((d1.dyad.bra.v==d2.dyad.ket.v)*d1.coeff*d2.coeff, Dyad{N}(d1.dyad.ket, d2.dyad.bra))
+end
+Base.:*(a::T, d::Dyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
+Base.:*(d::Dyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
+Base.:*(a::T, d::ScaledDyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
+Base.:*(d::ScaledDyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
 
 """
     Base.show(io::IO, P::Dyad{N}) where N
@@ -72,24 +140,29 @@ function Base.show(io::IO, P::Dyad{N}) where N
 end
 Base.show(io::IO, d::ScaledDyad) = print(io,string(d))
 
-"""
-    Base.show(io::IO, v::DyadSum{N,T}) where {N,T}
-
-TBW
-"""
-function Base.show(io::IO, v::DyadSum{N,T}) where {N,T}
-    for (ket,coeff) in v
-        print(io, string(ket), coeff)
+# function Base.show(io::IO, v::DyadSum{N,T}) where {N,T}
+#     for (key,val) in v
+#         @printf(" %12.8f +%12.8fi %s\n", real(val), imag(val), key)
+#     end
+# end
+function Base.show(io::IO, ::MIME"text/plain", a::DyadSum)
+    for (key,val) in a
+        show(io, "text/plain", (key,val))
+        println()
     end
 end
 
+
 function Base.string(d::Dyad{N}) where N
     return "|"*string(d.ket.v)*"><"*string(d.bra.v)*"|"
-    # return "|"*string(d.ket)*"><"*string(d.bra)*"|"
-    # return "|"*join(get_on_bits(d.ket.v))*"><"*join(get_on_bits(d.bra.v))*"|"
 end
 function Base.string(d::ScaledDyad)
     return string(d.coeff)*string(d.dyad)
+end
+function Base.display(ds::DyadSum)
+    for (key,val) in ds
+        @printf(" %12.8f +%12.8fi %s\n", real(val), imag(val), key)
+    end
 end
 
 
@@ -145,6 +218,14 @@ end
 #     map!(x->x*a, values(v1))
 # end
 
+function Base.size(d::Dyad{N}) where N
+    return (BigInt(2)^N, BigInt(2)^N)
+end
+Base.size(d::ScaledDyad) = size(d.dyad) 
+function Base.size(d::DyadSum{N}) where N
+    return (BigInt(2)^N, BigInt(2)^N)
+end
+
 
 function Base.Matrix(d::Dyad{N}) where N
     mat = zeros(Bool, size(d))
@@ -152,13 +233,16 @@ function Base.Matrix(d::Dyad{N}) where N
     return mat 
 end
 
-function Base.size(d::Dyad{N}) where N
-    return (BigInt(2)^N, BigInt(2)^N)
-end
-Base.size(d::ScaledDyad) = size(d.dyad) 
-
 function Base.Matrix(d::ScaledDyad{N,T}) where {N,T}
     mat = zeros(T, size(d))
     mat[d.dyad.ket.v+1, d.dyad.bra.v+1] = d.coeff 
+    return mat 
+end
+
+function Base.Matrix(d::DyadSum{N,T}) where {N,T}
+    mat = zeros(T, size(d))
+    for (dyad, coeff) in d
+        mat[dyad.ket.v+1, dyad.bra.v+1] = coeff 
+    end
     return mat 
 end
