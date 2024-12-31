@@ -2,7 +2,7 @@ using PauliOperators
 using LinearAlgebra
 using Printf
 
-function build_full_hamiltonian(ω,λ,N)
+function build_full_hamiltonian(ω,λ,g,N)
     "https://www.uni-ulm.de/fileadmin/website_uni_ulm/nawi.inst.260/%C3%9Cbungen/6Spin_Boson_Modell.pdf"
     Hs = PauliSum(1)
     Hb = PauliSum(N)
@@ -12,12 +12,11 @@ function build_full_hamiltonian(ω,λ,N)
     Hb = ω * bi' * bi 
     H = Hs ⊕ Hb
 
-    Z = PauliSum(Pauli("Z"))
-
-    # σ⁺ = .5*(Pauli("X") + 1im*Pauli("Y"))
-    # Hc = σ⁺⊗bi
-    # Hc += Hc'
-    Hc = λ * Z ⊗ (bi'+bi)
+    σᶻ = PauliSum(Pauli("Z"))
+    σ⁺ = .5*(Pauli("X") + 1im*Pauli("Y"))
+    σ⁻ = σ⁺' 
+    Hc = g * (σ⁺⊗bi + σ⁻⊗bi')
+    Hc += λ * σᶻ ⊗ (bi'+bi)
     clip!(Hc)
     # println("Hc")
     # display(Hc)
@@ -25,11 +24,58 @@ function build_full_hamiltonian(ω,λ,N)
     return H
 end
 
+function linbladian_matvec(H, L, γ, ρ)
+    
+    length(L) == length(γ) || throw(DimensionMismatch)
+
+    dρ = -1im * (H*ρ - ρ*H)
+    
+    for i in length(L)
+       dρ += γ[i] * (L[i] * (ρ * L[i]'))
+       LL = L[i]' * L[i] 
+       dρ -= γ[i]/2 * (ρ * LL + LL * ρ)
+    end
+    return dρ
+end
+    
 function run()
     ω0 = 1
     N = 4
-    g = .1 
-    H = build_full_hamiltonian(ω0, g, N)
+    g = .1 # σ⁺b + σ⁻b'    
+    λ = .1 # σᶻ(b + b')    
+
+    ρ = Dyad(1,0,0)
+    @printf(" Initial Density: %s\n", ρ)
+
+    H = ω0*PauliSum(Pauli("X"))
+    σ⁻ = .5*(Pauli("X") + -1im*Pauli("Y"))
+    γ = Vector{Float64}([])
+    L = Vector{PauliSum{1}}([])
+    
+    push!(L, σ⁻)
+    push!(γ, .001)
+    dρ = linbladian_matvec(H, L, γ, ρ)
+    println()
+    @printf(" ∂ₜρ %s\n", dρ)
+    sz_vals = []
+
+    stepsize = .1
+    nsteps = 100
+    for i in 1:nsteps
+        push!(sz_vals, tr(Matrix(ρ)*Matrix(Pauli("Z"))))
+        ρ += stepsize * linbladian_matvec(H, L, γ, ρ)
+    end
+
+    display(sz_vals)
+    
+end
+
+function run2()
+    ω0 = 1
+    N = 4
+    g = .1 # σ⁺b + σ⁻b'    
+    λ = .1 # σᶻ(b + b')    
+    H = build_full_hamiltonian(ω0, λ, g, N)
 
     # println("H")
     # display(H)

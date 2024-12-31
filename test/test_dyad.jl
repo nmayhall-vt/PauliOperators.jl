@@ -102,14 +102,25 @@ using BenchmarkTools
         s = rand(ScaledDyad{N})
         err = Matrix(s)*Matrix(x) - Matrix(s*x)
         @test isapprox(norm(err),0, atol=1e-14)
+        err = Matrix(x)*Matrix(s) - Matrix(x*s)
+        @test isapprox(norm(err),0, atol=1e-14)
     end
     
-    # for i in 1:10
-    #     p = rand(ScaledPauli{N})
-    #     k = rand(KetBitString{N})
-    #     b = rand(BraBitString{N})
-    #     err = Matrix(b)*Matrix(p)*Matrix(k) - Matrix(b*p*k)
-    #     @test isapprox(norm(err),0, atol=1e-14)
-    # end
+
+    for i in 1:10
+        A = PauliSum(N)
+        ρ = DyadSum(N)
+        for i in 1:4
+            A += rand(ScaledPauli{N})
+            ρ += rand(ScaledDyad{N,Float64})
+        end
+        ρ += ρ'
+        err = Matrix(A)*Matrix(ρ) - Matrix(A*ρ)
+        @test isapprox(norm(err),0, atol=1e-14)
+        err = Matrix(A')*Matrix(ρ) - Matrix(A'*ρ)
+        @test isapprox(norm(err),0, atol=1e-14)
+        err = Matrix(ρ)*Matrix(A) - Matrix(ρ*A)
+        @test isapprox(norm(err),0, atol=1e-14)
+    end
 end
 # run()

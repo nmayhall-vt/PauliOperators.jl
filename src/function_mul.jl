@@ -341,32 +341,52 @@ function Base.:*(p::FixedPhasePauli{N}, d::Dyad{N}) where {N}
     c, k = p * d.ket
     return ScaledDyad(N, c, k.v, d.bra.v)
 end
-function Base.:*(p::Pauli{N}, d::Dyad{N}) where {N}
-    c, k = p.pauli * d.ket
-    return ScaledDyad(N, c*get_phase(p), k.v, d.bra.v)
-end
-function Base.:*(p::Pauli{N}, d::ScaledDyad{N}) where {N}
-    c, k = p.pauli * d.dyad.ket
-    return ScaledDyad(N, c*get_phase(p)*d.coeff, k.v, d.dyad.bra.v)
-end
-function Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where {N}
-    c, k = p.pauli * d.dyad.ket
-    return ScaledDyad(N, c*p.coeff*d.coeff, k.v, d.dyad.bra.v)
-end
-
 function Base.:*(d::Dyad{N}, p::FixedPhasePauli{N}) where {N}
     c, k = d.bra * p
     return ScaledDyad(N, c, d.ket.v, k.v)
 end
-function Base.:*(d::Dyad{N}, p::Pauli{N}) where {N}
-    c, k = d.bra * p
-    return ScaledDyad(N, c, d.ket.v, k.v)
+
+Base.:*(d::ScaledDyad{N}, p::FixedPhasePauli{N}) where N = d.coeff * (d.dyad * p)
+Base.:*(p::FixedPhasePauli{N}, d::ScaledDyad{N}) where N = d.coeff * (p * d.dyad)
+Base.:*(p::Pauli{N}, d::Dyad{N}) where {N} = get_phase(p) * (p.pauli * d)
+Base.:*(d::Dyad{N}, p::Pauli{N}) where {N} = get_phase(p) * (d * p.pauli)
+Base.:*(p::Pauli{N}, d::ScaledDyad{N}) where {N} = d.coeff * (p * d.dyad)
+Base.:*(d::ScaledDyad{N}, p::Pauli{N}) where {N} = d.coeff * (d.dyad * p)
+Base.:*(p::ScaledPauli{N}, d::Dyad{N}) where {N} = get_coeff(p) * (p.pauli * d)
+Base.:*(d::Dyad{N}, p::ScaledPauli{N}) where {N} = get_coeff(p) * (d * p.pauli)
+Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where N = d.coeff * (p * d.dyad)
+Base.:*(d::ScaledDyad{N}, p::ScaledPauli{N}) where N = d.coeff * (d.dyad * p)
+
+
+function Base.:*(ps::PauliSum{N}, d::Dyad{N}) where {N}
+    out = DyadSum(N)
+    for (pauli,coeff) in ps.ops
+        out += coeff * pauli * d
+    end
+    return  out 
 end
-function Base.:*(d::ScaledDyad{N}, p::Pauli{N}) where {N}
-    c, k = d.dyad.bra * p.pauli
-    return ScaledDyad(N, c*d.coeff*get_phase(p), d.dyad.ket.v, k.v)
+function Base.:*(d::Dyad{N}, ps::PauliSum{N}) where {N}
+    out = DyadSum(N)
+    for (pauli,coeff) in ps.ops
+        out += coeff * d * pauli
+    end
+    return  out 
 end
-function Base.:*(d::ScaledDyad{N}, p::ScaledPauli{N}) where {N}
-    c, k = d.dyad.bra * p.pauli
-    return ScaledDyad(N, c*d.coeff*p.coeff, d.dyad.ket.v, k.v)
+function Base.:*(ps::PauliSum{N}, ds::DyadSum{N}) where {N}
+    out = DyadSum(N)
+    for (pauli,coeff) in ps.ops
+        for (dyad,coeff2) in ds 
+            out += coeff * coeff2 * pauli * dyad
+        end
+    end
+    return  out 
+end
+function Base.:*(ds::DyadSum{N}, ps::PauliSum{N}) where {N}
+    out = DyadSum(N)
+    for (pauli,coeff) in ps.ops
+        for (dyad,coeff2) in ds 
+            out += coeff * coeff2 * dyad * pauli
+        end
+    end
+    return  out 
 end
