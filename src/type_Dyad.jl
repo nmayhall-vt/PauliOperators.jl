@@ -55,7 +55,7 @@ function ScaledDyad(N::Integer, c::T, k::Integer, b::Integer) where T
     return ScaledDyad{N,T}(c, Dyad(N, k,b))
 end
 ScaledDyad(d::Dyad{N}; T=Bool) where N = ScaledDyad{N,T}(T(1), d)
-ScaledDyad(c::T, d::Dyad{N}) where {T,N} = return ScaledDyad{N,T}(c,d) 
+# ScaledDyad(c::T, d::Dyad{N}) where {T,N} = return ScaledDyad{N,T}(c,d) 
 
 function Base.rand(T::Type{Dyad{N}}) where N
     return Dyad{N}(rand(KetBitString{N}), rand(BraBitString{N}))

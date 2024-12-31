@@ -2,7 +2,6 @@ using PauliOperators
 using LinearAlgebra
 using Random
 using Test
-using BlockDavidson
 # using LinearMaps
 using BenchmarkTools
 
@@ -26,54 +25,31 @@ using BenchmarkTools
     
     
     
-    a = Pauli(N)
-    H = a + a'
-
+    H = PauliSum(N) 
     for i in 1:40
-        ai = rand()*rand(Pauli{N})
+        ai = rand(ScaledPauli{N})
         H += ai + ai'
     end
     Hmat = Matrix(H)
     
     @test norm(Hmat*v0 - H*v0) < 1e-14
     @test norm(Hmat*Hmat*v0 - H*H*v0) < 1e-12
-
-
-    e0, v0 = eigen(Hmat)
-
-    M = 4
-    e0 = e0[1:M]
-    v0 = v0[:, 1:M]
-    for i in 1:M
-        display(e0[i])
-    end
-
-    dav = Davidson(Hmat, T=ComplexF64, nroots=M)
-    @time e1, v1 = eigs(dav)
-    for i in 1:M
-        display(e1[i])
-    end
-
-    @show abs(det(v1'*v0))
-    @test isapprox(abs(det(v1'*v0)), 1)
     
-    scr = deepcopy(v0)
+    
+
+    ####
+    ## Now confirm matvec works as a function
+    vrand = rand(ComplexF64,size(Hmat)[1], 4)
+    
     function mymatvec(v)
+        scr = deepcopy(v)
         fill!(scr,0.0) 
         mul!(scr, H, v)
         return scr 
     end
-    # @btime $mymatvec($v0, $scr)
-    # function mymatvec(v) 
-    #     return H*v
-    # end
+    
+    @test norm(Hmat*vrand - Matrix(mymatvec(vrand))) < 1e-13
 
-    lmat = LinOpMat{ComplexF64}(mymatvec, Int128(2)^N, true)
-    
-    dav = Davidson(lmat, T=ComplexF64, nroots=M)
-    @time e2, v2 = eigs(dav)
-    
-    @show abs(det(v2'*v0))
-    @test isapprox(abs(det(v2'*v0)), 1)
+   
 end
 # run()
