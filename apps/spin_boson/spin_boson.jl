@@ -1,6 +1,7 @@
 using PauliOperators
 using LinearAlgebra
 using Printf
+using Plots 
 
 function build_full_hamiltonian(ω,λ,g,N)
     "https://www.uni-ulm.de/fileadmin/website_uni_ulm/nawi.inst.260/%C3%9Cbungen/6Spin_Boson_Modell.pdf"
@@ -30,7 +31,7 @@ function linbladian_matvec(H, L, γ, ρ)
 
     dρ = -1im * (H*ρ - ρ*H)
     
-    for i in length(L)
+    for i in 1:length(L)
        dρ += γ[i] * (L[i] * (ρ * L[i]'))
        LL = L[i]' * L[i] 
        dρ -= γ[i]/2 * (ρ * LL + LL * ρ)
@@ -49,24 +50,27 @@ function run()
 
     H = ω0*PauliSum(Pauli("X"))
     σ⁻ = .5*(Pauli("X") + -1im*Pauli("Y"))
+    σᶻ = PauliSum(Pauli("Z"))
     γ = Vector{Float64}([])
     L = Vector{PauliSum{1}}([])
     
     push!(L, σ⁻)
-    push!(γ, .001)
+    push!(L, σᶻ)
+    push!(γ, .2)
+    push!(γ, 2)
     dρ = linbladian_matvec(H, L, γ, ρ)
     println()
     @printf(" ∂ₜρ %s\n", dρ)
     sz_vals = []
 
-    stepsize = .1
-    nsteps = 100
+    stepsize = .001
+    nsteps = 10000
     for i in 1:nsteps
         push!(sz_vals, tr(Matrix(ρ)*Matrix(Pauli("Z"))))
         ρ += stepsize * linbladian_matvec(H, L, γ, ρ)
     end
 
-    display(sz_vals)
+    plot(sz_vals)
     
 end
 
