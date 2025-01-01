@@ -56,22 +56,27 @@ function run()
     
     push!(L, σ⁻)
     push!(L, σᶻ)
-    push!(γ, .2)
-    push!(γ, 2)
+    push!(γ, .1)
+    push!(γ, .1)
     dρ = linbladian_matvec(H, L, γ, ρ)
     println()
     @printf(" ∂ₜρ %s\n", dρ)
+    display(Matrix(ρ))
     sz_vals = []
+    tr_vals = Vector{ComplexF64}([])
 
     stepsize = .001
-    nsteps = 10000
+    nsteps = 20000
     for i in 1:nsteps
         push!(sz_vals, tr(Matrix(ρ)*Matrix(Pauli("Z"))))
+        push!(tr_vals, tr(Matrix(ρ*ρ)))
         ρ += stepsize * linbladian_matvec(H, L, γ, ρ)
     end
-
+    display(Matrix(ρ))
+    println(" tr(ρ): ", tr(Matrix(ρ)))
     plot(sz_vals)
-    
+    plot!(abs.(tr_vals))
+    savefig("./plot.pdf")
 end
 
 function run2()

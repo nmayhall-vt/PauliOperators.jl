@@ -122,5 +122,15 @@ using BenchmarkTools
         err = Matrix(ρ)*Matrix(A) - Matrix(ρ*A)
         @test isapprox(norm(err),0, atol=1e-14)
     end
+    for i in 1:10
+        A = DyadSum(N)
+        B = DyadSum(N)
+        for i in 1:4
+            A += rand(ScaledDyad{N,Float64})
+            B += rand(ScaledDyad{N,Float64})
+        end
+        err = Matrix(A)*Matrix(B) - Matrix(A*B)
+        @test isapprox(norm(err),0, atol=1e-14)
+    end
 end
 # run()

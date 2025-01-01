@@ -162,6 +162,20 @@ Base.:*(a::T, d::ScaledDyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff,
 Base.:*(d::ScaledDyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
 Base.:*(a::T, d::DyadSum{N}) where {N,T<:Number} = replace(kv -> kv[1] => kv[2]*a, d)
 Base.:*(d::DyadSum{N}, a::T) where {N,T<:Number} = replace(kv -> kv[1] => kv[2]*a, d)
+function Base.:*(d1::DyadSum{N,T}, d2::DyadSum{N,T}) where {N,T}
+    d3 = DyadSum{N,T}()
+    for (dyad1, coeff1) in d1
+        for (dyad2, coeff2) in d2
+            sdyad3 = dyad1*dyad2
+            if haskey(d3, sdyad3.dyad) 
+                d3[sdyad3.dyad] += sdyad3.coeff * coeff1 * coeff2
+            else
+                d3[sdyad3.dyad] = sdyad3.coeff * coeff1 * coeff2
+            end
+        end
+    end
+    return d3
+end 
 
 """
     Base.show(io::IO, P::Dyad{N}) where N
