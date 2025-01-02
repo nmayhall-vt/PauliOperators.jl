@@ -131,6 +131,15 @@ using BenchmarkTools
         end
         err = Matrix(A)*Matrix(B) - Matrix(A*B)
         @test isapprox(norm(err),0, atol=1e-14)
+    
+        A = rand(ScaledDyad{N,ComplexF64})
+        B = rand(ScaledDyad{N,ComplexF64})
+        @test isapprox(norm(Matrix(A)*Matrix(B)-Matrix(A*B)), 0, atol=1e-14)
+        
+        A = rand(ScaledDyad{N,ComplexF64})
+        @test isapprox(norm(Matrix(A)*1.2-Matrix(A*1.2)), 0, atol=1e-14)
     end
+
+
 end
 # run()

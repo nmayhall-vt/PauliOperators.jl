@@ -15,8 +15,8 @@ end
 # end
 
 DyadSum{N,T} = Dict{Dyad{N},T}
-DyadSum(N::Integer; T=Float64) = return Dict{Dyad{N}, T}()
-DyadSum(d::Dyad{N}; T=Float64) where N = Dict{Dyad{N}, T}(d=>T(1))
+DyadSum(N::Integer; T=ComplexF64) = return Dict{Dyad{N}, T}()
+DyadSum(d::Dyad{N}; T=Complex64) where N = Dict{Dyad{N}, T}(d=>T(1))
 DyadSum(d::ScaledDyad{N,T}) where {N,T} = Dict{Dyad{N}, T}(d.dyad=>d.coeff)
 
 
@@ -93,6 +93,10 @@ function Base.:+(a::DyadSum{N,T}, b::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     sum!(a,b)
     return out
 end
+function Base.sum!(a::DyadSum{N,T}, b::ScaledDyad{N,T}) where {N,T}
+    mergewith!(+,a,DyadSum(b))
+end
+
 function Base.sum!(a::DyadSum{N,T}, b::DyadSum{N,T}) where {N,T}
     mergewith!(+,a,b)
 end
@@ -159,7 +163,8 @@ end
 Base.:*(a::T, d::Dyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
 Base.:*(d::Dyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
 Base.:*(a::T, d::ScaledDyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
-Base.:*(d::ScaledDyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
+Base.:*(d::ScaledDyad{N,T}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
+Base.:*(d::ScaledDyad{N,T}, a::TT) where {N,T<:Number,TT<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
 Base.:*(a::T, d::DyadSum{N}) where {N,T<:Number} = replace(kv -> kv[1] => kv[2]*a, d)
 Base.:*(d::DyadSum{N}, a::T) where {N,T<:Number} = replace(kv -> kv[1] => kv[2]*a, d)
 function Base.:*(d1::DyadSum{N,T}, d2::DyadSum{N,T}) where {N,T}
