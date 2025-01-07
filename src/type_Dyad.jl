@@ -29,6 +29,14 @@ function Base.getindex(ds::Adjoint{<:Any,DyadSum{N,T}}, d::Dyad{N}) where {N,T}
     return parent(ds)[d']
 end
 
+"""
+    clip!(ps::PauliSum; thresh=1e-16)
+
+Delete Dyad's with coeffs smaller than thresh
+"""
+function clip!(ps::DyadSum{N,T}; thresh=1e-16) where {N,T}
+    filter!(p->abs(p.second) > thresh, ps.ops)
+end
 
 
 """
