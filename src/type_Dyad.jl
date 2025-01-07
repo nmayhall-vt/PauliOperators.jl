@@ -29,6 +29,8 @@ function Base.getindex(ds::Adjoint{<:Any,DyadSum{N,T}}, d::Dyad{N}) where {N,T}
     return parent(ds)[d']
 end
 
+# Base.isempty(d::Dyad) = false 
+# Base.iterate(d::Dyad) = (d, false)
 
 
 """
