@@ -16,7 +16,7 @@ end
 
 DyadSum{N,T} = Dict{Dyad{N},T}
 DyadSum(N::Integer; T=ComplexF64) = return Dict{Dyad{N}, T}()
-DyadSum(d::Dyad{N}; T=Complex64) where N = Dict{Dyad{N}, T}(d=>T(1))
+DyadSum(d::Dyad{N}; T=ComplexF64) where N = Dict{Dyad{N}, T}(d=>T(1))
 DyadSum(d::ScaledDyad{N,T}) where {N,T} = Dict{Dyad{N}, T}(d.dyad=>d.coeff)
 
 
@@ -62,7 +62,7 @@ function Base.rand(T::Type{Dyad{N}}) where N
 end
 
 function Base.rand(T::Type{ScaledDyad{N,TT}}) where {N,TT}
-    return ScaledDyad{N,TT}(rand(TT), rand(Dyad{N}))
+    return ScaledDyad{N,TT}(rand(TT)-TT(.5), rand(Dyad{N}))
 end
 
 function Base.rand(T::Type{ScaledDyad{N}}) where N
@@ -147,6 +147,7 @@ function Base.:-(a::DyadSum{N,T}) where {N,T}
     map!(x->-x, values(b))
     return b
 end
+
 
 
 
