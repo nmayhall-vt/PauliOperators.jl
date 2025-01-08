@@ -365,6 +365,18 @@ using Random
     sp_comm = commutator(sp1,sp2)
     sp_comm_true = (0.0+2.0im)*[ScaledPauli(Pauli("Z"))]
     @test sp_comm == sp_comm_true
+
+
+
+    println("Test Adjoint")
+    A = PauliSum(5)
+    B = PauliSum(5)
+    for i in 1:50
+        sum!(A, rand(ScaledPauli{5}))
+        sum!(B, rand(ScaledPauli{5}))
+    end
+    @test norm(Matrix(A)' - Matrix(A')) < 1e-8
+    @test norm(Matrix(B)' - Matrix(B')) < 1e-8
 end
 
 
