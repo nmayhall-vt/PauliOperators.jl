@@ -129,6 +129,10 @@ function PauliNew(N::Integer; X=[], Y=[], Z=[])
     return PauliNew{N,M}(θ, FixedPhasePauli{N}(ntuple(zints->zints, M), ntuple(xints->xints, M)))
 end
 
+function Pauli(fpp::FixedPhasePauli{N}) where N
+    return Pauli{N}(0, fpp)
+end
+
 
 """
     Base.show(io::IO, P::PauliMask)
@@ -136,7 +140,7 @@ end
 TBW
 """
 function Base.show(io::IO, p::Pauli{N}) where N
-    println(@sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p)) 
+    print(string(p)) 
 end
 
 """
@@ -144,7 +148,7 @@ end
 
 Display, y = iY
 """
-Base.string(p::Pauli{N}) where N = string(p.pauli)
+Base.string(p::Pauli) = @sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p.pauli)
 
 """
     Base.Matrix(p::Pauli)

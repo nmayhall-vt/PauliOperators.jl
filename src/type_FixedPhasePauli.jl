@@ -135,7 +135,7 @@ end
 
 TBW
 """
-Base.show(io::IO, p::FixedPhasePauli) = println(string(p)) 
+Base.show(io::IO, p::FixedPhasePauli) = print(string(p)) 
 
 """
     Base.display(p::Pauli)

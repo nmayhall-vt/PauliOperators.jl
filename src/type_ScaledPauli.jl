@@ -15,6 +15,10 @@ function ScaledPauli(p::Pauli{N}) where N
     return ScaledPauli{N}(get_phase(p), p.pauli) 
 end
 
+function ScaledPauli(p::FixedPhasePauli{N}) where N
+    return ScaledPauli(Pauli(p)) 
+end
+
 ScaledPauliVector{N} = Vector{ScaledPauli{N}}
 function ScaledPauliVector(N)
     return Vector{ScaledPauli{N}}([])
@@ -23,17 +27,22 @@ end
 function Base.display(sp::ScaledPauli)
     @printf(" %12.8f %12.8fi   %s\n", real(sp.coeff), imag(sp.coeff), string(sp.pauli))
 end
+Base.println(sp::ScaledPauli) = println(string(sp))
+ 
 function Base.display(sv::Vector{ScaledPauli{N}}) where {N}
     for i in sv
         display(i)
     end
 end
+
+# Base.show(io::IO, p::ScaledPauli{N}) where N = println(string(p))
+
 """
     Base.display(p::Pauli)
 
 Display, y = iY
 """
-Base.string(p::ScaledPauli) = string(p.pauli)
+Base.string(p::ScaledPauli) = @sprintf "%12.8f %12.8fim | %s" real(p.coeff) imag(p.coeff) string(p.pauli)
 
 
 """

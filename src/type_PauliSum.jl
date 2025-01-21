@@ -133,6 +133,13 @@ function Base.:*(ps::PauliSum{N}, a::Number) where {N}
 end
 Base.:*(a::Number, ps::PauliSum{N}) where {N} = ps*a
 
+function Base.:*(ps::PauliSum{N}, a::Union{Pauli{N}, ScaledPauli{N}, FixedPhasePauli{N}}) where {N}
+    return ps * PauliSum(a)
+end
+function Base.:*(a::Union{Pauli{N}, ScaledPauli{N}, FixedPhasePauli{N}}, ps::PauliSum{N}) where {N}
+    return PauliSum(a) * ps
+end
+
 """
     LinearAlgebra.mul!(ps::PauliSum, a::Number)
 

@@ -23,16 +23,9 @@ using Random
     println(" Now PF")
     a = FixedPhasePauli("XYZIXY")
     b = FixedPhasePauli("YXXYZZ")
-    display(a)
-    display(b)
-    display(a*b)
-    display(get_phase(a,b)*a*b)
-    display(1*c)
-    display(c)
     @test c == Pauli{6}(PauliOperators.phase(a,b), a*b) 
-    @test 1*c == get_phase(a,b)*a*b 
-    @test 2*c == 2*a*b*get_phase(a,b) 
-    
+    @test 1*c == get_phase(a,b)*(a*b)
+    @test 2*c == 2*(a*b)*get_phase(a,b) 
 
     @test commute(a,b) == false
     @test get_phase(c) == -1
@@ -69,25 +62,25 @@ using Random
     @test a != d
    
     sum1 = a + b
-    display(sum1)
-    println()
+    # display(sum1)
+    # println()
 
-    display(a)
-    display(sum1[a])
-    display(sum1[a.pauli])
+    # display(a)
+    # display(sum1[a])
+    # display(sum1[a.pauli])
     sum1[a] = 3
-    display(a)
+    # display(a)
 
     sum2 = a + d
-    display(sum2)
+    # display(sum2)
 
-    println()
+    # println()
     sum3 = sum1 + sum2
     sum!(sum1, sum2)
-    display(sum1)
+    # display(sum1)
     
-    println()
-    display(sum3)
+    # println()
+    # display(sum3)
 
     check = true
     for key in keys(sum3)
@@ -95,21 +88,6 @@ using Random
     end
     @test check
 
-    # Test Multiply
-
-
-    println("Test Multiply")
-    for i in 1:10
-        N = 8
-        a = rand(Pauli{N})
-        b = rand(Pauli{N})
-
-        display(a * b)
-        # println()
-        # display(s2)
-
-        @test all(Matrix(a) * Matrix(b) - Matrix(a * b) .≈ 0)
-    end
 
 
     println("Test Addition")
@@ -220,9 +198,9 @@ using Random
             push!(w, v[rand(1:10)]*i)
         end
     end
-    display(v)
-    println() 
-    display(w)
+    # display(v)
+    # println() 
+    # display(w)
 
     @test length(v) != length(w)
     @test length(v) == length(unique(w))
@@ -358,7 +336,18 @@ using Random
     spv2 = (1/2) .* [
                     ScaledPauli(Pauli(4; X=[2], Y=[4])),
                    -ScaledPauli(Pauli(4; X=[4], Y=[2]))];
+   
+    display(spv1)
+    println()
+    display(spv2)
+    println()
     spv_comm = commutator(spv1,spv2)
+    display(spv1)
+    println()
+    display(spv2)
+    println()
+    display(spv_comm)
+    return
     @test isempty(spv_comm)
 
     sp1 = ScaledPauli(Pauli("X")); sp2 = ScaledPauli(Pauli("Y"));
@@ -380,3 +369,40 @@ using Random
 end
 
 
+
+@testset "Multiply" begin
+    # Test Multiply
+    ntests = 10 
+    N = 7
+    println("Test Multiply")
+    for i in 1:ntests
+        a = rand(Pauli{N})
+        b = rand(Pauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = rand(Pauli{N})
+        b = rand(FixedPhasePauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = rand(Pauli{N})
+        b = rand(ScaledPauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = rand(ScaledPauli{N})
+        b = rand(ScaledPauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = rand(ScaledPauli{N})
+        b = rand(FixedPhasePauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+end

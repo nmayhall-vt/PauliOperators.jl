@@ -3,7 +3,7 @@
 
 TBW
 """
-function boson_binary_transformation(nqubits)
+function boson_binary_transformation(nqubits; verbose=0)
 
     # I = Matrix(Pauli("I"))
     # X = Matrix(Pauli("X"))
@@ -82,14 +82,15 @@ function boson_binary_transformation(nqubits)
         end
     end
 
-    println(" -------- Intermediate Representation -------- ")
-    # println(rep1)
-    for i in rep1
-        for j in i[1]
-            @printf("%2s ",j)
-        end
-        # println(i[2])
-        @printf("√%i\n",i[2])
+    if verbose > 0 
+        println(" -------- Intermediate Representation -------- ")
+        for i in rep1
+            for j in i[1]
+                @printf("%2s ",j)
+            end
+            # println(i[2])
+            @printf("√%i\n",i[2])
+        end 
     end 
 
 
@@ -98,7 +99,9 @@ function boson_binary_transformation(nqubits)
     σp = ((.5,"X"), (-.5im, "Y"))
     σm = ((.5,"X"), (.5im, "Y"))
    
-    println(" -------- Pauli Representation -------- ")
+    if verbose > 0 
+        println(" -------- Pauli Representation -------- ")
+    end
 
     rep2 = Dict{Tuple{Int128,Int128},ComplexF64}() 
     # rep2 = Dict{Pauli{nqubits},Float64}() 
@@ -143,48 +146,48 @@ function boson_binary_transformation(nqubits)
         end
     end
   
-    display(bdag)
+    # display(bdag)
     return bdag
-    for key in sort(rep2)
-        @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), Pauli(key[1]..., nqubits))
-        # println(key[1])
-    end
-    println(" Number of operators: ", length(rep2))
+    # for key in sort(rep2)
+    #     @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), Pauli(key[1]..., nqubits))
+    #     # println(key[1])
+    # end
+    # if verbose > 0: println(" Number of operators: ", length(rep2))
 
-    rep3 = Dict{Tuple{Int128,Int128},ComplexF64}() 
+    # rep3 = Dict{Tuple{Int128,Int128},ComplexF64}() 
 
-    println(" Create Product")
-    for prod in Iterators.product(keys(rep2), keys(rep2))
-        pbs = Pauli(prod[1]..., nqubits) * Pauli(prod[2]..., nqubits)
-        # println(pbs)
-        coeff::ComplexF64 = rep2[prod[1]]*rep2[prod[2]]'
-        key = (pbs.z, pbs.x)
-        if haskey(rep3, key)
-            rep3[key] += coeff 
-            # rep3[key] += coeff * get_phase(pbs) 
-        else
-            rep3[key] = coeff 
-            # rep3[key] = coeff * get_phase(pbs)
-        end
-    end
+    # # println(" Create Product")
+    # for prod in Iterators.product(keys(rep2), keys(rep2))
+    #     pbs = Pauli(prod[1]..., nqubits) * Pauli(prod[2]..., nqubits)
+    #     # println(pbs)
+    #     coeff::ComplexF64 = rep2[prod[1]]*rep2[prod[2]]'
+    #     key = (pbs.z, pbs.x)
+    #     if haskey(rep3, key)
+    #         rep3[key] += coeff 
+    #         # rep3[key] += coeff * get_phase(pbs) 
+    #     else
+    #         rep3[key] = coeff 
+    #         # rep3[key] = coeff * get_phase(pbs)
+    #     end
+    # end
 
-    for key in keys(rep3)
-        if abs(rep3[key]) < 1e-14
-            delete!(rep3,key)
-        end
-    end
+    # for key in keys(rep3)
+    #     if abs(rep3[key]) < 1e-14
+    #         delete!(rep3,key)
+    #     end
+    # end
  
-    flush(stdout)
-    println(" Build b'b matrix")
+    # # flush(stdout)
+    # # println(" Build b'b matrix")
 
-    mat = zeros(2^nqubits, 2^nqubits)
-    for key in sort(rep3)
-        pbs = Pauli(key[1]..., nqubits)
-        @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), pbs)
-        mat += key[2]*Matrix(pbs)
-        # println(key[1])
-    end
-    return mat
+    # mat = zeros(2^nqubits, 2^nqubits)
+    # for key in sort(rep3)
+    #     pbs = Pauli(key[1]..., nqubits)
+    #     # @printf("%12.8f %12.8fi %s\n", real(key[2]), imag(key[2]), pbs)
+    #     mat += key[2]*Matrix(pbs)
+    #     # println(key[1])
+    # end
+    # return mat
     
 end
 

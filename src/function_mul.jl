@@ -208,45 +208,19 @@ function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
     return Pauli{N}(θ, p1.pauli*p2.pauli)
 end
 
+Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where N = p1 * Pauli(p2)
+Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where N = Pauli(p1) * p2
 
-function Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where {N}
-    # x = p1.x ⊻ p2.x
-    # z = p1.z ⊻ p2.z
-    # θ = (p1.θ + phase(p2)) % 4
-    # θ += (2*count_ones(p1.x & p2.z)) % 4
-    # return Pauli{N}(θ, z, x)
-    θ = (p1.θ + phase(p1.pauli, p2)) % 4
-    return Pauli{N}(θ, p1.pauli*p2)
+function Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where N 
+    return p1.coeff * p2.coeff * (Pauli(p1.pauli) * Pauli(p2.pauli))
 end
-
-function Base.:*(p1::FixedPhasePauli{N}, p2::Pauli{N}) where {N}
-    # x = p1.x ⊻ p2.x
-    # z = p1.z ⊻ p2.z
-    # θ = (phase(p1) + p2.θ) % 4
-    # θ += (2*count_ones(p1.x & p2.z)) % 4
-    # return Pauli{N}(θ, z, x)
-    θ = (p2.θ + phase(p1, p2.pauli)) % 4
-    return Pauli{N}(θ,p1*p2.pauli)
-end
-
-Base.:*(p1::FixedPhasePauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p1 * p2.coeff, p1 * p2.pauli)
-Base.:*(p1::ScaledPauli{N}, p2::FixedPhasePauli{N}) where N = ScaledPauli{N}(p1.coeff, p1.pauli * p2)
-Base.:*(p1::ScaledPauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p1.coeff*p2.coeff * get_phase(p1.pauli, p2.pauli), p1.pauli*p2.pauli)
-Base.:*(p1::ScaledPauli{N}, p2::Pauli{N}) where N = ScaledPauli{N}(p1.coeff * get_phase(p1.pauli, phasefree(p2)), p1.pauli*p2)
-Base.:*(p1::Pauli{N}, p2::ScaledPauli{N}) where N = ScaledPauli{N}(p2.coeff * get_phase(p2.pauli, phasefree(p1)), p1*p2.pauli)
+Base.:*(p1::ScaledPauli{N}, p2::Union{Pauli{N}, FixedPhasePauli{N}}) where N = p1 * ScaledPauli(p2)
+Base.:*(p1::Union{Pauli{N}, FixedPhasePauli{N}}, p2::ScaledPauli{N}) where N = ScaledPauli(p1) * p2
 
 
-"""
-    Base.:*(p::Pauli{N}, c::Number) where {N}
-
-Multiply a `Pauli` with a number. This returns a `PauliSum` 
-"""
-Base.:*(p::Pauli{N}, c::T) where {N,T<:Number}             = ScaledPauli{N}(c*get_phase(p), p)
-Base.:*(p::FixedPhasePauli{N}, c::T) where {N,T<:Number}   = ScaledPauli{N}(c, p)
-Base.:*(p::ScaledPauli{N}, c::T) where {N,T<:Number}       = ScaledPauli{N}(p.coeff*c, p.pauli) 
-Base.:*(c::Number, p::Pauli) = p*c
-Base.:*(c::Number, p::FixedPhasePauli) = p*c
-Base.:*(c::Number, p::ScaledPauli) = p*c
+Base.:*(p::ScaledPauli{N}, c::Number) where {N} = ScaledPauli{N}(p.coeff*c, p.pauli) 
+Base.:*(p::Union{Pauli{N}, FixedPhasePauli{N}}, c::Number) where {N} = ScaledPauli(p)*c
+Base.:*(c::Number, p::Union{ScaledPauli{N}, Pauli{N}, FixedPhasePauli{N}}) where N = p*c
 
 
 
