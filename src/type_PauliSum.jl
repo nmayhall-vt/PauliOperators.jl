@@ -22,6 +22,12 @@ end
 function PauliSum(o::Pauli{N}) where N
     return PauliSum{N}(Dict(o.pauli => get_phase(o)))
 end
+function PauliSum(o::ScaledPauli{N}) where N
+    return PauliSum{N}(Dict(o.pauli => o.coeff))
+end
+function PauliSum(o::FixedPhasePauli{N}) where N
+    return PauliSum{N}(Dict(o => 1))
+end
 
 
 """

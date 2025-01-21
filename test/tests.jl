@@ -405,4 +405,43 @@ end
         @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
         @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
     end
+    for i in 1:ntests
+        a = PauliSum(N)
+        for i in 1:10
+            a += rand(ScaledPauli{N})
+        end
+        b = PauliSum(N)
+        for i in 1:10
+            b += rand(ScaledPauli{N})
+        end
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = PauliSum(N)
+        for i in 1:10
+            a += rand(ScaledPauli{N})
+        end
+        b = rand(FixedPhasePauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = PauliSum(N)
+        for i in 1:10
+            a += rand(ScaledPauli{N})
+        end
+        b = rand(Pauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
+    for i in 1:ntests
+        a = PauliSum(N)
+        for i in 1:10
+            a += rand(ScaledPauli{N})
+        end
+        b = rand(ScaledPauli{N})
+        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
+        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
+    end
 end
