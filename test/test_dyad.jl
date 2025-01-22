@@ -141,5 +141,15 @@ using BenchmarkTools
     end
 
 
+    # A = rand(FixedPhasePauli{N})
+    # B = rand(FixedPhasePauli{N})
+    # D = rand(Dyad{N})
+
+    # @show A
+    # @show B
+    # @show D
+    # @show A * B * D
+    # @show A * (B * D)
+    # @test norm(Matrix((A * B * D)) - Matrix(A * (B * D))) < 1e-14
 end
 # run()

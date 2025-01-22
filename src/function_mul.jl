@@ -204,8 +204,10 @@ end
 Multiply two `Pauli`'s together
 """
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
+    x = p1.pauli.x ⊻ p2.pauli.x
+    z = p1.pauli.z ⊻ p2.pauli.z
     θ = (p1.θ + p2.θ + phase(p1.pauli, p2.pauli)) % 4
-    return Pauli{N}(θ, p1.pauli*p2.pauli)
+    return Pauli{N}(θ, FixedPhasePauli{N}(z,x))
 end
 
 Base.:*(p1::Pauli{N}, p2::FixedPhasePauli{N}) where N = p1 * Pauli(p2)
@@ -217,9 +219,15 @@ end
 Base.:*(p1::ScaledPauli{N}, p2::Union{Pauli{N}, FixedPhasePauli{N}}) where N = p1 * ScaledPauli(p2)
 Base.:*(p1::Union{Pauli{N}, FixedPhasePauli{N}}, p2::ScaledPauli{N}) where N = ScaledPauli(p1) * p2
 
+function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where N 
+    x = p1.x ⊻ p2.x
+    z = p1.z ⊻ p2.z
+    return FixedPhasePauli{N}(z,x)
+end
 
-Base.:*(p::ScaledPauli{N}, c::Number) where {N} = ScaledPauli{N}(p.coeff*c, p.pauli) 
-Base.:*(p::Union{Pauli{N}, FixedPhasePauli{N}}, c::Number) where {N} = ScaledPauli(p)*c
+
+Base.:*(p::ScaledPauli{N}, c::Number) where N = ScaledPauli{N}(p.coeff*c, p.pauli) 
+Base.:*(p::Union{Pauli{N}, FixedPhasePauli{N}}, c::Number) where N = ScaledPauli(p)*c
 Base.:*(c::Number, p::Union{ScaledPauli{N}, Pauli{N}, FixedPhasePauli{N}}) where N = p*c
 
 
@@ -332,19 +340,11 @@ Base.:*(p::ScaledPauli{N}, d::ScaledDyad{N}) where N = d.coeff * (p * d.dyad)
 Base.:*(d::ScaledDyad{N}, p::ScaledPauli{N}) where N = d.coeff * (d.dyad * p)
 
 
-function Base.:*(ps::PauliSum{N}, d::Dyad{N}) where {N}
-    out = DyadSum(N)
-    for (pauli,coeff) in ps.ops
-        out += coeff * pauli * d
-    end
-    return  out 
+function Base.:*(ps::PauliSum{N}, d::Union{Dyad{N}, ScaledDyad{N}}) where {N}
+    return ps * DyadSum(d) 
 end
-function Base.:*(d::Dyad{N}, ps::PauliSum{N}) where {N}
-    out = DyadSum(N)
-    for (pauli,coeff) in ps.ops
-        out += coeff * d * pauli
-    end
-    return  out 
+function Base.:*(d::Union{Dyad{N}, ScaledDyad{N}}, ps::PauliSum{N}) where {N}
+    return DyadSum(d) * ps
 end
 function Base.:*(ps::PauliSum{N}, ds::DyadSum{N}) where {N}
     out = DyadSum(N)
@@ -364,3 +364,5 @@ function Base.:*(ds::DyadSum{N}, ps::PauliSum{N}) where {N}
     end
     return  out 
 end
+Base.:*(ds::DyadSum, p::AbstractPauli) = ds * PauliSum(p)
+Base.:*(p::AbstractPauli, ds::DyadSum) = PauliSum(p) * ds

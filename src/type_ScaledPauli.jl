@@ -19,6 +19,7 @@ function ScaledPauli(p::FixedPhasePauli{N}) where N
     return ScaledPauli(Pauli(p)) 
 end
 
+
 ScaledPauliVector{N} = Vector{ScaledPauli{N}}
 function ScaledPauliVector(N)
     return Vector{ScaledPauli{N}}([])

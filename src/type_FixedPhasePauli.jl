@@ -240,17 +240,6 @@ function Base.Matrix(p::FixedPhasePauli{N}) where N
 end
 
 """
-    Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
-
-Multiply two `FixedPhasePauli`'s together
-"""
-function Base.:*(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N}) where {N}
-    x = p1.x ⊻ p2.x
-    z = p1.z ⊻ p2.z
-    return FixedPhasePauli{N}(z,x)
-end
-
-"""
     get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N})
 
 Get the phase arising from the multiplication of two `FixedPhasePauli`'s

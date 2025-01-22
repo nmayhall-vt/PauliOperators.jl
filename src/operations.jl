@@ -170,6 +170,13 @@ function expectation_value(p::Pauli{N}, ket::KetBitString{N}) where N
     return (1im)^p.θ 
 end
 
+function expectation_value(p::ScaledPauli{N}, ket::KetBitString{N}) where N
+    is_diagonal(p) || return 0.0
+    
+    count_ones(p.pauli.z & ket.v) % 2 == 0 || return -p.coeff 
+    return p.coeff
+end
+
 function expectation_value(p::PauliSum{N}, ket::KetBitString{N}) where N
     
     expval = 0.0

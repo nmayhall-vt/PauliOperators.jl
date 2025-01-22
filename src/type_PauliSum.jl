@@ -107,7 +107,7 @@ end
 # end
 
 """
-    Base.-(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
+    Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
 
 Multiply two `PauliSum`s. 
 """
@@ -125,6 +125,14 @@ function Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
         end
     end 
     return out
+end
+
+function Base.rand(T::Type{PauliSum{N}}; n_paulis=2) where N
+    a = PauliSum(N) 
+    for i in 1:n_paulis
+        a += rand(ScaledPauli{N}) + rand(ScaledPauli{N})
+    end
+    return a 
 end
 
 """

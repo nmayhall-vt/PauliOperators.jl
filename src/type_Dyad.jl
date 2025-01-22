@@ -11,6 +11,11 @@ struct ScaledDyad{N,T}
     dyad::Dyad{N}
 end
 
+# function ScaledDyad(d::Dyad{N}; T=Bool) where N
+#     return ScaledDyad{N,T}(T(1), d)
+# end
+# ScaledDyad(d::ScaledDyad) = d
+
 # struct Adjoint{DyadSum{N,T}}
 # end
 
@@ -76,6 +81,22 @@ end
 function Base.rand(T::Type{ScaledDyad{N}}) where N
     return ScaledDyad{N,ComplexF64}(rand(ComplexF64), rand(Dyad{N}))
 end
+
+function Base.rand(T::Type{DyadSum{N}}; n_dyads=2) where N
+    a = DyadSum(N) 
+    for i in 1:n_dyads
+        a += rand(ScaledDyad{N}) + rand(ScaledDyad{N})
+    end
+    return a 
+end
+function Base.rand(T::Type{DyadSum{N,TT}}; n_dyads=2) where {N,TT}
+    a = DyadSum(N) 
+    for i in 1:n_dyads
+        a += rand(ScaledDyad{N,TT}) + rand(ScaledDyad{N,TT})
+    end
+    return a 
+end
+
 
 function Base.:+(d1::ScaledDyad{N}, d2::ScaledDyad{N}) where {N}
     if isequal(d1.dyad, d2.dyad)
@@ -160,15 +181,17 @@ end
 
 
 ### Multiplication 
-function Base.:*(d1::Dyad{N}, d2::Dyad{N}) where {N}
-    return ScaledDyad{N,Bool}(d1.bra.v==d2.ket.v, Dyad{N}(d1.ket, d2.bra))
-end
-function Base.:*(d1::Dyad{N}, d2::ScaledDyad{N,T}) where {N,T}
-    return ScaledDyad{N,T}((d1.bra.v==d2.dyad.ket.v)*d2.coeff, Dyad{N}(d1.ket, d2.dyad.bra))
-end
 function Base.:*(d1::ScaledDyad{N,T}, d2::ScaledDyad{N,T}) where {N,T}
     return ScaledDyad{N,T}((d1.dyad.bra.v==d2.dyad.ket.v)*d1.coeff*d2.coeff, Dyad{N}(d1.dyad.ket, d2.dyad.bra))
 end
+function Base.:*(d1::ScaledDyad{N,T1}, d2::ScaledDyad{N,T2}) where {N,T1,T2}
+    coeff3 = d1.coeff*d2.coeff
+    return ScaledDyad{N,typeof(coeff3)}((d1.dyad.bra.v==d2.dyad.ket.v)*coeff3, Dyad{N}(d1.dyad.ket, d2.dyad.bra))
+end
+Base.:*(d1::Dyad, d2::Dyad) = ScaledDyad(d1) * ScaledDyad(d2)
+Base.:*(d1::Dyad, d2::ScaledDyad) = ScaledDyad(d1) * d2
+Base.:*(d1::ScaledDyad, d2::Dyad) = d1 * ScaledDyad(d2)
+
 Base.:*(a::T, d::Dyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
 Base.:*(d::Dyad{N}, a::T) where {N,T<:Number} = ScaledDyad{N,T}(a, d)
 Base.:*(a::T, d::ScaledDyad{N}) where {N,T<:Number} = ScaledDyad{N,T}(a*d.coeff, d.dyad)
@@ -189,7 +212,9 @@ function Base.:*(d1::DyadSum{N,T}, d2::DyadSum{N,T}) where {N,T}
         end
     end
     return d3
-end 
+end
+Base.:*(d1::DyadSum, d2::Union{Dyad, ScaledDyad}) = d1 * DyadSum(d2)
+Base.:*(d1::Union{Dyad, ScaledDyad}, d2::DyadSum) = DyadSum(d1) * d2
 
 """
     Base.show(io::IO, P::Dyad{N}) where N

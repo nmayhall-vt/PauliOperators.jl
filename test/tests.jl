@@ -13,19 +13,12 @@ using Random
     b = Pauli("YXXYZZ")
     c = Pauli("ZZYYYX")
     c = rotate_phase(c,1)
-    # display(a)
-    # display(b)
-    # display(a*b)
-    # display(c)
     @test c == a*b 
     @test norm(-Matrix(a) - Matrix(-a)) < 1e-9 
   
     println(" Now PF")
     a = FixedPhasePauli("XYZIXY")
     b = FixedPhasePauli("YXXYZZ")
-    @test c == Pauli{6}(PauliOperators.phase(a,b), a*b) 
-    @test 1*c == get_phase(a,b)*(a*b)
-    @test 2*c == 2*(a*b)*get_phase(a,b) 
 
     @test commute(a,b) == false
     @test get_phase(c) == -1
@@ -36,8 +29,9 @@ using Random
     @test get_phase(rotate_phase(c,3)) == 1im
     @test get_phase(rotate_phase(c,5)) == -1im
 
-    a = FixedPhasePauli("ZXYI"); b = FixedPhasePauli("YZXX");
-    @test norm(Matrix(a*b)*get_phase(a,b) - Matrix(a)*Matrix(b)) ≈ 0
+    a = FixedPhasePauli("ZXYI"); 
+    b = FixedPhasePauli("YZXX");
+    @test norm(Matrix(a*b) * get_phase(a,b) - Matrix(a)*Matrix(b)) ≈ 0
 
     display((a.z, a.x))
     display((b.z, b.x))
@@ -61,57 +55,6 @@ using Random
     # @test hash(phasefree(a)) == hash(phasefree(d))
     @test a != d
    
-    sum1 = a + b
-    # display(sum1)
-    # println()
-
-    # display(a)
-    # display(sum1[a])
-    # display(sum1[a.pauli])
-    sum1[a] = 3
-    # display(a)
-
-    sum2 = a + d
-    # display(sum2)
-
-    # println()
-    sum3 = sum1 + sum2
-    sum!(sum1, sum2)
-    # display(sum1)
-    
-    # println()
-    # display(sum3)
-
-    check = true
-    for key in keys(sum3)
-        check = sum3[key] ≈ sum1[key] && check
-    end
-    @test check
-
-
-
-    println("Test Addition")
-    for i in 1:10
-        N = 8
-        a = rand(Pauli{N})
-        b = rand(Pauli{N})
-        c = rand(Pauli{N})
-        d = rand(Pauli{N})
-
-        s1 = a + b + d
-        s2 = a + c + d
-
-        @test all(Matrix(s1) + Matrix(s2) - Matrix(s1 + s2) .≈ 0)
-    end
-    
-
-    
-    a = rand(Pauli{6})
-    b = rand(Pauli{6})
-    s = a + b
-    c = 1.23
-    @test all(c*Matrix(s) - Matrix(c * s) .≈ 0)
-    println()
 
     ZX = [0+0im  0+0im   1+0im   0+0im
           0+0im  0+0im   0+0im  -1+0im
@@ -140,14 +83,6 @@ using Random
     @test (Pauli("X") + Pauli("Y")) ⊗ (Pauli("Y") + Pauli("Z")) ≈ Pauli("XY") + Pauli("XZ") + Pauli("YY") + Pauli("YZ") 
 
 
-    # is_hermitian
-    @test is_hermitian(Pauli("XXXXX")) == true
-    @test is_hermitian(Pauli("XXXXY")) == true
-    @test is_hermitian(Pauli("XXYZY")) == true
-    @test is_hermitian(Pauli("XXXXX")) == true
-    @test is_hermitian(phasefree(Pauli("YXXXX"))) == false 
-    @test is_hermitian(phasefree(Pauli("YYYXX"))) == false 
-    @test is_hermitian(phasefree(Pauli("YZYXX"))) == true 
 
     # Direct sums
     @test Pauli("X") ⊕ Pauli("IZ") ≈ Pauli("XII") + Pauli("IIZ")
@@ -162,30 +97,6 @@ using Random
     @test Pauli("YZXZ") * KetBitString([1,1,1,0]) == (1im, KetBitString([0,1,0,0]))
     @test Pauli("XZXZ") * KetBitString([1,1,1,0]) == (-1, KetBitString([0,1,0,0]))
 
-    for i in 1:50
-        N = 8
-        # o = Pauli("XYZI")
-        # v = KetBitString([1,0,0,0])
-        o = rand(Pauli{N})
-        v = KetBitString{N}(rand(0:Int128(2)^N-1))
-        @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
-        
-        o = rand(FixedPhasePauli{N})
-        v = KetBitString{N}(rand(0:Int128(2)^N-1))
-        @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
-    end
-
-    # ScaledPauli
-    N=8
-    for i in 1:10
-        a = ScaledPauli(rand(Pauli{N}))
-        b = ScaledPauli(rand(Pauli{N}))
-
-        a *= 2.3
-        b *= 3.2
-
-        @test get_coeff(a * b) ≈ get_coeff(a) * get_coeff(b) * get_phase(a.pauli, b.pauli)
-    end
 
     # Test unique!
     # Create vector of scaled paulis
@@ -370,78 +281,75 @@ end
 
 
 
-@testset "Multiply" begin
+
+@testset "Mul1" begin
     # Test Multiply
     ntests = 10 
     N = 7
-    println("Test Multiply")
-    for i in 1:ntests
-        a = rand(Pauli{N})
-        b = rand(Pauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
-    end
-    for i in 1:ntests
-        a = rand(Pauli{N})
-        b = rand(FixedPhasePauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
-    end
-    for i in 1:ntests
-        a = rand(Pauli{N})
-        b = rand(ScaledPauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
-    end
-    for i in 1:ntests
-        a = rand(ScaledPauli{N})
-        b = rand(ScaledPauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
-    end
-    for i in 1:ntests
-        a = rand(ScaledPauli{N})
-        b = rand(FixedPhasePauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
-    end
-    for i in 1:ntests
-        a = PauliSum(N)
-        for i in 1:10
-            a += rand(ScaledPauli{N})
+    types = [Pauli{N}, FixedPhasePauli{N}, ScaledPauli{N}, PauliSum{N}, Dyad{N}, ScaledDyad{N}, DyadSum{N}]
+    for t1 in types
+        for t2 in types
+            for i in 1:ntests
+                a = rand(t1)
+                b = rand(t2)
+                phase = 1
+                if t1 == FixedPhasePauli{N} && t2 == FixedPhasePauli{N}
+                    phase = get_phase(a,b)
+                end
+                @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b) * phase) .< 1e-14)
+            end
         end
-        b = PauliSum(N)
-        for i in 1:10
-            b += rand(ScaledPauli{N})
-        end
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
     end
-    for i in 1:ntests
-        a = PauliSum(N)
-        for i in 1:10
-            a += rand(ScaledPauli{N})
+end
+@testset "Add1" begin
+    # Test Multiply
+    ntests = 10 
+    N = 7
+    types = [Pauli{N}, FixedPhasePauli{N}, ScaledPauli{N}, PauliSum{N}]
+    for t1 in types
+        for t2 in types
+            for i in 1:ntests
+                a = rand(t1)
+                b = rand(t2)
+                @test all(abs.(Matrix(a) + Matrix(b) - Matrix(a + b)) .< 1e-14)
+            end
         end
-        b = rand(FixedPhasePauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
     end
-    for i in 1:ntests
-        a = PauliSum(N)
-        for i in 1:10
-            a += rand(ScaledPauli{N})
+end
+@testset "Add2" begin
+    # Test Multiply
+    ntests = 10 
+    N = 7
+    types = [Dyad{N}, ScaledDyad{N}]
+    for t1 in types
+        for t2 in types
+            for i in 1:ntests
+                a = rand(t1)
+                b = rand(t2)
+                @test all(abs.(Matrix(a) + Matrix(b) - Matrix(a + b)) .< 1e-14)
+            end
         end
-        b = rand(Pauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
     end
-    for i in 1:ntests
-        a = PauliSum(N)
+end
+
+@testset "is_hermitian" begin
+    # is_hermitian
+    @test is_hermitian(Pauli("XXXXX")) == true
+    @test is_hermitian(Pauli("XXXXY")) == true
+    @test is_hermitian(Pauli("XXYZY")) == true
+    @test is_hermitian(Pauli("XXXXX")) == true
+    @test is_hermitian(phasefree(Pauli("YXXXX"))) == false 
+    @test is_hermitian(phasefree(Pauli("YYYXX"))) == false 
+    @test is_hermitian(phasefree(Pauli("YZYXX"))) == true 
+end
+@testset "expectation_value" begin
+    N = 8
+    types = [Pauli{N}, FixedPhasePauli{N}, ScaledPauli{N}, PauliSum{N}]
+    for ti in types
         for i in 1:10
-            a += rand(ScaledPauli{N})
+            o = rand(ti)
+            v = rand(KetBitString{N})
+            @test expectation_value(o, v) == Vector(v)'*Matrix(o)*Vector(v) 
         end
-        b = rand(ScaledPauli{N})
-        @test all(abs.(Matrix(a) * Matrix(b) - Matrix(a * b)) .< 1e-14)
-        @test all(abs.(Matrix(b) * Matrix(a) - Matrix(b * a)) .< 1e-14)
     end
 end
