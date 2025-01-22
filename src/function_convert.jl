@@ -3,7 +3,7 @@ function Base.convert(::Type{Pauli{N}}, p::FixedPhasePauli{N}) where {N}
     return Pauli{N}(0, p)
 end
 
-function Base.convert(::Type{ScaledPauli{N}}, p::Pauli{N}) where {T,N}
+function Base.convert(::Type{ScaledPauli{N}}, p::Pauli{N}) where {N}
     return ScaledPauli{N}(get_phase(p), p.pauli)
 end
 
