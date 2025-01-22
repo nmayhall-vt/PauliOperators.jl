@@ -31,6 +31,6 @@ end
 
 Create dense vector representation in standard basis 
 """
-function Base.Vector(k::Union{Dyad{N}, FixedPhasePauli{N}}; T=Int64) where N
+function Base.Vector(k::Union{Dyad{N}, DyadSum{N}, PauliSum{N}, FixedPhasePauli{N}}; T=Int64) where N
     return vec(Matrix(k))
 end
