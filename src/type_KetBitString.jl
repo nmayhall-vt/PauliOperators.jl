@@ -3,7 +3,7 @@ abstract type AbstractState{N} end
 """
 An occupation number vector, up to 128 qubits
 """
-struct KetBitString{N} <: AbstractState{N}
+struct KetBitString{N} <: AbstractState{N} 
     v::Int128
 end
 struct BraBitString{N} <: AbstractState{N}
@@ -115,28 +115,6 @@ function Base.string(p::BraBitString{N}) where N
 end
 
 
-"""
-    Base.Vector(k::KetBitString{N}) where N
-
-TBW
-"""
-function Base.Vector(k::KetBitString{N}) where N
-    vec = zeros(Int8,Int128(2)^N)
-    vec[k.v+1] = 1
-    return vec 
-end
-"""
-    Base.Vector(k::KetBitString{N}) where N
-
-TBW
-"""
-function Base.Vector(k::SparseKetBasis{N,T}) where {N,T}
-    vec = zeros(T,Int128(2)^N)
-    for (ket, coeff) in k
-        vec[ket.v+1] = coeff
-    end
-    return vec 
-end
 
 
 """
@@ -167,9 +145,3 @@ function scale!(v1::SparseKetBasis{N,T}, a::Number) where {N,T}
     map!(x->x*a, values(v1))
 end
 
-
-function Base.Matrix(d::AbstractState{N}) where N
-    mat = zeros(Bool, size(d))
-    mat[d.v+1] = true
-    return mat 
-end

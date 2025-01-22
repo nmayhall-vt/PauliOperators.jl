@@ -1,7 +1,7 @@
 """
 An occupation number vectors, up to 128 qubits
 """
-struct Dyad{N} 
+struct Dyad{N}  
     ket::KetBitString{N}
     bra::BraBitString{N} # should this be a different type?
 end
@@ -318,22 +318,3 @@ function Base.size(d::DyadSum{N}) where N
 end
 
 
-function Base.Matrix(d::Dyad{N}) where N
-    mat = zeros(Bool, size(d))
-    mat[d.ket.v+1, d.bra.v+1] = true
-    return mat 
-end
-
-function Base.Matrix(d::ScaledDyad{N,T}) where {N,T}
-    mat = zeros(T, size(d))
-    mat[d.dyad.ket.v+1, d.dyad.bra.v+1] = d.coeff 
-    return mat 
-end
-
-function Base.Matrix(d::DyadSum{N,T}) where {N,T}
-    mat = zeros(T, size(d))
-    for (dyad, coeff) in d
-        mat[dyad.ket.v+1, dyad.bra.v+1] = coeff 
-    end
-    return mat 
-end

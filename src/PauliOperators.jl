@@ -20,6 +20,9 @@ include("function_convert.jl")
 include("function_commute.jl")
 include("function_otimes.jl")
 include("function_osum.jl")
+include("function_index.jl")
+include("function_Vector.jl")
+include("function_Matrix.jl")
 
 # Exports
 export Pauli
@@ -49,6 +52,7 @@ export clip!
 export ⊗
 export ⊕
 export expectation_value
+export index
 
 end
 

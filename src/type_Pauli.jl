@@ -52,7 +52,7 @@ This is convieniant for manual manipulations, but is not type-stable so will be 
 """
 function Pauli(str::String)
     p = FixedPhasePauli(str)
-    return Pauli{nqubits(p)}(phase(p), p) 
+    return Pauli{length(str)}(phase(p), p) 
 end
 
 
@@ -150,12 +150,6 @@ Display, y = iY
 """
 Base.string(p::Pauli) = @sprintf "%2i %2iim | %s" real(1im^p.θ) imag(1im^p.θ) string(p.pauli)
 
-"""
-    Base.Matrix(p::Pauli)
-
-TBW
-"""
-Base.Matrix(p::Pauli) = Matrix(p.pauli) .* get_phase(p)
 
 """
     rand(Pauli{N})

@@ -99,29 +99,6 @@ function Base.unique(spv::Vector{ScaledPauli{N}}) where {N}
 end
 
 
-"""
-    Base.Matrix(spv::Vector{ScaledPauli{N}}) where {T,N}
-
-TBW
-"""
-function Base.Matrix(spv::Vector{ScaledPauli{N}}; T=ComplexF64) where {N}
-    out = zeros(T, Int128(2)^N, Int128(2)^N)
-    for spvi in spv 
-        out .+= Matrix(spvi.pauli) .* spvi.coeff
-    end
-    return out
-end
-
-
-"""
-    Base.Matrix(p::Pauli{N}) where N
-
-Create dense matrix representation 
-"""
-function Base.Matrix(p::ScaledPauli{N}) where {N}
-    return Matrix(p.pauli) .* p.coeff 
-end
-
 
 """
     rand(ScaledPauli{N})

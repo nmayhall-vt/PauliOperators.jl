@@ -166,18 +166,6 @@ function LinearAlgebra.mul!(ps::PauliSum, a::Number)
     return ps
 end
 
-"""
-    Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
-
-Create a dense Matrix of type `T`
-"""
-function Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
-    out = zeros(T, Int128(2)^N, Int128(2)^N)
-    for (op, coeff) in ps.ops
-        out .+= Matrix(op) .* coeff 
-    end
-    return out
-end
 
 function is_hermitian(ps::PauliSum) 
     for (p,coeff) in ps.ops

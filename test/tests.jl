@@ -279,7 +279,18 @@ using Random
     @test norm(Matrix(B)' - Matrix(B')) < 1e-8
 end
 
-
+@testset "index" begin
+    N = 3
+    # types = [KetBitString{N}]
+    types = [Dyad{N}, KetBitString{N}]
+    for T in types 
+        Trand = rand(T)
+        v1 = Vector(Trand)
+        v2 = zeros(size(v1))
+        v2[index(Trand)] = 1
+        @test norm(v1 - v2) < 1e-16
+    end
+end
 
 
 @testset "Mul1" begin

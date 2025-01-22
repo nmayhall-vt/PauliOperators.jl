@@ -213,31 +213,6 @@ end
 
 
 
-function Base.Matrix(p::FixedPhasePauli{N}) where N
-    mat = ones(Int8,1,1)
-    str = string(p)
-    X = [0 1; 1 0]
-    y = [0 1; -1 0]
-    Y = [0 -1im; 1im 0]
-    Z = [1 0; 0 -1]
-    I = [1 0; 0 1]
-    # for i in reverse(1:N)
-    for i in 1:N
-        if str[i] == "X"[1] 
-            mat = kron(X,mat)
-        elseif str[i] == "y"[1]
-            mat = kron(y,mat)
-        elseif str[i] == "Z"[1]
-            mat = kron(Z,mat)
-        elseif str[i] == "I"[1]
-            mat = kron(I,mat)
-        else
-            throw(ErrorException)
-        end
-    end
-
-    return mat
-end
 
 """
     get_phase(p1::FixedPhasePauli{N}, p2::FixedPhasePauli{N})
