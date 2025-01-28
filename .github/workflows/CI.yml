@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - v2.0 
     tags: ['*']
   pull_request:
 concurrency:
@@ -18,8 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.7'
-          - '1.8'
+          - '1.11'
         os:
           - ubuntu-latest
           - macOS-latest

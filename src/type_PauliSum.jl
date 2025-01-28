@@ -1,55 +1,195 @@
-using LinearAlgebra
-
 """
-    ops::Dict{Pauli{N},ComplexF64}
+    PauliSum{N, T} = Dict{Tuple{Int128,Int128},T} 
 
 A collection of `Pauli`s, joined by addition.
 This uses a `Dict` to store them, however, the specific use cases should probably dictate the container type,
 so this will probably be removed.
 """
-struct PauliSum{N}  
-    ops::Dict{FixedPhasePauli{N},ComplexF64}
+PauliSum{N, T} = Dict{PauliBasis{N},T} 
+
+PauliSum(N, T) = Dict{PauliBasis{N},T}()
+
+function Base.rand(::Type{PauliSum{N, T}}; n_paulis=2) where {N,T}
+    out = PauliSum(N, T)
+    for i in 1:n_paulis
+        p = rand(Pauli{N})
+        out[PauliBasis(p)] = coeff(p) * rand(T)
+    end
+    return out 
+end
+function Base.rand(::Type{PauliSum{N}}; n_paulis=2, T=ComplexF64) where {N}
+    out = PauliSum(N, T)
+    for i in 1:n_paulis
+        p = rand(Pauli{N})
+        out[PauliBasis(p)] = coeff(p) * rand(T)
+    end
+    return out 
 end
 
-"""
-    PauliSum(N)
-
-TBW
-"""
-function PauliSum(N::Integer)
-    return PauliSum{N}(Dict{FixedPhasePauli{N},ComplexF64}())
-end
-function PauliSum(o::Pauli{N}) where N
-    return PauliSum{N}(Dict(o.pauli => get_phase(o)))
-end
-function PauliSum(o::ScaledPauli{N}) where N
-    return PauliSum{N}(Dict(o.pauli => o.coeff))
-end
-function PauliSum(o::FixedPhasePauli{N}) where N
-    return PauliSum{N}(Dict(o => 1))
+function is_hermitian(p::PauliSum{N, T}) where {N,T}
+    isherm = true
+    for coeff in values(p)
+        isherm = isherm && isapprox(imag(coeff), 0, atol=1e-16)
+    end
+    return isherm
 end
 
-
-"""
-    Base.display(ps::PauliSum)
-
-TBW
-"""
 function Base.display(ps::PauliSum)
-    for (key,val) in ps.ops
+    for (key,val) in ps
         @printf(" %12.8f +%12.8fi %s\n", real(val), imag(val), key)
     end
 end
 
-Base.get(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = get(ps.ops, p, zero(ComplexF64))
-Base.get(ps::PauliSum{N}, p::Pauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
-Base.get(ps::PauliSum{N}, p::ScaledPauli{N}) where N = get(ps.ops, p.pauli, zero(ComplexF64))
-Base.keys(ps::PauliSum) = keys(ps.ops)
-Base.getindex(ps::PauliSum{N}, p::Pauli{N}) where N = ps.ops[p.pauli]
-Base.getindex(ps::PauliSum{N}, p::FixedPhasePauli{N}) where N = ps.ops[p]
-Base.setindex!(ps::PauliSum{N}, v, p::Pauli{N}) where N = ps.ops[p.pauli] = v*get_phase(p)
-Base.setindex!(ps::PauliSum{N}, v, p::FixedPhasePauli{N}) where N = ps.ops[p] = v
-Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
+function Base.display(ps::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
+    for (key,val) in ps.parent
+        @printf(" %12.8f +%12.8fi %s\n", real(val), -imag(val), key)
+    end
+end
+
+"""
+    Base.Matrix(ps::PauliSum{N}; T=ComplexF64) where N
+
+Create a dense Matrix of type `T` in the standard basis
+"""
+function Base.Matrix(ps::PauliSum{N, T}) where {N,T}
+    out = zeros(T, Int128(2)^N, Int128(2)^N)
+    for (op, coeff) in ps
+        out .+= Matrix(op) .* coeff 
+    end
+    return out
+end
+
+function LinearAlgebra.tr(p::PauliSum{N, T}) where {N,T}
+    return get(p, PauliBasis{N}(0, 0), 0)
+end
+
+function LinearAlgebra.mul!(ps::PauliSum, a::Number)
+    map!(x->a*x, values(ps))
+    return ps
+end
+
+"""
+    Base.:-(ps1::PauliSum, ps2::PauliSum)
+
+Subtract two `PauliSum`s. 
+"""
+function Base.:-(ps1::PauliSum, ps2::PauliSum)
+    out = deepcopy(ps2)
+    map!(x->-x, values(out))
+    mergewith!(+, out, ps1)
+    return out 
+end
+
+"""
+    Base.:-(ps1::PauliSum, ps2::PauliSum)
+
+Subtract two `PauliSum`s. 
+"""
+function Base.:-(ps1::PauliSum)
+    out = deepcopy(ps1)
+    map!(x->-x, values(out))
+    return out 
+end
+
+Base.adjoint(d::PauliSum{N,T}) where {N,T} = Adjoint(d)
+Base.parent(d::Adjoint{<:Any, <:PauliSum}) = d.parent
+
+function Base.Matrix(ps::Adjoint{<:Any, PauliSum{N, T}}) where {N,T}
+    out = zeros(T, Int128(2)^N, Int128(2)^N)
+    for (op, coeff) in ps.parent
+        out .+= Matrix(op) .* adjoint(coeff) 
+    end
+    return out
+end
+
+
+"""
+    Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
+
+Multiply two `PauliSum`s. 
+"""
+function Base.:*(ps1::PauliSum{N, T}, ps2::PauliSum{N, T}) where {N, T}
+    out = PauliSum(N, T)
+    for (op1, coeff1) in ps1 
+        for (op2, coeff2) in ps2
+            prod = Pauli(op1) * Pauli(op2)
+            phase = global_phase(prod)
+            prod = PauliBasis(prod)
+            if haskey(out, prod)
+                out[prod] += 1im^phase * coeff1 * coeff2
+            else
+                out[prod] = 1im^phase * coeff1 * coeff2
+            end
+        end
+    end 
+    return out
+end
+"""
+    Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::PauliSum{N, T}) where {N, T}
+
+Multiply two `PauliSum`s. 
+"""
+function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::PauliSum{N, T}) where {N, T}
+    out = PauliSum(N, T)
+    for (op1, coeff1) in ps1.parent 
+        for (op2, coeff2) in ps2
+            prod = Pauli(op1) * Pauli(op2)
+            phase = global_phase(prod)
+            prod = PauliBasis(prod)
+            if haskey(out, prod)
+                out[prod] += 1im^phase * coeff1' * coeff2
+            else
+                out[prod] = 1im^phase * coeff1' * coeff2
+            end
+        end
+    end 
+    return out
+end
+"""
+    Base.:*(ps1::PauliSum{N, T}, ps2::Adjoint{<:Any, PauliSum{N, T}}) where {N, T}
+
+Multiply two `PauliSum`s. 
+"""
+function Base.:*(ps1::PauliSum{N, T}, ps2::Adjoint{<:Any, PauliSum{N, T}}) where {N, T}
+    out = PauliSum(N, T)
+    for (op1, coeff1) in ps1 
+        for (op2, coeff2) in ps2.parent
+            prod = Pauli(op1) * Pauli(op2)
+            phase = global_phase(prod)
+            prod = PauliBasis(prod)
+            if haskey(out, prod)
+                out[prod] += 1im^phase * coeff1 * coeff2'
+            else
+                out[prod] = 1im^phase * coeff1 * coeff2'
+            end
+        end
+    end 
+    return out
+end
+
+"""
+    Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::Adjoint{<:Any, PauliSum{N, T}}) where {N, T}
+
+Multiply two `PauliSum`s. 
+"""
+function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::Adjoint{<:Any, PauliSum{N, T}}) where {N, T}
+    out = PauliSum(N, T)
+    for (op1, coeff1) in ps1.parent 
+        for (op2, coeff2) in ps2.parent
+            prod = Pauli(op1) * Pauli(op2)
+            phase = global_phase(prod)
+            prod = PauliBasis(prod)
+            if haskey(out, prod)
+                out[prod] += 1im^phase * coeff1' * coeff2'
+            else
+                out[prod] = 1im^phase * coeff1' * coeff2'
+            end
+        end
+    end 
+    return out
+end
+
+Base.getindex(ps::PauliSum{N}, s::String) where N = ps[PauliBasis(s)]
 
 """
     Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
@@ -57,188 +197,31 @@ Base.haskey(ps::PauliSum, v) = haskey(ps.ops, v)
 Add two `PauliSum`s. 
 """
 function Base.sum!(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    mergewith!(+, ps1.ops, ps2.ops)
+    mergewith!(+, ps1, ps2)
 end
 
 """
-    Base.-(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
+    Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
 
-Subtract two `PauliSum`s. 
+TBW
 """
-function Base.:-(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    # out = PauliSum{N}()
-    # merge!(out, ps2)
-    out = deepcopy(ps2)
-    map!(x->-x, values(out.ops))
-    mergewith!(+, out.ops, ps1.ops)
+function Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
+    out = deepcopy(ps1)
+    sum!(out, ps2)
+    return out
+end
+
+"""
+    otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
+
+TBW
+"""
+function otimes(p1::PauliSum{N,T}, p2::PauliSum{M,T}) where {N,M,T}
+    out = PauliSum(N+M, T)
+    for (op1,coeff1) in p1
+        for (op2,coeff2) in p2
+            out[op1 ⊗ op2] = coeff1 * coeff2 
+        end
+    end
     return out 
-end
-
-Base.length(ps::PauliSum) = length(ps.ops)
-"""
-    LinearAlgebra.adjoint!(ps::PauliSum{N}) where N
-
-TBW
-"""
-function LinearAlgebra.adjoint!(ps::PauliSum{N}) where N 
-    for (key, val) in ps.ops
-        # ps[key] = adjoint(val)  
-        ps[key] = adjoint(val) * (-1)^count_ones(key.z & key.x) 
-    end
-end
-"""
-    LinearAlgebra.adjoint(ps::PauliSum{N}) where N
-
-TBW
-"""
-function LinearAlgebra.adjoint(ps::PauliSum{N}) where N 
-    out = deepcopy(ps)
-    adjoint!(out)    
-    return out
-end
-
-#
-# lazy adjoint views aren't yet working. 
-#
-# Base.adjoint(ps::PauliSum{N}) where N = Adjoint{ComplexF64,PauliSum{N}}(ps)
-# Base.size(aps::Adjoint{ComplexF64, PauliSum{N}}) where N = (length(aps.ops),)
-# function Base.adjoint(ps::PauliSum)
-#     return LinearAlgebra.Adjoint
-# end
-
-"""
-    Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-
-Multiply two `PauliSum`s. 
-"""
-function Base.:*(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    out = PauliSum(N)
-    for (op1, coeff1) in ps1.ops 
-        for (op2, coeff2) in ps2.ops
-            prod = op1 * op2
-            if haskey(out, prod)
-                out[prod] += get_phase(op1, op2)*coeff1*coeff2
-            else
-                out[prod] = get_phase(op1, op2)*coeff1*coeff2
-            end
-            # out.ops[prod] = get(out.ops, prod) + get_phase(prod)*coeff1*coeff2 
-        end
-    end 
-    return out
-end
-
-function Base.rand(T::Type{PauliSum{N}}; n_paulis=2) where N
-    a = PauliSum(N) 
-    for i in 1:n_paulis
-        a += rand(ScaledPauli{N}) + rand(ScaledPauli{N})
-    end
-    return a 
-end
-
-"""
-    Base.:*(ps::PauliSum{N}, a::Number) where {N}
-
-TBW
-"""
-function Base.:*(ps::PauliSum{N}, a::Number) where {N}
-    out = deepcopy(ps) 
-    mul!(out,a)
-    return out
-end
-Base.:*(a::Number, ps::PauliSum{N}) where {N} = ps*a
-
-function Base.:*(ps::PauliSum{N}, a::Union{Pauli{N}, ScaledPauli{N}, FixedPhasePauli{N}}) where {N}
-    return ps * PauliSum(a)
-end
-function Base.:*(a::Union{Pauli{N}, ScaledPauli{N}, FixedPhasePauli{N}}, ps::PauliSum{N}) where {N}
-    return PauliSum(a) * ps
-end
-
-"""
-    LinearAlgebra.mul!(ps::PauliSum, a::Number)
-
-TBW
-"""
-function LinearAlgebra.mul!(ps::PauliSum, a::Number)
-    for (op, coeff) in ps.ops 
-        ps[op] = coeff * a
-    end
-    return ps
-end
-
-
-function is_hermitian(ps::PauliSum) 
-    for (p,coeff) in ps.ops
-        if is_hermitian(p) ⊻ (abs(imag(coeff)) < 1e-12 )
-            return false
-        end
-    end
-    return true
-end
-
-"""
-    clip!(ps::PauliSum; thresh=1e-16)
-
-Delete Pauli's with coeffs smaller than thresh
-"""
-function clip!(ps::PauliSum{N}; thresh=1e-16) where {N}
-    filter!(p->abs(p.second) > thresh, ps.ops)
-end
-
-"""
-    Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
-
-TBW
-"""
-function Base.:≈(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
-    for (op, coeff) in p1.ops
-        if haskey(p2, op)
-            coeff ≈ p2[op] || return false
-        else
-            return false
-        end
-    end 
-    for (op, coeff) in p2.ops
-        if haskey(p1, op)
-            coeff ≈ p1[op] || return false
-        else
-            return false
-        end
-    end 
-    #     get(p2, op) .≈ coeff || return false
-    # end
-    # for (op, coeff) in p2.ops
-    #     get(p1, op) .≈ coeff || return false
-    # end
-    return true
-end
-
-
-"""
-    matvec(ps::PauliSum{N}, v::Matrix) where N
-
-TBW
-"""
-function matvec(ps::PauliSum{N}, v::Matrix) where N
-
-    σ = zeros(T,size(v))
-
-end
-
-function LinearAlgebra.diag(ps::PauliSum{N}) where N
-    out = PauliSum(N)
-    for (op,coeff) in ps.ops
-        if is_diagonal(op)
-            out[op] = coeff
-        end
-    end
-    return out
-end
-
-function LinearAlgebra.tr(p::PauliSum{N}) where N 
-    if haskey(p, FixedPhasePauli{N}(0,0))
-        return p[FixedPhasePauli{N}(0,0)] * Int128(2)^N
-    else
-        return 0
-    end
 end

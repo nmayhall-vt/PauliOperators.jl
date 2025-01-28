@@ -1,19 +1,18 @@
 name = "PauliOperators"
 uuid = "be646426-f34c-4536-b1d4-a45a9633e6db"
 authors = ["Nick Mayhall"]
-version = "1.0.0-DEV"
+version = "2.0.0"
 
 [deps]
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
 
 [compat]
-julia = "1.7"
+LinearAlgebra = "1.11.0"
+Printf = "1.11.0"
+Random = "1.11.0"
+julia = "1.11"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

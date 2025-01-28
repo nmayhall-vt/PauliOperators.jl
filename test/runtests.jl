@@ -1,8 +1,8 @@
 using PauliOperators
 using Test
 
-@testset "PauliOperators.jl" begin
-    include("tests.jl")
-    include("test_matvec.jl")
-    include("test_dyad.jl")
+@testset "Paulis.jl" begin
+    include("test_operator_methods.jl")
+    include("test_Pauli.jl")
+    include("test_Ket.jl")
 end
