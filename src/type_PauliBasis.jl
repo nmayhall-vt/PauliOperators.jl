@@ -5,6 +5,12 @@
 
 A positive, Hermitian Pauli, used as a basis for more general `Pauli`'s (which can have a complex phase).
 These are primarily used to provide a basis for linear combinations of Paulis, e.g., `PauliSum`'s.
+    
+    PauliBasis{N}(z,x)  =  i^θs ⋅ z₁...|x₁... 
+                            =  P₁⊗...⊗Pₙ
+
+Phase definitions:
+- `symplectic_phase`: `θs` - phase needed to cancel the phase arising from the ZX factorized form: `θs = θ-θg`
 """
 struct PauliBasis{N} 
     z::Int128
@@ -74,6 +80,7 @@ function Base.Matrix(p::PauliBasis{N}) where N
     return mat
 end
 
+PauliBasis(p::PauliBasis) = p
 
 """
     Base.string(p::Pauli{N}) where N

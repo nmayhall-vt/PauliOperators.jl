@@ -26,7 +26,11 @@ using Random
         # Adjoint
         for i in 1:10
             a = rand(T)
-            @test norm(Matrix(a)' - Matrix(a')) < 1e-9 
+            err = norm(Matrix(a)' - Matrix(a')) < 1e-9 
+            if !err
+                @show a err
+            end
+            @test err
         end
         
         # Trace 

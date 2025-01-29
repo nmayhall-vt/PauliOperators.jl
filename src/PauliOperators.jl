@@ -36,7 +36,6 @@ module PauliOperators
 
     export is_hermitian 
 
-    export phase
     export symplectic_phase
-    export global_phase
+    export coeff
 end

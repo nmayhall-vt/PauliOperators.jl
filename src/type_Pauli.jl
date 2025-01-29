@@ -34,35 +34,36 @@ similarly,
 We use `θs` to denote the phase needed to make the Pauli operator Hermitian and positive, and we refer to this as the `symplectic_phase`, since it arises solely from the symplectic representation of the Pauli.
 However, this is not the only phase we need to worry about. Since various phases accumulate during Pauli multiplication, we allow a given `Pauli` to have an arbitrary global phase, `θg`, so that the `Pauli` type can be closed under multiplication. As such, our `Pauli` phases are defined according to the following:
 
-    Pauli{N}(θ,z,x)  =  i^θ ⋅ z₁...|x₁... 
-                     =  i^θ ⋅ i^-θs ⋅ P₁⊗...⊗Pₙ
-                     =  i^θg ⋅ P₁⊗...⊗Pₙ
+    Pauli{N}(s,z,x)  =  s ⋅ z₁...|x₁... 
+                     =  s ⋅ i^-θs ⋅ P₁⊗...⊗Pₙ
+                     =  coeff ⋅ P₁⊗...⊗Pₙ
 
     PauliBasis{N}(z,x)  =  i^θs ⋅ z₁...|x₁... 
                             =  P₁⊗...⊗Pₙ
 
-- Phase definitions:
-    - `phase`: `θ` - total phase stored in `Pauli` data type. Sum of global and symplective phases: `θ = θg + θs`
-    - `symplectic_phase`: `θs` - phase needed to cancel the phase arising from the ZX factorized form: `θs = θ-θg`
-    - `global_phase`: `θg` - arbitrary global phase in front of the positive Hermitian Pauli operator: `θg=θ-θs`
+Phase definitions:
+- `symplectic_phase`: `θs` - phase needed to cancel the phase arising from the ZX factorized form: `θs = θ-θg`
+
+Since we need to keep track of a phase for a Pauli, we might as well let it become a general scalar value for broader use. As such, `Pauli.s` is a arbitrary complex number.
 """
 struct Pauli{N} 
-    θ::Int8
+    s::ComplexF64
     z::Int128
     x::Int128
 end
 
-@inline phase(p::Pauli) = p.θ
-@inline symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
 """
-    global_phase(p::Pauli)
+    coeff(p::Pauli)
 
-phase(p) - symplectic_phase(p)
+Return the coefficient from the product of the scalar times the inverse symplectic_phase
 """
-@inline global_phase(p::Pauli) = (4 + phase(p)%4 - symplectic_phase(p)%4 )%4
+coeff(p::Pauli) = 1im^Float64((4 - symplectic_phase(p) )%4)
+symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
+# @inline coeff(p::Pauli) = p.s * 1im^(4 - symplectic_phase(p) )%4
+# @inline symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
 
 function Pauli(p::PauliBasis{N}) where N
-    return Pauli{N}(symplectic_phase(p), p.z, p.x)
+    return Pauli{N}(1im^symplectic_phase(p), p.z, p.x)
 end
 
 """
@@ -75,7 +76,7 @@ function Pauli(z::I, x::I, N) where I<:Integer
     z < Int128(2)^N || throw(DimensionMismatch)
     x < Int128(2)^N || throw(DimensionMismatch)
     # θ = get_hermitian_phase(z,x)
-    return Pauli{N}(0, z, x)
+    return Pauli{N}(1, z, x)
 end
 
 
@@ -114,7 +115,7 @@ function Pauli(str::String)
         idx += 1
     end
     θ = 4-ny%4
-    return Pauli{N}(θ, z, x)
+    return Pauli{N}(1im^θ, z, x)
 end
 
 
@@ -151,6 +152,7 @@ end
 
 
 
+
 """
     Base.string(p::Pauli{N}) where N
 
@@ -180,7 +182,7 @@ end
 TBW
 """
 function Base.display(p::Pauli{N}) where N
-    @printf "%2i %2iim | %s\n" real(1im^p.θ) imag(1im^p.θ) string(p) 
+    @printf "%2i %2iim | %s\n" real(p.s) imag(p.s) string(p) 
 end
 
 
@@ -202,16 +204,17 @@ end
 
 TBW
 """
-function is_hermitian(p::Pauli)
-    return ~(iseven(p.θ) ⊻ iseven(nY(p)))
+function is_hermitian(p::Pauli; thresh=1e-16)
+    return ~((abs(imag(coeff(p)))<thresh) ⊻ iseven(nY(p)))
 end
+
 
 """
     Base.Matrix(p::Pauli{N}) where N
 
 Build dense matrix representation in standard basis
 """
-Base.Matrix(p::Pauli) = Matrix(PauliBasis(p)) * 1im^global_phase(p)
+Base.Matrix(p::Pauli) = Matrix(PauliBasis(p)) * coeff(p)
 
 
 """
@@ -220,16 +223,7 @@ Base.Matrix(p::Pauli) = Matrix(PauliBasis(p)) * 1im^global_phase(p)
 TBW
 """
 function Base.:-(p::Pauli{N}) where {N}
-    return Pauli{N}((p.θ + 2)%4, p.z, p.x) 
-end
-
-"""
-    coeff(p::Pauli)
-
-Return the coefficient from the phase, 1^θ
-"""
-function coeff(p::Pauli)
-    return 1im^global_phase(p)
+    return Pauli{N}(-p.s, p.z, p.x) 
 end
 
 
@@ -238,9 +232,7 @@ end
 
 Adjoint
 """
-function Base.adjoint(p::Pauli)
-    is_hermitian(p) ? p : -p
-end
+Base.adjoint(p::Pauli{N}) where N = Pauli{N}(p.s', p.z, p.x)
 
 function LinearAlgebra.tr(p::Pauli)
     return coeff(p) * ((p.z == 0) && (p.x == 0))
@@ -254,10 +246,12 @@ Multiply two `Pauli`'s together
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
-    θ = (p1.θ + p2.θ + 2*count_ones(p1.x & p2.z) ) % 4
-    return Pauli{N}(θ, z, x)
+    s = p1.s * p2.s * 1im^(2*count_ones(p1.x & p2.z)) % 4
+    return Pauli{N}(s, z, x)
 end
 
+Base.:*(p::Pauli{N}, s::Number) where N = Pauli{N}(p.s * s, p.z, p.x)
+Base.:*(s::Number, p::Pauli{N}) where N = p*s 
 
 """
     Base.:+(p::Pauli{N}, q::Pauli{N}) where N
@@ -278,7 +272,7 @@ end
 TBW
 """
 function otimes(p1::Pauli{N}, p2::Pauli{M}) where {N,M} 
-    Pauli{N+M}((p1.θ + p2.θ)%4, p1.z | p2.z << N, p1.x | p2.x << N)
+    Pauli{N+M}(p1.s * p2.s, p1.z | p2.z << N, p1.x | p2.x << N)
 end
 
 """
