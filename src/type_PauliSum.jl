@@ -199,6 +199,16 @@ Add two `PauliSum`s.
 function Base.sum!(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
     mergewith!(+, ps1, ps2)
 end
+function Base.sum!(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
+    for (Pauli, coeff) in ps2.parent
+        if haskey(ps1, Pauli')
+            ps1[Pauli'] += coeff'
+        else
+            ps1[Pauli'] = coeff'
+        end
+    end
+    return ps1
+end
 
 """
     Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
@@ -206,6 +216,11 @@ end
 TBW
 """
 function Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
+    out = deepcopy(ps1)
+    sum!(out, ps2)
+    return out
+end
+function Base.:+(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
     out = deepcopy(ps1)
     sum!(out, ps2)
     return out

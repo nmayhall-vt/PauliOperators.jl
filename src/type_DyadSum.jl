@@ -59,18 +59,6 @@ function Base.Matrix(ps::Adjoint{<:Any, DyadSum{N, T}}) where {N,T}
     return out
 end
 
-"""
-    Base.:+(p::DyadBasis{N}, q::DyadBasis{N}) where N
-
-Add two `Dyad`'s together, return a `DyadSum`
-"""
-function Base.:+(p::DyadBasis{N}, q::DyadBasis{N}) where N
-    if DyadBasis(p) == DyadBasis(q)
-        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p)+coeff(q))
-    else 
-        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p), DyadBasis(q) => coeff(q))
-    end
-end
 
 function Base.rand(::Type{DyadSum{N, T}}; n_terms=2) where {N,T}
     out = DyadSum(N, T)
@@ -142,10 +130,17 @@ function LinearAlgebra.ishermitian(d::DyadSum{N, T}) where {N,T}
     isherm = true
     for (dyad,coeff) in d
         if dyad.ket.v == dyad.bra.v 
-            isherm = isherm && isapprox(imag(coeff), 0, atol=1e-16)
+            if abs(imag(coeff)) > 1e-16 
+                return false
+            end
         else
-            if abs(coeff) > 1e-16
-                isherm = false
+            if haskey(d, dyad') == false
+                return false
+                # isherm = isherm && isapprox(imag(d[DyadBasis(dyad')]), 0, atol=1e-16)
+            else
+                if abs(coeff - d[DyadBasis(dyad')]') > 1e-16
+                    return false
+                end 
             end
         end
     end
@@ -156,14 +151,43 @@ function Base.sum!(ps1::DyadSum{N}, ps2::DyadSum{N}) where {N}
     mergewith!(+, ps1, ps2)
 end
 
+function Base.sum!(ps1::DyadSum{N,T}, ps2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
+    for (dyad, coeff) in ps2.parent
+        if haskey(ps1, dyad')
+            ps1[dyad'] += coeff'
+        else
+            ps1[dyad'] = coeff'
+        end
+    end
+    return ps1
+end
+
+"""
+    Base.:+(p::DyadBasis{N}, q::DyadBasis{N}) where N
+
+Add two `Dyad`'s together, return a `DyadSum`
+"""
+function Base.:+(p::DyadBasis{N}, q::DyadBasis{N}) where N
+    if DyadBasis(p) == DyadBasis(q)
+        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p)+coeff(q))
+    else 
+        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p), DyadBasis(q) => coeff(q))
+    end
+end
+
 """
     Base.:+(ps1::DyadSum{N}, ps2::DyadSum{N}) where {N}
 
 TBW
 """
-function Base.:+(ps1::DyadSum{N}, ps2::DyadSum{N}) where {N}
+function Base.:+(ps1::DyadSum{N,T}, ps2::DyadSum{N,T}) where {N,T} 
     out = deepcopy(ps1)
     sum!(out, ps2)
+    return out
+end
+function Base.:+(d1::DyadSum{N,T}, d2::Adjoint{<:Any, <:DyadSum{N,T}}) where {N,T}
+    out = deepcopy(d1)
+    sum!(out, d2)
     return out
 end
 
