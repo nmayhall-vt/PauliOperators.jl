@@ -11,10 +11,10 @@ using Random
     types = []
     push!(types, PauliBasis{N})
     push!(types, Pauli{N})
-    # push!(types, PauliSum{N, ComplexF64})
+    push!(types, PauliSum{N, ComplexF64})
     push!(types, DyadBasis{N})
     push!(types, Dyad{N})
-    # push!(types, DyadSum{N, ComplexF64})
+    push!(types, DyadSum{N, ComplexF64})
 
     for T1 in types
         for T2 in types
