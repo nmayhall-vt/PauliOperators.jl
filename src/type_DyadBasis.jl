@@ -38,7 +38,7 @@ Base.adjoint(d::DyadBasis{N}) where N = DyadBasis{N}(adjoint(d.bra), adjoint(d.k
 
 Base.:*(d1::DyadBasis, d2::DyadBasis) = Dyad(d1) * Dyad(d2)
 
-@inline is_hermitian(d::DyadBasis) = d.ket.v == d.bra.v
+@inline LinearAlgebra.ishermitian(d::DyadBasis) = d.ket.v == d.bra.v
 
 
 function Base.iterate(::Type{DyadBasis{N}}, state = 1) where N

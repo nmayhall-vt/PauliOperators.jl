@@ -18,7 +18,7 @@ using Random
         # Hermiticity
         for i in 1:10
             a = rand(T)
-            if is_hermitian(a)
+            if ishermitian(a)
                 @test norm(Matrix(a) - Matrix(a)') < 1e-14
             end
         end 

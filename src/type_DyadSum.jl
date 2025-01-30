@@ -138,7 +138,7 @@ function Base.:*(d1::DyadSum{N,T}, d2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     return d3
 end
 
-function is_hermitian(d::DyadSum{N, T}) where {N,T}
+function LinearAlgebra.ishermitian(d::DyadSum{N, T}) where {N,T}
     isherm = true
     for (dyad,coeff) in d
         if dyad.ket.v == dyad.bra.v 

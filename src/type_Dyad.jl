@@ -46,7 +46,7 @@ end
 
 Base.rand(::Type{Dyad{N}}) where N = Dyad{N}(true, rand(Ket{N}), rand(Bra{N}))
 
-@inline is_hermitian(d::Dyad) = d.ket.v == d.bra.v
+@inline LinearAlgebra.ishermitian(d::Dyad) = d.ket.v == d.bra.v
 
 """
     Base.:+(p::Dyad{N}, q::Dyad{N}) where N

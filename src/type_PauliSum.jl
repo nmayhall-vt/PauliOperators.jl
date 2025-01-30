@@ -26,7 +26,7 @@ function Base.rand(::Type{PauliSum{N}}; n_paulis=2, T=ComplexF64) where {N}
     return out 
 end
 
-function is_hermitian(p::PauliSum{N, T}) where {N,T}
+function LinearAlgebra.ishermitian(p::PauliSum{N, T}) where {N,T}
     isherm = true
     for coeff in values(p)
         isherm = isherm && isapprox(imag(coeff), 0, atol=1e-16)
@@ -113,12 +113,12 @@ function Base.:*(ps1::PauliSum{N, T}, ps2::PauliSum{N, T}) where {N, T}
     for (op1, coeff1) in ps1 
         for (op2, coeff2) in ps2
             prod = Pauli(op1) * Pauli(op2)
-            phase = global_phase(prod)
+            c = coeff(prod)
             prod = PauliBasis(prod)
             if haskey(out, prod)
-                out[prod] += 1im^phase * coeff1 * coeff2
+                out[prod] += c * coeff1 * coeff2
             else
-                out[prod] = 1im^phase * coeff1 * coeff2
+                out[prod] = c * coeff1 * coeff2
             end
         end
     end 
@@ -134,12 +134,12 @@ function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::PauliSum{N, T}) where
     for (op1, coeff1) in ps1.parent 
         for (op2, coeff2) in ps2
             prod = Pauli(op1) * Pauli(op2)
-            phase = global_phase(prod)
+            c = coeff(prod)
             prod = PauliBasis(prod)
             if haskey(out, prod)
-                out[prod] += 1im^phase * coeff1' * coeff2
+                out[prod] += c * coeff1' * coeff2
             else
-                out[prod] = 1im^phase * coeff1' * coeff2
+                out[prod] = c * coeff1' * coeff2
             end
         end
     end 
@@ -155,12 +155,12 @@ function Base.:*(ps1::PauliSum{N, T}, ps2::Adjoint{<:Any, PauliSum{N, T}}) where
     for (op1, coeff1) in ps1 
         for (op2, coeff2) in ps2.parent
             prod = Pauli(op1) * Pauli(op2)
-            phase = global_phase(prod)
+            c = coeff(prod)
             prod = PauliBasis(prod)
             if haskey(out, prod)
-                out[prod] += 1im^phase * coeff1 * coeff2'
+                out[prod] += c * coeff1 * coeff2'
             else
-                out[prod] = 1im^phase * coeff1 * coeff2'
+                out[prod] = c * coeff1 * coeff2'
             end
         end
     end 
@@ -177,12 +177,12 @@ function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::Adjoint{<:Any, PauliS
     for (op1, coeff1) in ps1.parent 
         for (op2, coeff2) in ps2.parent
             prod = Pauli(op1) * Pauli(op2)
-            phase = global_phase(prod)
+            c = coeff(prod)
             prod = PauliBasis(prod)
             if haskey(out, prod)
-                out[prod] += 1im^phase * coeff1' * coeff2'
+                out[prod] += c * coeff1' * coeff2'
             else
-                out[prod] = 1im^phase * coeff1' * coeff2'
+                out[prod] = c * coeff1' * coeff2'
             end
         end
     end 

@@ -57,10 +57,11 @@ end
 
 Return the coefficient from the product of the scalar times the inverse symplectic_phase
 """
-coeff(p::Pauli) = 1im^Float64((4 - symplectic_phase(p) )%4)
-symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
-# @inline coeff(p::Pauli) = p.s * 1im^(4 - symplectic_phase(p) )%4
-# @inline symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
+# coeff(p::Pauli) = 1im^Float64((4 - symplectic_phase(p) )%4)
+# symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
+@inline coeff(p::Pauli) = p.s * 1im^inv_symplectic_phase(p)
+@inline inv_symplectic_phase(p::Pauli) = (4-symplectic_phase(p)%4)
+@inline symplectic_phase(p::Pauli) = (4-count_ones(p.z & p.x)%4)%4
 
 function Pauli(p::PauliBasis{N}) where N
     return Pauli{N}(1im^symplectic_phase(p), p.z, p.x)
@@ -182,7 +183,7 @@ end
 TBW
 """
 function Base.display(p::Pauli{N}) where N
-    @printf "%2i %2iim | %s\n" real(p.s) imag(p.s) string(p) 
+    @printf "% .4f % .4fim | %s\n" real(p.s) imag(p.s) string(p) 
 end
 
 
@@ -192,7 +193,7 @@ end
 TBW
 """
 function Base.rand(T::Type{Pauli{N}}) where N
-    return Pauli{N}(rand(0:3), rand(0:Int128(2)^N-1), rand(0:Int128(2)^N-1))
+    return Pauli{N}(randn(ComplexF64), rand(0:Int128(2)^N-1), rand(0:Int128(2)^N-1))
 end
 
 function nY(p::Pauli)
@@ -200,12 +201,12 @@ function nY(p::Pauli)
 end
 
 """
-    is_hermitian(p::Pauli)
+    ishermitian(p::Pauli)
 
 TBW
 """
-function is_hermitian(p::Pauli; thresh=1e-16)
-    return ~((abs(imag(coeff(p)))<thresh) ⊻ iseven(nY(p)))
+function LinearAlgebra.ishermitian(p::Pauli; thresh=1e-16)
+    return abs(imag(coeff(p)))<thresh
 end
 
 
@@ -230,9 +231,16 @@ end
 """
     Base.adjoint(p::Pauli)
 
-Adjoint
+
+    Pauli{N}(s,z,x)  =  s ⋅ z₁...|x₁... 
+                     =  s ⋅ i^-θs ⋅ P₁⊗...⊗Pₙ
+                     =  coeff ⋅ P₁⊗...⊗Pₙ
+
+Since the PauliBasis is Hermitian, we have that
+    Pauli' = coeff' ⋅ P₁⊗...⊗Pₙ
 """
-Base.adjoint(p::Pauli{N}) where N = Pauli{N}(p.s', p.z, p.x)
+Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
+# Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
 
 function LinearAlgebra.tr(p::Pauli)
     return coeff(p) * ((p.z == 0) && (p.x == 0))
@@ -246,7 +254,7 @@ Multiply two `Pauli`'s together
 function Base.:*(p1::Pauli{N}, p2::Pauli{N}) where {N}
     x = p1.x ⊻ p2.x
     z = p1.z ⊻ p2.z
-    s = p1.s * p2.s * 1im^(2*count_ones(p1.x & p2.z)) % 4
+    s = p1.s * p2.s * 1im^(2*count_ones(p1.x & p2.z) % 4)
     return Pauli{N}(s, z, x)
 end
 

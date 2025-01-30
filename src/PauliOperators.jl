@@ -34,8 +34,6 @@ module PauliOperators
     export ⊕
     export expectation_value
 
-    export is_hermitian 
-
     export symplectic_phase
     export coeff
 end
