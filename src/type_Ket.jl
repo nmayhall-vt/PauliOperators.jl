@@ -152,3 +152,10 @@ function Base.iterate(::Type{Ket{N}}, state = 1) where N
     state > 4^N && return
     return Ket{N}(state-1), state+1 
 end
+
+function otimes(k1::Ket{N}, k2::Ket{M}) where {N,M}
+    Ket{N+M}(k1.v | k2.v << N)
+end
+function otimes(k1::Bra{N}, k2::Bra{M}) where {N,M}
+    Bra{N+M}(k1.v | k2.v << N)
+end

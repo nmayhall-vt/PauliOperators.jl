@@ -17,6 +17,8 @@ struct PauliBasis{N}
     x::Int128
 end
 
+LinearAlgebra.ishermitian(p::PauliBasis) = true
+coeff(p::PauliBasis) = 1
 
 @inline symplectic_phase(p::PauliBasis) = (4-count_ones(p.z & p.x)%4)%4
 

@@ -9,7 +9,10 @@ using Random
     Random.seed!(1)
   
     N  = 3
-    types = [Pauli{N}, Dyad{N}, PauliSum{N, ComplexF64}]
+    types = []
+    push!(types, PauliBasis{N})
+    push!(types, Pauli{N})
+    push!(types, PauliSum{N, ComplexF64})
     push!(types, Dyad{N})
     push!(types, DyadBasis{N})
     push!(types, DyadSum{N, ComplexF64})
@@ -81,13 +84,21 @@ end
     Random.seed!(1)
   
     N  = 3
-    types = [Pauli{N}, PauliSum{N, ComplexF64}]
+    types = []
+    push!(types, Pauli{N})
+    push!(types, PauliSum{N,ComplexF64})
+    push!(types, Dyad{N})
+    push!(types, DyadSum{N,ComplexF64})
 
     for T in types
         # Negate
         for i in 1:10
             a = rand(T)
-            @test norm(-Matrix(a) - Matrix(-a)) < 1e-9 
+            err = norm(-Matrix(a) - Matrix(-a)) < 1e-9 
+            if !err
+                @show T, err
+            end
+            @test err
         end
         
     end
@@ -95,7 +106,13 @@ end
         
 @testset "Multiplication" begin
     N  = 3
-    types = [Pauli{N}, PauliBasis{N}, PauliSum{N, ComplexF64}, Dyad{N}, DyadBasis{N}, DyadSum{N, ComplexF64}]
+    types = []
+    push!(types, PauliBasis{N})
+    push!(types, Pauli{N})
+    push!(types, PauliSum{N, ComplexF64})
+    push!(types, DyadBasis{N})
+    push!(types, Dyad{N})
+    push!(types, DyadSum{N, ComplexF64})
 
     for T in types
         for i in 1:20
@@ -113,6 +130,8 @@ end
                 @show a b err
             end
             @test err
+           
+             
         end 
         
     end
@@ -120,9 +139,13 @@ end
 
 @testset "Tensor product" begin
     N = 3
-    types = [Pauli{N}, PauliBasis{N}, PauliSum{N, ComplexF64}]
-    # push!(types, Dyad{N})
-    # push!(types, DyadBasis{N})
+    types = []
+    push!(types, PauliBasis{N})
+    push!(types, Pauli{N})
+    push!(types, PauliSum{N, ComplexF64})
+    push!(types, DyadBasis{N})
+    push!(types, Dyad{N})
+    push!(types, DyadSum{N, ComplexF64})
 
     @test Pauli("X") ⊗ Pauli("Y") ⊗ Pauli("Z") == Pauli("XYZ")
     for T in types
@@ -150,3 +173,31 @@ end
     end 
     
 end  
+
+@testset "Scalar Mult" begin
+    N = 3
+    types = []
+    push!(types, Pauli{N})
+    push!(types, PauliSum{N, ComplexF64})
+    push!(types, Dyad{N})
+    push!(types, DyadSum{N, ComplexF64})
+    for T in types
+        for i in 1:100
+            # Now scalar multiplication
+            
+            a = rand(T)
+            err = norm(2.3 * Matrix(a)  - Matrix(2.3 * a)) < 1e-14
+            if !err
+                @show a b err
+            end
+            @test err
+            
+            # Now scalar multiplication
+            err = norm(2.3 * Matrix(a)'  - Matrix(2.3 * a')) < 1e-14
+            if !err
+                @show a b err
+            end
+            @test err
+        end
+    end
+end

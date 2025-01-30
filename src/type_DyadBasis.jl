@@ -49,7 +49,12 @@ end
 
 Base.display(d::DyadBasis{N}) where N = println(string(d))
 function Base.string(d::DyadBasis{N}) where N
-    return "|"*string(d.ket.v)*"><"*string(d.bra.v)*"|"
+    return string(d.ket)*string(d.bra)
 end
 
 coeff(d::DyadBasis) = true 
+
+
+function otimes(p1::DyadBasis{N}, p2::DyadBasis{M}) where {N,M} 
+    DyadBasis{N+M}(p1.ket ⊗ p2.ket, p1.bra ⊗ p2.bra)
+end

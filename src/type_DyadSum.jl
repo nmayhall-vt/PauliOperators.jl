@@ -15,10 +15,7 @@ function Base.getindex(ds::DyadSum{N,T}, d::Dyad{N}) where {N,T}
     return ds[DyadBasis(d)]
 end
 function Base.getindex(ds::Adjoint{<:Any,DyadSum{N,T}}, d::Dyad{N}) where {N,T} 
-    return parent(ds)[DyadBasis(d)']
-end
-function Base.getindex(ds::Adjoint{<:Any,DyadSum{N,T}}, d::DyadBasis{N}) where {N,T} 
-    return parent(ds)[d']
+    return parent(ds)[DyadBasis(d)]'
 end
 
 
@@ -126,6 +123,21 @@ function Base.:*(d1::DyadSum{N,T}, d2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     return d3
 end
 
+function Base.:*(ps1::DyadSum{N, T}, a::Number) where {N, T}
+    out = deepcopy(ps1)
+    mul!(out, a)
+    return out
+end
+Base.:*(a::Number, ps1::DyadSum{N, T}) where {N, T} = ps1 * a
+
+function Base.:*(ps1::Adjoint{<:Any, DyadSum{N, T}}, a::Number) where {N, T}
+    return (ps1.parent * a)'
+end
+Base.:*(a::Number, ps1::Adjoint{<:Any, DyadSum{N, T}}) where {N, T} = ps1 * a
+function Base.getindex(ps::Adjoint{<:Any, DyadSum{N,T}}, a::DyadBasis{N}) where {N,T} 
+    return ps.parent[a]'
+end
+
 function LinearAlgebra.ishermitian(d::DyadSum{N, T}) where {N,T}
     isherm = true
     for (dyad,coeff) in d
@@ -190,7 +202,13 @@ function Base.:+(d1::DyadSum{N,T}, d2::Adjoint{<:Any, <:DyadSum{N,T}}) where {N,
     sum!(out, d2)
     return out
 end
+Base.:+(d2::Adjoint{<:Any, <:DyadSum{N,T}}, d1::DyadSum{N,T}) where {N,T} = d1 + d2
 
+function Base.:-(ps1::DyadSum)
+    out = deepcopy(ps1)
+    map!(x->-x, values(out))
+    return out 
+end
 
 function LinearAlgebra.tr(p::DyadSum{N, T}) where {N,T}
     tmp = T(0)
@@ -203,4 +221,20 @@ end
 function LinearAlgebra.mul!(ps::DyadSum, a::Number)
     map!(x->a*x, values(ps))
     return ps
+end
+
+
+"""
+    otimes(p1::DyadSum{N,T}, p2::DyadSum{M,T}) where {N,M,T}
+
+TBW
+"""
+function otimes(p1::DyadSum{N,T}, p2::DyadSum{M,T}) where {N,M,T}
+    out = DyadSum(N+M, T)
+    for (op1,coeff1) in p1
+        for (op2,coeff2) in p2
+            out[op1 ⊗ op2] = coeff1 * coeff2 
+        end
+    end
+    return out 
 end

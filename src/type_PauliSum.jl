@@ -63,11 +63,6 @@ function LinearAlgebra.tr(p::PauliSum{N, T}) where {N,T}
     return get(p, PauliBasis{N}(0, 0), 0)
 end
 
-function LinearAlgebra.mul!(ps::PauliSum, a::Number)
-    map!(x->a*x, values(ps))
-    return ps
-end
-
 """
     Base.:-(ps1::PauliSum, ps2::PauliSum)
 
@@ -100,6 +95,16 @@ function Base.Matrix(ps::Adjoint{<:Any, PauliSum{N, T}}) where {N,T}
         out .+= Matrix(op) .* adjoint(coeff) 
     end
     return out
+end
+
+function Base.size(d::PauliSum{N}) where N
+    return (BigInt(2)^N, BigInt(2)^N)
+end
+
+
+function LinearAlgebra.mul!(ps::PauliSum, a::Number)
+    map!(x->a*x, values(ps))
+    return ps
 end
 
 
@@ -189,8 +194,27 @@ function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, ps2::Adjoint{<:Any, PauliS
     return out
 end
 
-Base.getindex(ps::PauliSum{N}, s::String) where N = ps[PauliBasis(s)]
+function Base.:*(ps1::PauliSum{N, T}, a::Number) where {N, T}
+    out = deepcopy(ps1)
+    mul!(out, a)
+    return out
+end
+Base.:*(a::Number, ps1::PauliSum{N, T}) where {N, T} = ps1 * a
 
+function Base.:*(ps1::Adjoint{<:Any, PauliSum{N, T}}, a::Number) where {N, T}
+    out = deepcopy(ps1.parent)
+    map!(x->adjoint(x), values(out))
+    mul!(out, a)
+    return out
+end
+Base.:*(a::Number, ps1::Adjoint{<:Any, PauliSum{N, T}}) where {N, T} = ps1 * a
+
+Base.getindex(ps::PauliSum, s::String) = ps[PauliBasis(s)]
+function Base.getindex(ps::Adjoint{<:Any, PauliSum{N,T}}, a::PauliBasis{N}) where {N,T} 
+    return ps.parent[a]'
+end
+
+Base.keys(ps::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = keys(ps.parent)
 """
     Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
 
@@ -209,6 +233,7 @@ function Base.sum!(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where
     end
     return ps1
 end
+Base.:+(ps2::Adjoint{<:Any, PauliSum{N,T}}, ps1::PauliSum{N,T}) where {N,T} = ps1 + ps2 
 
 """
     Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}

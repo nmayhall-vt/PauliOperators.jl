@@ -52,6 +52,8 @@ struct Pauli{N}
     x::Int128
 end
 
+PauliTypes{N} = Union{Pauli{N}, PauliBasis{N}}
+
 """
     coeff(p::Pauli)
 
@@ -242,7 +244,7 @@ Since the PauliBasis is Hermitian, we have that
 Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
 # Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
 
-function LinearAlgebra.tr(p::Pauli)
+function LinearAlgebra.tr(p::Union{Pauli, PauliBasis})
     return coeff(p) * ((p.z == 0) && (p.x == 0))
 end
 
@@ -266,7 +268,7 @@ Base.:*(s::Number, p::Pauli{N}) where N = p*s
 
 Add two `Pauli`'s together, return a `PauliSum`
 """
-function Base.:+(p::Pauli{N}, q::Pauli{N}) where N
+function Base.:+(p::PauliTypes{N}, q::PauliTypes{N}) where N
     if PauliBasis(p) == PauliBasis(q)
         return PauliSum{N, ComplexF64}(PauliBasis(p) => coeff(p)+coeff(q))
     else 
