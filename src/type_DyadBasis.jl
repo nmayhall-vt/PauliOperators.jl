@@ -36,8 +36,6 @@ Base.rand(::Type{DyadBasis{N}}) where N = DyadBasis{N}(rand(Ket{N}), rand(Bra{N}
           
 Base.adjoint(d::DyadBasis{N}) where N = DyadBasis{N}(adjoint(d.bra), adjoint(d.ket))
 
-Base.:*(d1::DyadBasis, d2::DyadBasis) = Dyad(d1) * Dyad(d2)
-
 @inline LinearAlgebra.ishermitian(d::DyadBasis) = d.ket.v == d.bra.v
 
 

@@ -30,10 +30,6 @@ end
           
 Base.adjoint(d::Dyad{N}) where N = Dyad{N}(coeff(d), adjoint(d.bra), adjoint(d.ket))
 
-function Base.:*(d1::Dyad{N}, d2::Dyad{N}) where N
-    return Dyad{N}(coeff(d1) * coeff(d2) * (d1.bra.v==d2.ket.v), d1.ket, d2.bra)
-end
-
 Base.:*(d1::Dyad{N}, a::Number) where N = Dyad{N}(coeff(d1)*a, d1.ket, d1.bra)
 Base.:*(a::Number, d1::Dyad{N}) where N = d1 * a 
 

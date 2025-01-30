@@ -8,10 +8,12 @@ using Random
     Random.seed!(1)
   
     N  = 3
-    types = [Pauli{N}, PauliBasis{N}, PauliSum{N, ComplexF64}]
-    # types = [Pauli{N}, Dyad{N}, PauliSum{N, ComplexF64}]
-    # push!(types, Dyad{N})
-    # push!(types, DyadBasis{N})
+    types = []
+    push!(types, PauliBasis{N})
+    push!(types, Pauli{N})
+    # push!(types, PauliSum{N, ComplexF64})
+    push!(types, DyadBasis{N})
+    push!(types, Dyad{N})
     # push!(types, DyadSum{N, ComplexF64})
 
     for T1 in types
