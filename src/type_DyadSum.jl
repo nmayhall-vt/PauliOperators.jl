@@ -101,9 +101,9 @@ function Base.:*(d1::DyadSum{N,T}, d2::DyadSum{N,T}) where {N,T}
         for (dyad2, coeff2) in d2
             sdyad3 = dyad1*dyad2
             if haskey(d3, DyadBasis(sdyad3)) 
-                d3[DyadBasis(sdyad3)] += sdyad3.weight * coeff1 * coeff2
+                d3[DyadBasis(sdyad3)] += coeff(sdyad3) * coeff1 * coeff2
             else
-                d3[DyadBasis(sdyad3)] = sdyad3.weight * coeff1 * coeff2
+                d3[DyadBasis(sdyad3)] = coeff(sdyad3) * coeff1 * coeff2
             end
         end
     end
@@ -115,9 +115,9 @@ function Base.:*(d1::Adjoint{<:Any, DyadSum{N,T}}, d2::DyadSum{N,T}) where {N,T}
         for (dyad2, coeff2) in d2
             sdyad3 = dyad1'*dyad2
             if haskey(d3, DyadBasis(sdyad3)) 
-                d3[DyadBasis(sdyad3)] += sdyad3.weight * coeff1' * coeff2
+                d3[DyadBasis(sdyad3)] += coeff(sdyad3) * coeff1' * coeff2
             else
-                d3[DyadBasis(sdyad3)] = sdyad3.weight * coeff1' * coeff2
+                d3[DyadBasis(sdyad3)] = coeff(sdyad3) * coeff1' * coeff2
             end
         end
     end
@@ -129,9 +129,9 @@ function Base.:*(d1::DyadSum{N,T}, d2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
         for (dyad2, coeff2) in d2.parent
             sdyad3 = dyad1*dyad2'
             if haskey(d3, DyadBasis(sdyad3)) 
-                d3[DyadBasis(sdyad3)] += sdyad3.weight * coeff1 * coeff2'
+                d3[DyadBasis(sdyad3)] += coeff(sdyad3) * coeff1 * coeff2'
             else
-                d3[DyadBasis(sdyad3)] = sdyad3.weight * coeff1 * coeff2'
+                d3[DyadBasis(sdyad3)] = coeff(sdyad3) * coeff1 * coeff2'
             end
         end
     end
