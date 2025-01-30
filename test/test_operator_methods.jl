@@ -67,6 +67,12 @@ using Random
                 @show T, err
             end
             @test err
+            
+            err = norm(Matrix(a)' + Matrix(b) - Matrix(a'+b)) < 1e-9
+            if !err
+                @show T, err
+            end
+            @test err
         end
         
     end
