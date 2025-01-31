@@ -62,15 +62,6 @@ function Base.:*(d::DyadSum{N,T}, p::Union{Pauli{N}, PauliBasis{N}}) where {N,T}
     return out 
 end 
 
-function Base.:*(p::Union{Pauli{N}, PauliBasis{N}}, d::DyadSum{N,T}) where {N,T}
-    out = DyadSum(N)
-    for (dyad, coeff) in d
-        new_dyad = p*dyad
-        sum!(out, new_dyad * coeff)
-    end
-    return out 
-end 
-
 function Base.:*(d::DyadSum{N,T}, p::PauliSum{N}) where {N,T}
     out = DyadSum(N,T)
     for (dyad, coeff_d) in d
