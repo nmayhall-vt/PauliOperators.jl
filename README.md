@@ -4,6 +4,7 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://nmayhall-vt.github.io/PauliOperators.jl/dev/)
 [![Build Status](https://github.com/nmayhall-vt/PauliOperators.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/nmayhall-vt/PauliOperators.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/nmayhall-vt/PauliOperators.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/nmayhall-vt/PauliOperators.jl)
+[![codecov](https://codecov.io/gh/nmayhall-vt/PauliOperators.jl/branch/v2.0/graph/badge.svg?token=8Y2tTRjV4U)](https://codecov.io/gh/nmayhall-vt/PauliOperators.jl)
 
 Simple package providing bitstring representations of tensor products of Pauli operators for efficient manipulations. In this representation, the Pauli string operator is represented as two binary strings, one for x and one for z.
 
