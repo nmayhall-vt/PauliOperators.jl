@@ -225,11 +225,11 @@ function Base.sum!(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
     mergewith!(+, ps1, ps2)
 end
 function Base.sum!(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
-    for (Pauli, coeff) in ps2.parent
-        if haskey(ps1, Pauli')
-            ps1[Pauli'] += coeff'
+    for (pauli, coeff) in ps2.parent
+        if haskey(ps1, pauli)
+            ps1[pauli] += coeff'
         else
-            ps1[Pauli'] = coeff'
+            ps1[pauli] = coeff'
         end
     end
     return ps1
