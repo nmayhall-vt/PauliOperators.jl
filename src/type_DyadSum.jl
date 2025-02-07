@@ -179,7 +179,7 @@ end
 
 Add two `Dyad`'s together, return a `DyadSum`
 """
-function Base.:+(p::DyadBasis{N}, q::DyadBasis{N}) where N
+function Base.:+(p::Union{Dyad{N}, DyadBasis{N}}, q::Union{Dyad{N}, DyadBasis{N}}) where N
     if DyadBasis(p) == DyadBasis(q)
         return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p)+coeff(q))
     else 
