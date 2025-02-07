@@ -8,6 +8,7 @@ so this will probably be removed.
 PauliSum{N, T} = Dict{PauliBasis{N},T} 
 
 PauliSum(N, T) = Dict{PauliBasis{N},T}()
+PauliSum(N<:Integer) = Dict{PauliBasis{N}, ComplexF64}()
 
 function Base.rand(::Type{PauliSum{N, T}}; n_paulis=2) where {N,T}
     out = PauliSum(N, T)
