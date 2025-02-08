@@ -37,7 +37,7 @@ using Random
         end
         
         # Trace 
-        for i in 1:10
+        for i in 1:100
             a = rand(T)
             err = abs(tr(Matrix(a)) - tr(a)) < 1e-9 
             if !err

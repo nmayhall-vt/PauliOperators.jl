@@ -61,7 +61,7 @@ function Base.Matrix(ps::PauliSum{N, T}) where {N,T}
 end
 
 function LinearAlgebra.tr(p::PauliSum{N, T}) where {N,T}
-    return get(p, PauliBasis{N}(0, 0), 0)
+    return get(p, PauliBasis{N}(0, 0), 0)*2^N
 end
 
 """

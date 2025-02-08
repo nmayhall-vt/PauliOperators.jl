@@ -244,8 +244,8 @@ Since the PauliBasis is Hermitian, we have that
 Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
 # Base.adjoint(p::Pauli{N}) where N = Pauli{N}(coeff(p)'*1im^symplectic_phase(p), p.z, p.x)
 
-function LinearAlgebra.tr(p::Union{Pauli, PauliBasis})
-    return coeff(p) * ((p.z == 0) && (p.x == 0))
+function LinearAlgebra.tr(p::Union{Pauli{N}, PauliBasis{N}}) where N
+    return coeff(p) * ((p.z == 0) && (p.x == 0)) * 2^N
 end
 
 """
