@@ -1,8 +1,9 @@
 Base.:*(p::Pauli, pb::PauliBasis) = p*Pauli(pb)
 Base.:*(pb::PauliBasis, p::Pauli) = Pauli(pb)*p
-Base.:*(ps::PauliSum, p::Union{Pauli, PauliBasis}) = ps * PauliSum(p) 
-Base.:*(p::Union{Pauli, PauliBasis}, ps::PauliSum) = PauliSum(p) * ps 
-Base.:*(p::Union{Pauli, PauliBasis}, ps::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = PauliSum(p) * ps 
+# Base.:*(ps::PauliSum, p::Union{Pauli, PauliBasis}) = ps * PauliSum(p) 
+# Base.:*(p::Union{Pauli, PauliBasis}, ps::PauliSum) = PauliSum(p) * ps 
+# Base.:*(p::Union{Pauli, PauliBasis}, ps::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = PauliSum(p) * ps 
+# Base.:*(ps::Adjoint{<:Any, PauliSum{N,T}}, p::Union{Pauli, PauliBasis}) where {N,T} = ps * PauliSum(p)  
 
 function Base.:*(d1::Union{Dyad{N}, DyadBasis{N}}, d2::Union{Dyad{N}, DyadBasis{N}}) where N
     return Dyad{N}(coeff(d1) * coeff(d2) * (d1.bra.v==d2.ket.v), d1.ket, d2.bra)
@@ -45,26 +46,26 @@ function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, p::Union{Pauli{N}, PauliBasis{
 end 
 
 
-function Base.:*(p::Union{Pauli{N}, PauliBasis{N}}, d::DyadSum{N,T}) where {N,T}
-    out = DyadSum(N)
-    for (dyad, coeff) in d
-        new_dyad = p*dyad
-        sum!(out, new_dyad * coeff)
-    end
-    return out 
-end 
-Base.:*(p::Union{Pauli, PauliBasis}, ps::Adjoint{<:Any, DyadSum{N,T}}) where {N,T} = PauliSum(p) * ps 
+# function Base.:*(p::Union{Pauli{N}, PauliBasis{N}}, d::DyadSum{N,T}) where {N,T}
+#     out = DyadSum(N)
+#     for (dyad, coeff) in d
+#         new_dyad = p*dyad
+#         sum!(out, new_dyad * coeff)
+#     end
+#     return out 
+# end 
 
-function Base.:*(d::DyadSum{N,T}, p::Union{Pauli{N}, PauliBasis{N}}) where {N,T}
-    out = DyadSum(N,T)
-    for (dyad, coeff) in d
-        new_dyad = dyad*p
-        sum!(out, new_dyad * coeff)
-    end
-    return out 
-end 
 
-function Base.:*(d::DyadSum{N,T}, p::PauliSum{N}) where {N,T}
+# function Base.:*(d::DyadSum{N,T}, p::Union{Pauli{N}, PauliBasis{N}}) where {N,T}
+#     out = DyadSum(N,T)
+#     for (dyad, coeff) in d
+#         new_dyad = dyad*p
+#         sum!(out, new_dyad * coeff)
+#     end
+#     return out 
+# end 
+
+function Base.:*(d::DyadSum{N,T}, p::PauliSum{N,T}) where {N,T}
     out = DyadSum(N,T)
     for (dyad, coeff_d) in d
         for (pauli, coeff_p) in p
@@ -85,9 +86,31 @@ function Base.:*(d::DyadSum{N,T}, p::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
     end
     return out 
 end 
+function Base.:*(d::Adjoint{<:Any, DyadSum{N,T}}, p::PauliSum{N,T}) where {N,T}
+    out = DyadSum(N,T)
+    for (dyad, coeff_d) in d.parent
+        for (pauli, coeff_p) in p
+            new_dyad = dyad'*pauli
+            sum!(out, new_dyad * coeff_d' * coeff_p)
+        end   
+    end
+    return out 
+end 
+
+function Base.:*(d::Adjoint{<:Any, DyadSum{N,T}}, p::Adjoint{<:Any, PauliSum{N, T}}) where {N,T}
+    out = DyadSum(N,T)
+    for (dyad, coeff_d) in d.parent
+        for (pauli, coeff_p) in p.parent
+            new_dyad = dyad'*pauli
+            sum!(out, new_dyad * coeff_d' * coeff_p')
+        end   
+    end
+    return out 
+end 
 
 
-function Base.:*(p::PauliSum{N}, d::DyadSum{N,T}) where {N,T}
+
+function Base.:*(p::PauliSum{N,T}, d::DyadSum{N,T}) where {N,T}
     out = DyadSum(N,T)
     for (dyad, coeff_d) in d
         for (pauli, coeff_p) in p
@@ -98,7 +121,7 @@ function Base.:*(p::PauliSum{N}, d::DyadSum{N,T}) where {N,T}
     return out 
 end 
 
-function Base.:*(p::PauliSum{N}, d::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
+function Base.:*(p::PauliSum{N,T}, d::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     out = DyadSum(N,T)
     for (dyad, coeff_d) in d.parent
         for (pauli, coeff_p) in p
@@ -109,58 +132,65 @@ function Base.:*(p::PauliSum{N}, d::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     return out 
 end 
 
-
-function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, p::PauliSum{N,T}) where {N,T}
-    out = DyadSum(N)
-    for (pauli, coeff) in p
-        new_dyad = d*pauli
-        sum!(out, new_dyad * coeff)
+function Base.:*(p::Adjoint{<:Any, PauliSum{N,T}}, d::DyadSum{N,T}) where {N,T}
+    out = DyadSum(N,T)
+    for (dyad, coeff_d) in d
+        for (pauli, coeff_p) in p.parent
+            new_dyad = pauli*dyad
+            sum!(out, new_dyad * coeff_d * coeff_p')
+        end   
     end
     return out 
 end 
 
-function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, p::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
-    out = DyadSum(N)
-    for (pauli, coeff) in p.parent
-        new_dyad = d*pauli
-        sum!(out, new_dyad * coeff')
-    end
-    return out 
-end 
-
-function Base.:*(p::PauliSum{N,T}, d::Union{Dyad{N}, DyadBasis{N}}) where {N,T}
-    out = DyadSum(N)
-    for (pauli, coeff) in p
-        new_dyad = pauli*d
-        sum!(out, new_dyad * coeff)
-    end
-    return out 
-end 
-
-function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, ds::DyadSum{N,T}) where {N,T}
-    out = DyadSum(N)
-    for (dyad, coeff) in ds
-        new_dyad = d*dyad
-        sum!(out, new_dyad * coeff)
-    end
-    return out 
-end 
-
-function Base.:*(ds::DyadSum{N,T}, d::Union{Dyad{N}, DyadBasis{N}}) where {N,T}
-    out = DyadSum(N)
-    for (dyad, coeff) in ds
-        new_dyad = dyad*d
-        sum!(out, new_dyad * coeff)
+function Base.:*(p::Adjoint{<:Any, PauliSum{N,T}}, d::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
+    out = DyadSum(N,T)
+    for (dyad, coeff_d) in d.parent
+        for (pauli, coeff_p) in p.parent
+            new_dyad = pauli*dyad'
+            sum!(out, new_dyad * coeff_d' * coeff_p')
+        end   
     end
     return out 
 end 
 
 
-function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, ds::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
-    out = DyadSum(N)
-    for (dyad, coeff) in ds.parent
-        new_dyad = d*dyad'
-        sum!(out, new_dyad * coeff')
-    end
-    return out 
-end 
+promote_to_sum(d::Union{Dyad, DyadBasis}) = DyadSum(d)
+promote_to_sum(d::Union{Pauli, PauliBasis}) = PauliSum(d)
+promote_to_sum(d::Ket) = KetSum(d)
+
+Singles{N} = Union{Dyad{N}, DyadBasis{N}, Pauli{N}, PauliBasis{N}}
+Sums{N,T} = Union{DyadSum{N,T}, PauliSum{N,T}, Adjoint{<:Any, DyadSum{N,T}}, Adjoint{<:Any, PauliSum{N,T}}}
+
+Base.:*(s::Singles{N}, p::Sums{N,T}) where {N,T} = promote_to_sum(s) * p
+Base.:*(p::Sums{N,T}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
+
+
+# Base.:*(s::Singles{N}, p::PauliSum{N,T}) where {N,T} = promote_to_sum(s) * p
+# Base.:*(s::Singles{N}, p::DyadSum{N,T}) where {N,T} = promote_to_sum(s) * p 
+# Base.:*(d::Singles{N}, p::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = promote(d) * p
+# Base.:*(d::Singles{N}, p::Adjoint{<:Any, DyadSum{N,T}}) where {N,T} = promote(d) * p
+
+# Base.:*(p::PauliSum{N,T}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
+# Base.:*(p::DyadSum{N,T}, s::Singles{N}) where {N,T} =  p * promote_to_sum(s)
+# Base.:*(p::Adjoint{<:Any, PauliSum{N,T}}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
+# Base.:*(p::Adjoint{<:Any, DyadSum{N,T}}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
+
+# function Base.:*(ds::DyadSum{N,T}, d::Union{Dyad{N}, DyadBasis{N}}) where {N,T}
+#     out = DyadSum(N)
+#     for (dyad, coeff) in ds
+#         new_dyad = dyad*d
+#         sum!(out, new_dyad * coeff)
+#     end
+#     return out 
+# end 
+
+
+# function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, ds::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
+#     out = DyadSum(N)
+#     for (dyad, coeff) in ds.parent
+#         new_dyad = d*dyad'
+#         sum!(out, new_dyad * coeff')
+#     end
+#     return out 
+# end 

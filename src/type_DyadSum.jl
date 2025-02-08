@@ -123,6 +123,21 @@ function Base.:*(d1::DyadSum{N,T}, d2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
     return d3
 end
 
+function Base.:*(d1::Adjoint{<:Any, DyadSum{N,T}}, d2::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
+    d3 = DyadSum{N,T}()
+    for (dyad1, coeff1) in d1.parent
+        for (dyad2, coeff2) in d2.parent
+            sdyad3 = dyad1'*dyad2'
+            if haskey(d3, DyadBasis(sdyad3)) 
+                d3[DyadBasis(sdyad3)] += coeff(sdyad3) * coeff1' * coeff2'
+            else
+                d3[DyadBasis(sdyad3)] = coeff(sdyad3) * coeff1' * coeff2'
+            end
+        end
+    end
+    return d3
+end
+
 function Base.:*(ps1::DyadSum{N, T}, a::Number) where {N, T}
     out = deepcopy(ps1)
     mul!(out, a)

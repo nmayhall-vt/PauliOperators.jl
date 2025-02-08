@@ -126,3 +126,4 @@ function Base.iterate(::Type{PauliBasis{N}}, state = 1) where N
     next = CartesianIndices((2^N,2^N))[state]
     return PauliBasis{N}(next[1]-1, next[2]-1), state+1 
 end
+
