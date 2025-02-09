@@ -165,32 +165,3 @@ Sums{N,T} = Union{DyadSum{N,T}, PauliSum{N,T}, Adjoint{<:Any, DyadSum{N,T}}, Adj
 Base.:*(s::Singles{N}, p::Sums{N,T}) where {N,T} = promote_to_sum(s) * p
 Base.:*(p::Sums{N,T}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
 
-
-# Base.:*(s::Singles{N}, p::PauliSum{N,T}) where {N,T} = promote_to_sum(s) * p
-# Base.:*(s::Singles{N}, p::DyadSum{N,T}) where {N,T} = promote_to_sum(s) * p 
-# Base.:*(d::Singles{N}, p::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = promote(d) * p
-# Base.:*(d::Singles{N}, p::Adjoint{<:Any, DyadSum{N,T}}) where {N,T} = promote(d) * p
-
-# Base.:*(p::PauliSum{N,T}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
-# Base.:*(p::DyadSum{N,T}, s::Singles{N}) where {N,T} =  p * promote_to_sum(s)
-# Base.:*(p::Adjoint{<:Any, PauliSum{N,T}}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
-# Base.:*(p::Adjoint{<:Any, DyadSum{N,T}}, s::Singles{N}) where {N,T} = p * promote_to_sum(s)
-
-# function Base.:*(ds::DyadSum{N,T}, d::Union{Dyad{N}, DyadBasis{N}}) where {N,T}
-#     out = DyadSum(N)
-#     for (dyad, coeff) in ds
-#         new_dyad = dyad*d
-#         sum!(out, new_dyad * coeff)
-#     end
-#     return out 
-# end 
-
-
-# function Base.:*(d::Union{Dyad{N}, DyadBasis{N}}, ds::Adjoint{<:Any, DyadSum{N,T}}) where {N,T}
-#     out = DyadSum(N)
-#     for (dyad, coeff) in ds.parent
-#         new_dyad = d*dyad'
-#         sum!(out, new_dyad * coeff')
-#     end
-#     return out 
-# end 

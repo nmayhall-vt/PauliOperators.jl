@@ -56,3 +56,6 @@ coeff(d::DyadBasis) = true
 function otimes(p1::DyadBasis{N}, p2::DyadBasis{M}) where {N,M} 
     DyadBasis{N+M}(p1.ket ⊗ p2.ket, p1.bra ⊗ p2.bra)
 end
+
+Base.:*(d1::DyadBasis{N}, a::Number) where N = Dyad(d1)*a
+Base.:*(a::Number, d1::DyadBasis{N}) where N = Dyad(d1)*a

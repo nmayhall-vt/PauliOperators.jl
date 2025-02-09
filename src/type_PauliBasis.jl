@@ -118,6 +118,8 @@ function otimes(p1::PauliBasis{N}, p2::PauliBasis{M}) where {N,M}
 end
 
 Base.:*(p1::PauliBasis, p2::PauliBasis) = Pauli(p1) * Pauli(p2)
+Base.:*(p1::PauliBasis{N}, a::Number) where N = Pauli(p1)*a
+Base.:*(a::Number, p1::PauliBasis{N}) where N = Pauli(p1)*a
 
 Base.adjoint(p::PauliBasis) = p
 
