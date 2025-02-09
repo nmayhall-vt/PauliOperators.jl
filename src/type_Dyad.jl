@@ -47,19 +47,6 @@ Base.rand(::Type{Dyad{N}}) where N = Dyad{N}(true, rand(Ket{N}), rand(Bra{N}))
 
 @inline LinearAlgebra.ishermitian(d::Dyad) = d.ket.v == d.bra.v
 
-"""
-    Base.:+(p::Dyad{N}, q::Dyad{N}) where N
-
-Add two `Dyad`'s together, return a `DyadSum`
-"""
-function Base.:+(p::Dyad{N}, q::Dyad{N}) where N
-    if DyadBasis(p) == DyadBasis(q)
-        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p)+coeff(q))
-    else 
-        return DyadSum{N, ComplexF64}(DyadBasis(p) => coeff(p), DyadBasis(q) => coeff(q))
-    end
-end
-
 function Base.:-(ps1::Dyad{N}) where {N}
     return Dyad{N}(-ps1.s, ps1.ket, ps1.bra) 
 end

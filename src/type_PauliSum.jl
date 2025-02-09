@@ -64,17 +64,7 @@ function LinearAlgebra.tr(p::PauliSum{N, T}) where {N,T}
     return get(p, PauliBasis{N}(0, 0), 0)*2^N
 end
 
-"""
-    Base.:-(ps1::PauliSum, ps2::PauliSum)
 
-Subtract two `PauliSum`s. 
-"""
-function Base.:-(ps1::PauliSum, ps2::PauliSum)
-    out = deepcopy(ps2)
-    map!(x->-x, values(out))
-    mergewith!(+, out, ps1)
-    return out 
-end
 
 """
     Base.:-(ps1::PauliSum, ps2::PauliSum)
@@ -216,41 +206,7 @@ function Base.getindex(ps::Adjoint{<:Any, PauliSum{N,T}}, a::PauliBasis{N}) wher
 end
 
 Base.keys(ps::Adjoint{<:Any, PauliSum{N,T}}) where {N,T} = keys(ps.parent)
-"""
-    Base.sum!(p1::PauliSum{N}, p2::PauliSum{N}) where {N}
 
-Add two `PauliSum`s. 
-"""
-function Base.sum!(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    mergewith!(+, ps1, ps2)
-end
-function Base.sum!(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
-    for (pauli, coeff) in ps2.parent
-        if haskey(ps1, pauli)
-            ps1[pauli] += coeff'
-        else
-            ps1[pauli] = coeff'
-        end
-    end
-    return ps1
-end
-Base.:+(ps2::Adjoint{<:Any, PauliSum{N,T}}, ps1::PauliSum{N,T}) where {N,T} = ps1 + ps2 
-
-"""
-    Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-
-TBW
-"""
-function Base.:+(ps1::PauliSum{N}, ps2::PauliSum{N}) where {N}
-    out = deepcopy(ps1)
-    sum!(out, ps2)
-    return out
-end
-function Base.:+(ps1::PauliSum{N,T}, ps2::Adjoint{<:Any, PauliSum{N,T}}) where {N,T}
-    out = deepcopy(ps1)
-    sum!(out, ps2)
-    return out
-end
 
 """
     otimes(p1::PauliSum{N}, p2::PauliSum{M}) where {N,M}
