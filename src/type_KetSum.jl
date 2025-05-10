@@ -64,3 +64,18 @@ function Base.Vector(k::Adjoint{<:Any, KetSum{N,T}}) where {N,T}
     end
     return vec 
 end
+
+"""
+    otimes(p1::KetSum{N,T}, p2::KetSum{M,T}) where {N,M,T}
+
+TBW
+"""
+function otimes(p1::KetSum{N,T}, p2::KetSum{M,T}) where {N,M,T}
+    out = KetSum(N+M, T)
+    for (op1,coeff1) in p1
+        for (op2,coeff2) in p2
+            out[op1 ⊗ op2] = coeff1 * coeff2 
+        end
+    end
+    return out 
+end
