@@ -7,6 +7,21 @@ DyadSum(N::Integer; T=ComplexF64) = Dict{DyadBasis{N}, T}()
 DyadSum(d::Dyad{N}; T=ComplexF64) where N = Dict{DyadBasis{N}, T}(DyadBasis(d)=>T(coeff(d)))
 DyadSum(d::DyadBasis{N}; T=ComplexF64) where N = Dict{DyadBasis{N}, T}(DyadBasis(d)=>T(1))
 
+function DyadSum(k::Ket{N}; T=Float64) where {N}
+    d = DyadSum(N,T)
+    d += Dyad{N}(1,k,k')
+    return d
+end
+
+function DyadSum(ks::KetSum{N,T}) where {N,T}
+    d = DyadSum{N,T}()
+    for (ki,ci) in ks
+        for (kj,cj) in ks
+            d += Dyad(ci*cj', ki, kj')
+        end
+    end
+    return d
+end
 
 Base.adjoint(d::DyadSum{N,T}) where {N,T} = Adjoint(d)
 Base.parent(d::Adjoint{<:Any, <:DyadSum}) = d.parent

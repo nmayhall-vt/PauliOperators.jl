@@ -34,7 +34,8 @@ module PauliOperators
     export ⊗
     export ⊕
     export expectation_value
-
+    export commute
+    
     export symplectic_phase
     export coeff
 end
