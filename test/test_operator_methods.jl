@@ -219,6 +219,7 @@ end
     push!(typesA, PauliBasis{N})
     push!(typesA, Pauli{N})
     push!(typesA, PauliSum{N, ComplexF64})
+    push!(typesB, Ket{N})
     push!(typesB, DyadBasis{N})
     push!(typesB, Dyad{N})
     push!(typesB, DyadSum{N, ComplexF64})
@@ -230,13 +231,20 @@ end
                 a = rand(TA)
                 b = rand(TB)
                 val = expectation_value(a, b)
+
+                if TB == Ket{N}
+                    b = DyadBasis{N}(b,b')
+                end
                 ref = tr(Matrix(a) * Matrix(b))
                 err = abs(val-ref) < 1e-14
                 if !err
+                    println(TA)
+                    println(TB)
                     display(a)
                     display(b)
-                    display(expectation_value(a,b))
-                    display(ref)
+                    println("val: ", val)
+                    println("ref: ", ref)
+                    display(abs(val-ref))
                     @show a b err
                 end
                 @test err

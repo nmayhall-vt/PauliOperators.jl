@@ -1,9 +1,6 @@
 
-function expectation_value(p::PauliBasis{N}, ket::Ket{N}) where N
-    is_diagonal(p) || return 0.0
-
-    count_ones(p.z & ket.v) % 2 == 0 || return -1
-    return 1
+function expectation_value(p::Union{PauliBasis{N}, Pauli{N}}, ket::Ket{N}) where N
+    return (-1)^count_ones(p.z & ket.v) * (p.x == 0) * coeff(p)
 end
 
 
@@ -14,7 +11,7 @@ function expectation_value(p::Union{PauliBasis{N}, Pauli{N}}, d::Union{Dyad{N}, 
     return (-1)^sgn * val * coeff(p) * coeff(d) * 1im^symplectic_phase(p)
 end
 
-function expectation_value(p::PauliSum{N,T}, d::Union{Dyad{N}, DyadBasis{N}}) where {N,T}
+function expectation_value(p::PauliSum{N,T}, d::Union{Ket{N}, Dyad{N}, DyadBasis{N}}) where {N,T}
     eval = zero(T)
     for (pi,ci) in p
         eval += expectation_value(pi, d) * ci
