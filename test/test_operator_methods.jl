@@ -211,3 +211,36 @@ end
         end
     end
 end
+
+@testset "expectation_value" begin
+    N = 3
+    typesA = []
+    typesB = []
+    push!(typesA, PauliBasis{N})
+    push!(typesA, Pauli{N})
+    push!(typesA, PauliSum{N, ComplexF64})
+    push!(typesB, DyadBasis{N})
+    push!(typesB, Dyad{N})
+    push!(typesB, DyadSum{N, ComplexF64})
+    for TA in typesA
+        for TB in typesB
+            for i in 1:100
+                # Now scalar multiplication
+                
+                a = rand(TA)
+                b = rand(TB)
+                val = expectation_value(a, b)
+                ref = tr(Matrix(a) * Matrix(b))
+                err = abs(val-ref) < 1e-14
+                if !err
+                    display(a)
+                    display(b)
+                    display(expectation_value(a,b))
+                    display(ref)
+                    @show a b err
+                end
+                @test err
+            end
+        end
+    end
+end

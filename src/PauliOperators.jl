@@ -16,6 +16,7 @@ module PauliOperators
     include("multiplication.jl")
     include("addition.jl")
     include("conversions.jl")
+    include("expectation_value.jl")
 
     const ⊗ = otimes
     const ⊕ = osum
